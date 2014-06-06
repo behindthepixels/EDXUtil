@@ -10,6 +10,13 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EDXPrerequisites.h" />
+    <ClInclude Include="Windows\Application.h" />
+    <ClInclude Include="Windows\Base.h" />
+    <ClInclude Include="Windows\Event.h" />
+    <ClInclude Include="Windows\Window.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{197C330A-0EBC-47DC-8A32-0F05F315F0C1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
