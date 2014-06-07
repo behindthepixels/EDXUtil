@@ -17,6 +17,9 @@
     <ClInclude Include="Windows\Event.h" />
     <ClInclude Include="Windows\Window.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Windows\Window.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{197C330A-0EBC-47DC-8A32-0F05F315F0C1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

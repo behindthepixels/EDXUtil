@@ -13,6 +13,9 @@ namespace EDX
 		static HINSTANCE InstHandle;
 
 	public:
+		static const wchar_t* WinClassName;
+
+	public:
 		static HINSTANCE GetInstanceHandle() { return InstHandle; }
 	};
 }
