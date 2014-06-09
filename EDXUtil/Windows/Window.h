@@ -2,40 +2,68 @@
 
 #include "../EDXPrerequisites.h"
 #include "Base.h"
+#include "Event.h"
 
 #include <Windows.h>
 
 namespace EDX
 {
-	LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
 	class Window : public Object
 	{
-	private:
+	protected:
 		HWND mhWnd;
-		uint miResX, miResY;
+		uint miWidth, miHeight;
 		wstring mstrTitle;
+		bool mbActive;
+
+	public:
+		NotifyEvent mMainLoopEvent;
+		NotifyEvent mInitializeEvent;
+		NotifyEvent mReleaseEvent;
+		ResizeEvent	mResizeEvent;
+		MouseEvent mMouseEvent;
 
 	public:
 		Window()
 		{
 		}
 
-		bool Create(const wstring& strTitle,
-			const uint iResX,
-			const uint iResY);
+		virtual bool Create(const wstring& strTitle,
+			const uint iWidth,
+			const uint iHeight);
 
+		virtual void Destroy();
+		
+		HWND GetHandle() const { return mhWnd; }
+
+		bool IsActive() const { return mbActive; }
+		void SetActive(const bool active) { mbActive = active; }
+
+		virtual void InvokeMainLoop() { mMainLoopEvent.Invoke(this, EventArgs()); }
+
+		// Event handlers
+		void SetMainLoop(const NotifyEvent& mainLoopEvent) { mMainLoopEvent = mainLoopEvent; }
+		void SetInit(const NotifyEvent& initEvent) { mInitializeEvent = initEvent; }
+		void SetResize(const ResizeEvent& resizeEvent) { mResizeEvent = resizeEvent; }
+		void SetRelease(const NotifyEvent& releaseEvent) { mReleaseEvent = releaseEvent; }
+
+	protected:
 		bool RegisterWindowClass();
 	};
 
-	LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	class GLWindow : public Window
 	{
-		switch (msg)
-		{
-		default:
-			return DefWindowProc(hwnd, msg, wParam, lParam);
-		}
-		return 0;
-	}
+	protected:
+		HGLRC mhRC;
+		HDC mhDC;
+
+		bool Create(const wstring& strTitle,
+			const uint iWidth,
+			const uint iHeight);
+		virtual void Destroy();
+
+	public:
+		void InvokeMainLoop() { mMainLoopEvent.Invoke(this, EventArgs()); SwapBuffers(mhDC); }
+	};
 
 }
