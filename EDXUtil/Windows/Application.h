@@ -13,7 +13,7 @@ namespace EDX
 	{
 	private:
 		static HINSTANCE InstHandle;
-		static Window* pPrimaryWindow;
+		static Window* pMainWindow;
 
 	public:
 		static const wchar_t* WinClassName;
@@ -21,7 +21,7 @@ namespace EDX
 	public:
 		static void Init(HINSTANCE inst) { InstHandle = inst; }
 		static HINSTANCE GetInstanceHandle() { return InstHandle; }
-		static Window* GetPrimaryWindow() { return pPrimaryWindow; }
+		static Window* GetMainWindow() { return pMainWindow; }
 
 		static int Run(Window* pWindow);
 		static void Dispose();
