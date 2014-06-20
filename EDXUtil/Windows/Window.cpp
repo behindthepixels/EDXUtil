@@ -45,7 +45,6 @@ namespace EDX
 
 	void Window::Destroy()
 	{
-		mReleaseEvent.Invoke(this, EventArgs());
 		::UnregisterClass(Application::WinClassName, Application::GetInstanceHandle());
 	}
 
@@ -131,14 +130,14 @@ namespace EDX
 
 	void GLWindow::Destroy()
 	{
-		Window::Destroy();
-
 		::wglMakeCurrent(0, 0);
 		::wglDeleteContext(mhRC);
 		::ReleaseDC(mhWnd, mhDC);
 
 		mhDC = 0;
 		mhRC = 0;
+
+		Window::Destroy();
 	}
 
 	LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)

@@ -1,8 +1,10 @@
 #include <Windows.h>
-#include <gl\GL.h>
+#include <gl/GL.h>
 
-#include "Windows\Window.h"
-#include "Windows\Application.h"
+#include "Windows/Window.h"
+#include "Windows/Application.h"
+
+#include "Windows/Thread.h"
 
 using namespace EDX;
 

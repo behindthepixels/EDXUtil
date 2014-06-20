@@ -23,10 +23,12 @@
     <ClInclude Include="Windows\Application.h" />
     <ClInclude Include="Windows\Base.h" />
     <ClInclude Include="Windows\Event.h" />
+    <ClInclude Include="Windows\Thread.h" />
     <ClInclude Include="Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Application.cpp" />
+    <ClCompile Include="Windows\Thread.cpp" />
     <ClCompile Include="Windows\Window.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

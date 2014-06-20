@@ -35,7 +35,9 @@ namespace EDX
 			}
 		}
 
+		pMainWindow->mReleaseEvent.Invoke(pMainWindow, EventArgs());
 		Dispose();
+
 		return (int)msg.wParam;
 	}
 
