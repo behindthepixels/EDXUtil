@@ -36,7 +36,7 @@ namespace EDX
 			if (mbRunning)
 			{
 				int iErr = SetEvent(mStopEvent);
-				if (iErr != 0)
+				if (iErr == 0)
 					DWORD dw = GetLastError();
 
 				WaitForSingleObject(mhThreadHandle, INFINITE);
@@ -45,6 +45,7 @@ namespace EDX
 			}
 		}
 
+		inline void SelfTerminate() { SetEvent(mStopEvent); CloseHandle(mhThreadHandle); }
 		inline bool IsRunning() { return mbRunning; }
 		inline HANDLE GetThreadHandle() { return mhThreadHandle; }
 
