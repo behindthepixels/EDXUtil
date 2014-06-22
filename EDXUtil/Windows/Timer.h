@@ -2,7 +2,7 @@
 
 #include "../EDXPrerequisites.h"
 
-#include <Windows.h>
+#include "Base.h"
 
 namespace EDX
 {

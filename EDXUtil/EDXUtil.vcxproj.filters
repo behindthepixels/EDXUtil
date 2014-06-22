@@ -22,6 +22,12 @@
     <Filter Include="Source Files\Math">
       <UniqueIdentifier>{981541c5-6055-41d4-93c2-4b8f1697f948}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\RNG">
+      <UniqueIdentifier>{a85dc5ab-4dbe-4853-a845-ea1447e2154c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SIMD">
+      <UniqueIdentifier>{3aa073e3-ec69-4ae4-b102-5dd744d29876}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Windows\Event.h">
@@ -69,6 +75,30 @@
     <ClInclude Include="Math\VecBase.h">
       <Filter>Source Files\Math</Filter>
     </ClInclude>
+    <ClInclude Include="RNG\Random.h">
+      <Filter>Source Files\RNG</Filter>
+    </ClInclude>
+    <ClInclude Include="SIMD\BoolSSE.h">
+      <Filter>Source Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="SIMD\FloatSSE.h">
+      <Filter>Source Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="SIMD\IntSSE.h">
+      <Filter>Source Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="SIMD\SSE.h">
+      <Filter>Source Files\SIMD</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Matrix.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Ray.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\BoundingBox.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">
@@ -79,6 +109,9 @@
     </ClCompile>
     <ClCompile Include="Windows\Thread.cpp">
       <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Matrix.cpp">
+      <Filter>Source Files\Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -4,8 +4,6 @@
 #include "Base.h"
 #include "Event.h"
 
-#include <Windows.h>
-
 namespace EDX
 {
 	class Window : public Object

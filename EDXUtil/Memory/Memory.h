@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../EDXPrerequisites.h"
-#include "EDXMath.h"
+#include "../Math/EDXMath.h"
 
 namespace EDX
 {
@@ -126,5 +126,3 @@ namespace EDX
 		}
 	};
 }
-
-#endif

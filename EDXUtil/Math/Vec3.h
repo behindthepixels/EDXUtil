@@ -2,6 +2,7 @@
 
 #include "Constants.h"
 #include "VecBase.h"
+#include "EDXMath.h"
 #include <iostream>
 
 namespace EDX
@@ -122,4 +123,122 @@ namespace EDX
 	typedef Vec<3, float>	Vector3;
 	typedef Vec<3, int>		Vector3i;
 	typedef Vec<3, bool>	Vector3b;
+
+	namespace Math
+	{
+		template<class T>
+		inline T Dot(const Vec<3, T>& vVec1, const Vec<3, T>& vVec2)
+		{
+			return vVec1.x * vVec2.x + vVec1.y * vVec2.y + vVec1.z * vVec2.z;
+		}
+		template<class T>
+		inline T AbsDot(const Vec<3, T>& vVec1, const Vec<3, T>& vVec2)
+		{
+			T ret = Dot(vVec1, vVec2); return ret >= 0 ? ret : -ret;
+		}
+		template<class T>
+		inline Vec<3, T> Cross(const Vec<3, T>& vVec1, const Vec<3, T>& vVec2)
+		{
+			return Vec<3, T>(vVec1.y * vVec2.z - vVec1.z * vVec2.y,
+				vVec1.z * vVec2.x - vVec1.x * vVec2.z,
+				vVec1.x * vVec2.y - vVec1.y * vVec2.x);
+		}
+		template<class T>
+		inline Vec<3, T> Curl(const Vec<3, T>& vDvdx, const Vec<3, T>& vDvdy, const Vec<3, T>& vDvdz)
+		{
+			return Vec<3, T>(vDvdy.z - vDvdz.y, vDvdz.x - vDvdx.z, vDvdx.y - vDvdy.x);
+		}
+		template<class T>
+		inline T LengthSquared(const Vec<3, T>& vVec)
+		{
+			return Dot(vVec, vVec);
+		}
+		inline float Length(const Vector3& vVec)
+		{
+			return Math::Sqrt(LengthSquared(vVec));
+		}
+		inline Vector3 Normalize(const Vector3& v)
+		{
+			return v / Length(v);
+		}
+		inline float Distance(const Vector3& p1, const Vector3& p2)
+		{
+			return Length(p1 - p2);
+		}
+		inline float DistanceSquared(const Vector3& p1, const Vector3& p2)
+		{
+			return LengthSquared(p1 - p2);
+		}
+		inline Vector3 Reflect(const Vector3& vInci, const Vector3& nNorm)
+		{
+			return vInci + Vector3(2 * Dot(-vInci, nNorm) * nNorm);
+		}
+		inline Vector3 Refract(const Vector3& vInci, const Vector3& nNorm, float eta)
+		{
+			float NDotI = Dot(nNorm, vInci);
+			float k = 1.0f - eta * eta * (1.0f - NDotI * NDotI);
+			if (k < 0.0f)
+				return Vector3::ZERO;
+			else
+				return eta * vInci - (eta * NDotI + Math::Sqrt(k)) * Vector3(nNorm);
+		}
+		inline Vector3 FaceForward(const Vector3& n, const Vector3& v)
+		{
+			return (Dot(n, v) < 0.0f) ? -n : n;
+		}
+		inline Vector3 SphericalDirection(float fSinTheta, float fCosTheta, float fPhi)
+		{
+			return Vector3(fSinTheta * Math::Cos(fPhi),
+				fCosTheta,
+				fSinTheta * Math::Sin(fPhi));
+		}
+		inline Vector3 SphericalDirection(float fSinTheta, float fCosTheta,
+			float fPhi, const Vector3& vX,
+			const Vector3& vY, const Vector3& vZ)
+		{
+			return fSinTheta * Math::Cos(fPhi) * vX +
+				fCosTheta * vY + fSinTheta * Math::Sin(fPhi) * vZ;
+		}
+		inline float SphericalTheta(const Vector3& vVec)
+		{
+			return Math::Sin(Math::Clamp(vVec.y, -1.0f, 1.0f));
+		}
+		inline float SphericalPhi(const Vector3& vVec)
+		{
+			float p = Math::Atan2(vVec.z, vVec.x);
+			return (p < 0.0f) ? p + 2.0f * float(float(Math::EDX_PI)) : p;
+		}
+
+		template<uint Dimension>
+		inline Vec<Dimension, int> FloorToInt(const Vec<Dimension, float>& vec)
+		{
+			Vec<Dimension, int> vRet;
+			for (auto d = 0; d < Dimension; d++)
+				vRet[d] = FloorToInt(vec[d]);
+			return vRet;
+		}
+		template<uint Dimension>
+		inline Vec<Dimension, int> RoundToInt(const Vec<Dimension, float>& vec)
+		{
+			Vec<Dimension, int> vRet;
+			for (auto d = 0; d < Dimension; d++)
+				vRet[d] = RoundToInt(vec[d]);
+			return vRet;
+		}
+
+		inline void CoordinateSystem(const Vector3& vVec1, Vector3* vVec2, Vector3* vVec3)
+		{
+			if (Math::Abs(vVec1.x) > Math::Abs(vVec1.y))
+			{
+				float fInvLen = 1.0f / Math::Sqrt(vVec1.x * vVec1.x + vVec1.z * vVec1.z);
+				*vVec2 = Vector3(-vVec1.z * fInvLen, 0.0f, vVec1.x * fInvLen);
+			}
+			else
+			{
+				float fInvLen = 1.0f / Math::Sqrt(vVec1.y * vVec1.y + vVec1.z * vVec1.z);
+				*vVec2 = Vector3(0.0f, vVec1.z * fInvLen, -vVec1.y * fInvLen);
+			}
+			*vVec3 = Cross(vVec1, *vVec2);
+		}
+	}
 }

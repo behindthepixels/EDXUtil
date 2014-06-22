@@ -20,14 +20,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EDXPrerequisites.h" />
+    <ClInclude Include="Math\BoundingBox.h" />
     <ClInclude Include="Math\Constants.h" />
     <ClInclude Include="Math\EDXMath.h" />
+    <ClInclude Include="Math\Matrix.h" />
+    <ClInclude Include="Math\Ray.h" />
     <ClInclude Include="Math\Vec2.h" />
     <ClInclude Include="Math\Vec3.h" />
     <ClInclude Include="Math\Vec4.h" />
     <ClInclude Include="Math\VecBase.h" />
     <ClInclude Include="Memory\Memory.h" />
     <ClInclude Include="Memory\RefPtr.h" />
+    <ClInclude Include="RNG\Random.h" />
+    <ClInclude Include="SIMD\BoolSSE.h" />
+    <ClInclude Include="SIMD\FloatSSE.h" />
+    <ClInclude Include="SIMD\IntSSE.h" />
+    <ClInclude Include="SIMD\SSE.h" />
     <ClInclude Include="Windows\Application.h" />
     <ClInclude Include="Windows\Base.h" />
     <ClInclude Include="Windows\Event.h" />
@@ -36,6 +44,7 @@
     <ClInclude Include="Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Math\Matrix.cpp" />
     <ClCompile Include="Windows\Application.cpp" />
     <ClCompile Include="Windows\Thread.cpp" />
     <ClCompile Include="Windows\Window.cpp" />

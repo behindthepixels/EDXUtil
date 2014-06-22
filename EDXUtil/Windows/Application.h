@@ -3,8 +3,6 @@
 #include "../EDXPrerequisites.h"
 #include "Base.h"
 
-#include <Windows.h>
-
 namespace EDX
 {
 	class Window;

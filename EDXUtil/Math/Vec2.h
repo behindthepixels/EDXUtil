@@ -2,6 +2,7 @@
 
 #include "Constants.h"
 #include "VecBase.h"
+#include "EDXMath.h"
 #include <iostream>
 
 namespace EDX
@@ -116,4 +117,49 @@ namespace EDX
 	typedef Vec<2, float>	Vector2;
 	typedef Vec<2, int>		Vector2i;
 	typedef Vec<2, bool>	Vector2b;
+
+	namespace Math
+	{
+		template<class T>
+		inline T Dot(const Vec<2, T>& vVec1, const Vec<2, T>& vVec2)
+		{
+			return vVec1.x * vVec2.x + vVec1.y * vVec2.y;
+		}
+		template<class T>
+		inline T AbsDot(const Vec<2, T>& vVec1, const Vec<2, T>& vVec2)
+		{
+			T ret = Dot(vVec1, vVec2);
+			return ret >= 0 ? ret : -ret;
+		}
+		template<class T>
+		inline T Cross(const Vec<2, T>& vVec1, const Vec<2, T>& vVec2)
+		{
+			return vVec1.x * vVec2.y - vVec1.y * vVec2.x;
+		}
+		template<class T>
+		inline T Curl(const Vec<2, T>& vDvdx, const Vec<2, T>& vDvdy)
+		{
+			return vDvdx.y - vDvdy.x;
+		}
+		template<class T>
+		inline T LengthSquared(const Vec<2, T>& vVec)
+		{
+			return Dot(vVec, vVec);
+		}
+		inline float Length(const Vector2& vVec)
+		{
+			return Math::Sqrt(LengthSquared(vVec));
+		}
+		inline Vector2 Normalize(const Vector2& v)
+		{
+			return v / Length(v);
+		}
+		inline float Distance(const Vector2& p1, const Vector2& p2)
+		{
+			return Length(p1 - p2);
+		}
+		inline float DistanceSquared(const Vector2& p1, const Vector2& p2)
+		{
+			return LengthSquared(p1 - p2); 
+		}
 }
