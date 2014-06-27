@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EDXPrerequisites.h" />
+    <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Math\BoundingBox.h" />
     <ClInclude Include="Math\Constants.h" />
     <ClInclude Include="Math\EDXMath.h" />
@@ -44,6 +45,7 @@
     <ClInclude Include="Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Math\Matrix.cpp" />
     <ClCompile Include="Windows\Application.cpp" />
     <ClCompile Include="Windows\Thread.cpp" />

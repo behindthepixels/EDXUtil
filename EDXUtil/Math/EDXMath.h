@@ -13,9 +13,9 @@ namespace EDX
 		inline bool NumericValid(T num) { return !_isnan(num) && _finite(num); }
 
 		template <class T1, class T2, class T3>
-		inline T1 Clamp(T1 tVal, T2 tMin, T3 tMax)
+		inline T1 Clamp(T1 tVal, T2 tmn, T3 tMax)
 		{
-			if (tVal < tMin) return tMin;
+			if (tVal < tmn) return tmn;
 			if (tVal > tMax) return tMax;
 			return tVal;
 		}
@@ -49,15 +49,15 @@ namespace EDX
 		inline int RoundToInt(float fVal) { return FloorToInt(fVal + 0.5f); }
 
 		template <class T1, class T2>
-		inline float LinStep(const T1& tVal, const T2& tMin, const T2& tMax)
+		inline float LinStep(const T1& tVal, const T2& tmn, const T2& tMax)
 		{
-			if (tMin == tMax)
+			if (tmn == tMax)
 			{
 				return 0.0f;
 			}
-			return Saturate((tVal - tMin) / (tMax - tMin));
+			return Saturate((tVal - tmn) / (tMax - tmn));
 		}
-		template<class T1, class T2> inline auto Lerp(const T1& eMin, const T2& eMax, const float fVal) -> decltype(eMin + eMax) { return eMin * (1 - fVal) + eMax * fVal; }
+		template<class T1, class T2> inline auto Lerp(const T1& min, const T2& eMax, const float fVal) -> decltype(min + eMax) { return min * (1 - fVal) + eMax * fVal; }
 		template<class T1, class T2> inline auto Max(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 > e2 ? e1 : e2; }
 		template<class T1, class T2> inline auto AbsMax(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return Abs(e1) > Abs(e2) ? e1 : e2; }
 		template<class T1, class T2> inline auto Min(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 < e2 ? e1 : e2; }
@@ -121,9 +121,9 @@ namespace EDX
 			assert(abs(e2) < 1e8f);
 			T eVal = Math::Lerp(e1, e2, fLerp);
 
-			T eMinusCur = fLerp;
-			T eMinusCurSqr = eMinusCur * eMinusCur;
-			T eMinusCurCub = eMinusCurSqr * eMinusCur;
+			T emnusCur = fLerp;
+			T emnusCurSqr = emnusCur * emnusCur;
+			T emnusCurCub = emnusCurSqr * emnusCur;
 
 			T eK = e2 - e1;
 			T eD1 = (e2 - e0) * 0.5f;
@@ -145,8 +145,8 @@ namespace EDX
 			T eA1 = eD1;
 			T eA2 = 3 * eK - 2 * eD1 - eD2;
 			T eA3 = eD1 + eD2 - 2 * eK;
-			T eRet = eA3 * eMinusCurCub + eA2 * eMinusCurSqr + eA1 * eMinusCur + eA0;
-			//eRet = eA0 * eMinusCurCub + eA1 * eMinusCurSqr + eA2 * eMinusCur + eA3;
+			T eRet = eA3 * emnusCurCub + eA2 * emnusCurSqr + eA1 * emnusCur + eA0;
+			//eRet = eA0 * emnusCurCub + eA1 * emnusCurSqr + eA2 * emnusCur + eA3;
 			assert(NumericValid(eRet));
 
 			return eRet;

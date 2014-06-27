@@ -4,38 +4,38 @@
 
 namespace EDX
 {
-#define RAY_EPSI 1e-3f
+#define RAY_EPSI 1e-4f
 	class Ray
 	{
 	public:
-		Vector3 mptOrg;
-		Vector3 mvDir;
+		Vector3 mOrg;
+		Vector3 mDir;
 
-		mutable float mfMin, mfMax;
-		int miDepth;
+		mutable float mn, max;
+		int mDepth;
 
 	public:
 		Ray()
-			: mptOrg(Vector3::ZERO), mvDir(Vector3::UNIT_Z),
-			miDepth(0), mfMin(RAY_EPSI), mfMax(float(Math::EDX_INFINITY))
+			: mOrg(Vector3::ZERO), mDir(Vector3::UNIT_Z),
+			mDepth(0), mn(RAY_EPSI), max(float(Math::EDX_INFINITY))
 		{
 		}
-		Ray(const Vector3& ptOrig, const Vector3& vDir, float fMax = float(Math::EDX_INFINITY), float fMin = 0.0f, int iDepth = 0)
-			: mptOrg(ptOrig), mvDir(vDir), miDepth(iDepth), mfMin(fMin + RAY_EPSI), mfMax(fMax - RAY_EPSI)
+		Ray(const Vector3& vOrig, const Vector3& vDir, float fMax = float(Math::EDX_INFINITY), float fmn = 0.0f, int iDepth = 0)
+			: mOrg(vOrig), mDir(vDir), mDepth(iDepth), mn(fmn + RAY_EPSI), max(fMax - RAY_EPSI)
 		{
 		}
 		~Ray()
 		{
 		}
 
-		inline Vector3 CalcPoint(float fDist) const { return mptOrg + mvDir * fDist; }
+		inline Vector3 CalcPoint(float fDist) const { return mOrg + mDir * fDist; }
 	};
 
 	class RayDifferential : public Ray
 	{
 	public:
-		Vector3 mvDxOrg, mvDyOrg;
-		Vector3 mvDxDir, mvDyDir;
+		Vector3 mDxOrg, mDyOrg;
+		Vector3 mDxDir, mDyDir;
 
 		bool mbHasDifferential;
 
@@ -44,8 +44,8 @@ namespace EDX
 			: Ray(), mbHasDifferential(false)
 		{
 		}
-		RayDifferential(const Vector3& ptOrig, const Vector3& vDir, float fMax = float(Math::EDX_INFINITY), float fMin = 0.0f, int iDepth = 0)
-			: Ray(ptOrig, vDir, fMax, fMin, iDepth), mbHasDifferential(false)
+		RayDifferential(const Vector3& vOrig, const Vector3& vDir, float fMax = float(Math::EDX_INFINITY), float fmn = 0.0f, int iDepth = 0)
+			: Ray(vOrig, vDir, fMax, fmn, iDepth), mbHasDifferential(false)
 		{
 		}
 		RayDifferential(const Ray& ray)

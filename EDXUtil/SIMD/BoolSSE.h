@@ -116,12 +116,12 @@ namespace EDX
 
 		template<size_t i0, size_t i1, size_t i2, size_t i3> __forceinline const BoolSSE Shuffle(const BoolSSE& lhs)
 		{
-			return _mm_shuffle_epi32(lhs, _MM_SHUFFLE(i3, i2, i1, i0));
+			return _mm_shuffle_epi32(lhs, _mm_SHUFFLE(i3, i2, i1, i0));
 		}
 
 		template<size_t i0, size_t i1, size_t i2, size_t i3> __forceinline const BoolSSE Shuffle(const BoolSSE& lhs, const BoolSSE& rhs)
 		{
-			return _mm_Shuffle_ps(lhs, rhs, _MM_SHUFFLE(i3, i2, i1, i0));
+			return _mm_Shuffle_ps(lhs, rhs, _mm_SHUFFLE(i3, i2, i1, i0));
 		}
 
 		template<> __forceinline const BoolSSE Shuffle<0, 0, 2, 2>(const BoolSSE& lhs) { return _mm_moveldup_ps(lhs); }

@@ -28,25 +28,25 @@ namespace EDX
 		typedef void(*FuncHandler) (Params...);
 
 	private:
-		FuncHandler mFHandler;
+		FuncHandler mHandler;
 
 	public:
 		StaticFuncDelegate(FuncHandler func)
-			: mFHandler(func)
+			: mHandler(func)
 		{
 		}
 
 		void Invoke(Params... args) const
 		{
-			(*mFHandler)(args...);
+			(*mHandler)(args...);
 		}
 
 		void* GetOwner() const { return nullptr; }
-		void* GetFuncHandler() const { return (void*)(*(int*)&mFHandler); }
+		void* GetFuncHandler() const { return (void*)(*(int*)&mHandler); }
 
 		virtual Delegate<Params...>* Clone() const
 		{
-			return new StaticFuncDelegate<Params...>(mFHandler);
+			return new StaticFuncDelegate<Params...>(mHandler);
 		}
 	};
 
@@ -58,26 +58,26 @@ namespace EDX
 
 	private:
 		Class* mpOwner;
-		FuncHandler mFHandler;
+		FuncHandler mHandler;
 
 	public:
 		MemberFuncDelegate(Class* pOwner, FuncHandler func)
 			: mpOwner(pOwner)
-			, mFHandler(func)
+			, mHandler(func)
 		{
 		}
 
 		void Invoke(Params... args) const
 		{
-			(mpOwner->*mFHandler)(args...);
+			(mpOwner->*mHandler)(args...);
 		}
 
 		void* GetOwner() const { return mpOwner; }
-		void* GetFuncHandler() const { return (void*)(*(int*)&mFHandler); }
+		void* GetFuncHandler() const { return (void*)(*(int*)&mHandler); }
 
 		virtual Delegate<Params...>* Clone() const
 		{
-			return new MemberFuncDelegate<Class, Params...>(mpOwner, mFHandler);
+			return new MemberFuncDelegate<Class, Params...>(mpOwner, mHandler);
 		}
 	};
 
@@ -86,7 +86,7 @@ namespace EDX
 	class Event
 	{
 	protected:
-		vector<Delegate<Params...>*> mvListeners;
+		vector<Delegate<Params...>*> mListeners;
 
 	public:
 		Event()
@@ -105,8 +105,8 @@ namespace EDX
 		Event<Params...>& operator = (const Event<Params...>& other)
 		{
 			Release();
-			for (const auto& it : other.mvListeners)
-				mvListeners.push_back(it->Clone());
+			for (const auto& it : other.mListeners)
+				mListeners.push_back(it->Clone());
 			return *this;
 		}
 
@@ -123,7 +123,7 @@ namespace EDX
 
 		void Invoke(Params... args)
 		{
-			for (auto& listener : mvListeners)
+			for (auto& listener : mListeners)
 			{
 				listener->Invoke(args...);
 			}
@@ -132,18 +132,18 @@ namespace EDX
 		// For StaticFuncDelegate
 		void Bind(typename StaticFuncDelegate<Params...>::FuncHandler pFunc)
 		{
-			mvListeners.push_back(new StaticFuncDelegate<Params...>(pFunc));
+			mListeners.push_back(new StaticFuncDelegate<Params...>(pFunc));
 		}
 
 		void Unbind(typename StaticFuncDelegate<Params...>::FuncHandler pFunc)
 		{
 			StaticFuncDelegate<Params...> tmp = StaticFuncDelegate<Params...>(pFunc);
-			for (auto it = mvListeners.begin(); it != mvListeners.end(); it++)
+			for (auto it = mListeners.begin(); it != mListeners.end(); it++)
 			{
 				if ((**it) == tmp)
 				{
 					delete (*it);
-					mvListeners.erase(it);
+					mListeners.erase(it);
 					break;
 				}
 			}
@@ -153,19 +153,19 @@ namespace EDX
 		template<class Class>
 		void Bind(Class* pListener, typename MemberFuncDelegate<Class, Params...>::FuncHandler pFunc)
 		{
-			mvListeners.push_back(new MemberFuncDelegate<Class, Params...>(pListener, pFunc));
+			mListeners.push_back(new MemberFuncDelegate<Class, Params...>(pListener, pFunc));
 		}
 
 		template<class Class>
 		void Unbind(Class* pListener, typename MemberFuncDelegate<Class, Params...>::FuncHandler pFunc)
 		{
 			MemberFuncDelegate<Class, Params...> tmp = MemberFuncDelegate<Class, Params...>(pListener, pFunc);
-			for (auto it = mvListeners.begin(); it != mvListeners.end(); it++)
+			for (auto it = mListeners.begin(); it != mListeners.end(); it++)
 			{
 				if ((**it) == tmp)
 				{
 					delete (*it);
-					mvListeners.erase(it);
+					mListeners.erase(it);
 					break;
 				}
 			}
@@ -173,17 +173,17 @@ namespace EDX
 
 		void Release()
 		{
-			for (auto& it : mvListeners)
+			for (auto& it : mListeners)
 			{
 				delete it;
 				it = NULL;
 			}
-			mvListeners.clear();
+			mListeners.clear();
 		}
 
 		bool Attached() const
 		{
-			return !mvListeners.empty();
+			return !mListeners.emy();
 		}
 	};
 

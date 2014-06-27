@@ -45,7 +45,7 @@ namespace EDX
 			}
 		}
 
-		inline void SelfTerminate() { SetEvent(mStopEvent); CloseHandle(mhThreadHandle); }
+		inline void SelfTermnate() { SetEvent(mStopEvent); CloseHandle(mhThreadHandle); }
 		inline bool IsRunning() { return mbRunning; }
 		inline HANDLE GetThreadHandle() { return mhThreadHandle; }
 

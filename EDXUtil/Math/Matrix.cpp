@@ -36,7 +36,7 @@ namespace EDX
 	Matrix Matrix::Inverse(const Matrix& m)
 	{
 		int indxc[4], indxr[4];
-		int ipiv[4] = {0, 0, 0, 0};
+		int ipiv[4] = { 0, 0, 0, 0 };
 		float minv[4][4];
 		memcpy(minv, m.m, 4 * 4 * sizeof(float));
 		for (int i = 0; i < 4; i++)
@@ -84,7 +84,7 @@ namespace EDX
 					float save = minv[j][icol];
 					minv[j][icol] = 0;
 					for (int k = 0; k < 4; k++)
-						minv[j][k] -= minv[icol][k]*save;
+						minv[j][k] -= minv[icol][k] * save;
 				}
 			}
 		}
@@ -101,21 +101,21 @@ namespace EDX
 
 	Matrix Matrix::Translate(const Vector3& vDelta)
 	{
-		Matrix mMat(1, 0, 0, vDelta.x,
+		Matrix mat(1, 0, 0, vDelta.x,
 					0, 1, 0, vDelta.y,
 					0, 0, 1, vDelta.z,
 					0, 0, 0,        1);
-		return mMat;
+		return mat;
 	}
 
 	Matrix Matrix::Scale(float fX, float fY, float fZ)
 	{
-		Matrix mMat(fX, 0, 0, 0,
+		Matrix mat(fX, 0, 0, 0,
 					0, fY, 0, 0,
 					0, 0, fZ, 0,
 					0, 0, 0, 1);
 
-		return mMat;
+		return mat;
 	}
 
 	Matrix Matrix::Rotate(float fAngle, const Vector3& vAxis)
@@ -150,30 +150,30 @@ namespace EDX
 
 	Matrix Matrix::LookAt(const Vector3& ptEye, const Vector3& ptTarget, const Vector3& vUp)
 	{
-		float mMat[4][4];
+		float mat[4][4];
 
-		mMat[0][3] = ptEye.x;
-		mMat[1][3] = ptEye.y;
-		mMat[2][3] = ptEye.z;
-		mMat[3][3] = 1.0f;
+		mat[0][3] = ptEye.x;
+		mat[1][3] = ptEye.y;
+		mat[2][3] = ptEye.z;
+		mat[3][3] = 1.0f;
 
 		Vector3 vDir = Math::Normalize(ptTarget - ptEye);
 		Vector3 vRight = Math::Normalize(Math::Cross(Math::Normalize(vUp), vDir));
 		Vector3 vNewUp = Math::Cross(vDir, vRight);
-		mMat[0][0] = vRight.x;
-		mMat[1][0] = vRight.y;
-		mMat[2][0] = vRight.z;
-		mMat[3][0] = 0.0f;
-		mMat[0][1] = vNewUp.x;
-		mMat[1][1] = vNewUp.y;
-		mMat[2][1] = vNewUp.z;
-		mMat[3][1] = 0.0f;
-		mMat[0][2] = vDir.x;
-		mMat[1][2] = vDir.y;
-		mMat[2][2] = vDir.z;
-		mMat[3][2] = 0.0f;
+		mat[0][0] = vRight.x;
+		mat[1][0] = vRight.y;
+		mat[2][0] = vRight.z;
+		mat[3][0] = 0.0f;
+		mat[0][1] = vNewUp.x;
+		mat[1][1] = vNewUp.y;
+		mat[2][1] = vNewUp.z;
+		mat[3][1] = 0.0f;
+		mat[0][2] = vDir.x;
+		mat[1][2] = vDir.y;
+		mat[2][2] = vDir.z;
+		mat[3][2] = 0.0f;
 
-		Matrix mCamToWorld(mMat);
+		Matrix mCamToWorld(mat);
 
 		return Inverse(mCamToWorld);
 	}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <smmintrin.h>
+#include <smntrin.h>
 
 #include "../EDXPrerequisites.h"
 #include "../Math/Constants.h"
@@ -71,19 +71,19 @@ __forceinline size_t __btr(size_t v, size_t i)
 	__int64 r = v; _bittestandreset64(&r, i); return r;
 }
 
-typedef __int64 atomic_t;
+typedef __int64 atomc_t;
 
-__forceinline int64 atomic_add(volatile int64* m, const int64 v)
+__forceinline int64 atomc_add(volatile int64* m, const int64 v)
 {
 	return _InterlockedExchangeAdd64(m, v);
 }
 
-__forceinline int64 atomic_xchg(volatile int64 *p, int64 v)
+__forceinline int64 atomc_xchg(volatile int64 *p, int64 v)
 {
 	return _InterlockedExchange64((volatile long long *)p, v);
 }
 
-__forceinline int64 atomic_cmpxchg(volatile int64* m, const int64 v, const int64 c)
+__forceinline int64 atomc_cmpxchg(volatile int64* m, const int64 v, const int64 c)
 {
 	return _InterlockedCompareExchange64(m, v, c);
 }

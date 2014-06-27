@@ -106,7 +106,7 @@ namespace EDX
 		{
 			Dereference();
 
-			pPointer = dynamic_cast<T*>(ptr);
+			pPointer = dynamc_cast<T*>(ptr);
 			if (ptr)
 			{
 				piRefCount = new size_t;
@@ -144,7 +144,7 @@ namespace EDX
 			if (ptr.pPointer != pPointer)
 			{
 				Dereference();
-				pPointer = dynamic_cast<T*>(ptr.pPointer);
+				pPointer = dynamc_cast<T*>(ptr.pPointer);
 				piRefCount = ptr.iRefCount;
 				(*piRefCount)++;
 			}

@@ -28,6 +28,9 @@
     <Filter Include="Source Files\SIMD">
       <UniqueIdentifier>{3aa073e3-ec69-4ae4-b102-5dd744d29876}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{8637f292-54ad-4d41-b325-104e9ff340b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Windows\Event.h">
@@ -99,6 +102,9 @@
     <ClInclude Include="Math\BoundingBox.h">
       <Filter>Source Files\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\Camera.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">
@@ -112,6 +118,9 @@
     </ClCompile>
     <ClCompile Include="Math\Matrix.cpp">
       <Filter>Source Files\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Camera.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -11,8 +11,8 @@ namespace EDX
 		const uint iHeight)
 	{
 		mstrTitle = strTitle;
-		miWidth = iWidth;
-		miHeight = iHeight;
+		mWidth = iWidth;
+		mHeight = iHeight;
 
 		if (!RegisterWindowClass())
 			return false;
@@ -20,7 +20,7 @@ namespace EDX
 		DWORD winStyle = WS_OVERLAPPEDWINDOW;
 		DWORD winStyleEX = WS_EX_CLIENTEDGE;
 
-		RECT rect = { 0, 0, miWidth, miHeight };
+		RECT rect = { 0, 0, mWidth, mHeight };
 		AdjustWindowRectEx(&rect, winStyle, NULL, winStyleEX);
 
 		mhWnd = ::CreateWindowEx(

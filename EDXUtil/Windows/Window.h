@@ -10,7 +10,7 @@ namespace EDX
 	{
 	protected:
 		HWND mhWnd;
-		uint miWidth, miHeight;
+		uint mWidth, mHeight;
 		wstring mstrTitle;
 		bool mbActive;
 
@@ -19,7 +19,7 @@ namespace EDX
 		NotifyEvent mInitializeEvent;
 		NotifyEvent mReleaseEvent;
 		ResizeEvent	mResizeEvent;
-		MouseEvent mMouseEvent;
+		MouseEvent mouseEvent;
 
 	public:
 		Window()

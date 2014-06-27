@@ -9,17 +9,17 @@ namespace EDX
 	class Timer
 	{
 	public:
-		double mfLastElapsedAbsoluteTime;
-		double mfBaseAbsoluteTime;
+		double mLastElapsedAbsoluteTime;
+		double mBaseAbsoluteTime;
 
-		double mfLastElapsedTime;
-		double mfBaseTime;
-		double mfStopTime;
+		double mLastElapsedTime;
+		double mBaseTime;
+		double mStopTime;
 		bool mbTimerStopped;
 
 		wchar_t mstrFrameRate[16];
-		dword mdwNumFrames;
-		double mfLastFPSTime;
+		dword mdwNumrames;
+		double mLastFPSTime;
 
 		LARGE_INTEGER mPerfFreq;
 
@@ -28,17 +28,17 @@ namespace EDX
 			QueryPerformanceFrequency(&mPerfFreq);
 			double fTime = GetAbsoluteTime();
 
-			mfBaseAbsoluteTime = fTime;
-			mfLastElapsedAbsoluteTime = fTime;
+			mBaseAbsoluteTime = fTime;
+			mLastElapsedAbsoluteTime = fTime;
 
-			mfBaseTime = fTime;
-			mfStopTime = 0.0;
-			mfLastElapsedTime = fTime;
+			mBaseTime = fTime;
+			mStopTime = 0.0;
+			mLastElapsedTime = fTime;
 			mbTimerStopped = false;
 
 			mstrFrameRate[0] = L'\0';
-			mdwNumFrames = 0;
-			mfLastFPSTime = fTime;
+			mdwNumrames = 0;
+			mLastFPSTime = fTime;
 		}
 
 		double GetAbsoluteTime()
@@ -52,23 +52,23 @@ namespace EDX
 		double GetTime()
 		{
 			// Get either the current time or the stop time, depending
-			// on whether we're stopped and what command was sent
-			return (mfStopTime != 0.0) ? mfStopTime : GetAbsoluteTime();
+			// on whether we're stopped and what comand was sent
+			return (mStopTime != 0.0) ? mStopTime : GetAbsoluteTime();
 		}
 
 		double GetElapsedTime()
 		{
 			double fTime = GetAbsoluteTime();
 
-			double fElapsedAbsoluteTime = (double)(fTime - mfLastElapsedAbsoluteTime);
-			mfLastElapsedAbsoluteTime = fTime;
+			double fElapsedAbsoluteTime = (double)(fTime - mLastElapsedAbsoluteTime);
+			mLastElapsedAbsoluteTime = fTime;
 			return fElapsedAbsoluteTime;
 		}
 
 		// Return the current time
 		double GetAppTime()
 		{
-			return GetTime() - mfBaseTime;
+			return GetTime() - mBaseTime;
 		}
 
 		// Reset the timer
@@ -76,9 +76,9 @@ namespace EDX
 		{
 			double fTime = GetTime();
 
-			mfBaseTime = fTime;
-			mfLastElapsedTime = fTime;
-			mfStopTime = 0;
+			mBaseTime = fTime;
+			mLastElapsedTime = fTime;
+			mStopTime = 0;
 			mbTimerStopped = false;
 			return 0.0;
 		}
@@ -89,9 +89,9 @@ namespace EDX
 			double fTime = GetAbsoluteTime();
 
 			if (mbTimerStopped)
-				mfBaseTime += fTime - mfStopTime;
-			mfStopTime = 0.0;
-			mfLastElapsedTime = fTime;
+				mBaseTime += fTime - mStopTime;
+			mStopTime = 0.0;
+			mLastElapsedTime = fTime;
 			mbTimerStopped = false;
 		}
 
@@ -102,8 +102,8 @@ namespace EDX
 
 			if (!mbTimerStopped)
 			{
-				mfStopTime = fTime;
-				mfLastElapsedTime = fTime;
+				mStopTime = fTime;
+				mLastElapsedTime = fTime;
 				mbTimerStopped = true;
 			}
 		}
@@ -111,12 +111,12 @@ namespace EDX
 		// Advance the timer by 1/10th second
 		void SingleStep(double fTimeAdvance)
 		{
-			mfStopTime += fTimeAdvance;
+			mStopTime += fTimeAdvance;
 		}
 
 		void MarkFrame()
 		{
-			mdwNumFrames++;
+			mdwNumrames++;
 		}
 
 		wchar_t* GetFrameRate()
@@ -124,11 +124,11 @@ namespace EDX
 			double fTime = GetAbsoluteTime();
 
 			// Only re-compute the FPS (frames per second) once per second
-			if (fTime - mfLastFPSTime > 1.0)
+			if (fTime - mLastFPSTime > 1.0)
 			{
-				double fFPS = mdwNumFrames / (fTime - mfLastFPSTime);
-				mfLastFPSTime = fTime;
-				mdwNumFrames = 0L;
+				double fFPS = mdwNumrames / (fTime - mLastFPSTime);
+				mLastFPSTime = fTime;
+				mdwNumrames = 0L;
 				swprintf_s(mstrFrameRate, L"%0.02f fps", (float)fFPS);
 			}
 			return mstrFrameRate;

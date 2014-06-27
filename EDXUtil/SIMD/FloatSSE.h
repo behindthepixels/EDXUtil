@@ -39,7 +39,7 @@ namespace EDX
 		//__forceinline ssef(float rhs) : m128(_mm_set1_ps(rhs)) {}
 
 		__forceinline FloatSSE (const float& fVal)
-			: m128(_mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(_mm_load_ss(&fVal)), _MM_SHUFFLE(0, 0, 0, 0)))) {}
+			: m128(_mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(_mm_load_ss(&fVal)), _mm_SHUFFLE(0, 0, 0, 0)))) {}
 
 		__forceinline FloatSSE(float a, float b)
 			: m128(_mm_set_ps(b, a, b, a)) {}
@@ -157,9 +157,9 @@ namespace EDX
 		__forceinline const FloatSSE operator * (const float& lhs, const FloatSSE& rhs) { return FloatSSE(lhs) * rhs; }
 		__forceinline const FloatSSE operator / (const float& lhs, const FloatSSE& rhs) { return lhs * Rcp(rhs); }
 
-		__forceinline const FloatSSE Min(const FloatSSE& lhs, const FloatSSE& rhs) { return _mm_min_ps(lhs.m128, rhs.m128); }
-		__forceinline const FloatSSE Min(const FloatSSE& lhs, const float& rhs) { return _mm_min_ps(lhs.m128, FloatSSE(rhs)); }
-		__forceinline const FloatSSE Min(const float& lhs, const FloatSSE& rhs) { return _mm_min_ps(FloatSSE(lhs), rhs.m128); }
+		__forceinline const FloatSSE mn(const FloatSSE& lhs, const FloatSSE& rhs) { return _mm_mn_ps(lhs.m128, rhs.m128); }
+		__forceinline const FloatSSE mn(const FloatSSE& lhs, const float& rhs) { return _mm_mn_ps(lhs.m128, FloatSSE(rhs)); }
+		__forceinline const FloatSSE mn(const float& lhs, const FloatSSE& rhs) { return _mm_mn_ps(FloatSSE(lhs), rhs.m128); }
 
 		__forceinline const FloatSSE Max(const FloatSSE& lhs, const FloatSSE& rhs) { return _mm_max_ps(lhs.m128, rhs.m128); }
 		__forceinline const FloatSSE Max(const FloatSSE& lhs, const float& rhs) { return _mm_max_ps(lhs.m128, FloatSSE(rhs)); }
@@ -177,12 +177,12 @@ namespace EDX
 		//----------------------------------------------------------------------------------------------
 		// Rounding Functions
 		//----------------------------------------------------------------------------------------------
-		__forceinline const FloatSSE RoundEven(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_NEAREST_INT); }
-		__forceinline const FloatSSE RoundDown(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_NEG_INF  ); }
-		__forceinline const FloatSSE RoundUp(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_POS_INF  ); }
-		__forceinline const FloatSSE RoundZero(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_ZERO   ); }
-		__forceinline const FloatSSE Floor(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_NEG_INF  ); }
-		__forceinline const FloatSSE Ceil(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_POS_INF  ); }
+		__forceinline const FloatSSE RoundEven(const FloatSSE& lhs) { return _mm_round_ps(lhs, _mm_FROUND_TO_NEAREST_INT); }
+		__forceinline const FloatSSE RoundDown(const FloatSSE& lhs) { return _mm_round_ps(lhs, _mm_FROUND_TO_NEG_INF  ); }
+		__forceinline const FloatSSE RoundUp(const FloatSSE& lhs) { return _mm_round_ps(lhs, _mm_FROUND_TO_POS_INF  ); }
+		__forceinline const FloatSSE RoundZero(const FloatSSE& lhs) { return _mm_round_ps(lhs, _mm_FROUND_TO_ZERO   ); }
+		__forceinline const FloatSSE Floor(const FloatSSE& lhs) { return _mm_round_ps(lhs, _mm_FROUND_TO_NEG_INF  ); }
+		__forceinline const FloatSSE Ceil(const FloatSSE& lhs) { return _mm_round_ps(lhs, _mm_FROUND_TO_POS_INF  ); }
 
 		//----------------------------------------------------------------------------------------------
 		// Movement/Shifting/Shuffling Functions
@@ -192,12 +192,12 @@ namespace EDX
 
 		template<size_t i0, size_t i1, size_t i2, size_t i3> __forceinline const FloatSSE Shuffle(const FloatSSE& rhs)
 		{
-			return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(rhs), _MM_SHUFFLE(i3, i2, i1, i0)));
+			return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(rhs), _mm_SHUFFLE(i3, i2, i1, i0)));
 		}
 
 		template<size_t i0, size_t i1, size_t i2, size_t i3> __forceinline const FloatSSE Shuffle(const FloatSSE& lhs, const FloatSSE& rhs)
 		{
-			return _mm_shuffle_ps(lhs, rhs, _MM_SHUFFLE(i3, i2, i1, i0));
+			return _mm_shuffle_ps(lhs, rhs, _mm_SHUFFLE(i3, i2, i1, i0));
 		}
 
 		__forceinline const FloatSSE Shuffle8(const FloatSSE& lhs, const IntSSE& shuf)
@@ -247,18 +247,18 @@ namespace EDX
 		//----------------------------------------------------------------------------------------------
 		// Reductions
 		//----------------------------------------------------------------------------------------------
-		__forceinline const FloatSSE VReduceMin(const FloatSSE& v) { FloatSSE h = Min(Shuffle<1,0,3,2>(v),v); return Min(Shuffle<2,3,0,1>(h),h); }
+		__forceinline const FloatSSE VReducemn(const FloatSSE& v) { FloatSSE h = mn(Shuffle<1,0,3,2>(v),v); return mn(Shuffle<2,3,0,1>(h),h); }
 		__forceinline const FloatSSE VReduceMax(const FloatSSE& v) { FloatSSE h = Max(Shuffle<1,0,3,2>(v),v); return Max(Shuffle<2,3,0,1>(h),h); }
 		__forceinline const FloatSSE vReduceAdd(const FloatSSE& v) { FloatSSE h = Shuffle<1,0,3,2>(v) + v ; return Shuffle<2,3,0,1>(h) + h ; }
 
-		__forceinline float ReduceMin(const FloatSSE& v) { return _mm_cvtss_f32(VReduceMin(v)); }
+		__forceinline float Reducemn(const FloatSSE& v) { return _mm_cvtss_f32(VReducemn(v)); }
 		__forceinline float ReduceMax(const FloatSSE& v) { return _mm_cvtss_f32(VReduceMax(v)); }
 		__forceinline float ReduceAdd(const FloatSSE& v) { return _mm_cvtss_f32(vReduceAdd(v)); }
 
-		__forceinline size_t SelectMin(const FloatSSE& v) { return __bsf(_mm_movemask_ps(v == VReduceMin(v))); }
+		__forceinline size_t Selectmn(const FloatSSE& v) { return __bsf(_mm_movemask_ps(v == VReducemn(v))); }
 		__forceinline size_t SelectMax(const FloatSSE& v) { return __bsf(_mm_movemask_ps(v == VReduceMax(v))); }
 
-		__forceinline size_t SelectMin(const BoolSSE& valid, const FloatSSE& v) { const FloatSSE tmp = Select(valid, v, FloatSSE(Math::EDX_INFINITY)); return __bsf(_mm_movemask_ps(valid & (tmp == VReduceMin(tmp)))); }
+		__forceinline size_t Selectmn(const BoolSSE& valid, const FloatSSE& v) { const FloatSSE tmp = Select(valid, v, FloatSSE(Math::EDX_INFINITY)); return __bsf(_mm_movemask_ps(valid & (tmp == VReducemn(tmp)))); }
 		__forceinline size_t SelectMax(const BoolSSE& valid, const FloatSSE& v) { const FloatSSE tmp = Select(valid, v, FloatSSE(Math::EDX_NEG_INFINITY)); return __bsf(_mm_movemask_ps(valid & (tmp == VReduceMax(tmp)))); }
 
 	}

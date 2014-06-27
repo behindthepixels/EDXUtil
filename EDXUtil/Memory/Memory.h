@@ -51,32 +51,32 @@ namespace EDX
 	class MemoryArena
 	{
 	private:
-		uint miBlockSize;
-		uint miCurrOffset;
+		uint mBlockSize;
+		uint mCurrOffset;
 		byte* mpCurrentBlock;
 
-		vector<byte*> mvUsedBlocks, mvAvailableBlocks;
+		vector<byte*> mUsedBlocks, mAvailableBlocks;
 
 	public:
 		MemoryArena(uint uiSize = 32768)
 		{
-			miBlockSize = uiSize;
-			miCurrOffset = 0;
-			mpCurrentBlock = AllocAligned<byte>(miBlockSize);
+			mBlockSize = uiSize;
+			mCurrOffset = 0;
+			mpCurrentBlock = AllocAligned<byte>(mBlockSize);
 		}
 		~MemoryArena()
 		{
 			// Free all memories in the destructor
 			FreeAligned(mpCurrentBlock);
 
-			for (uint i = 0; i < mvUsedBlocks.size(); i++)
+			for (uint i = 0; i < mUsedBlocks.size(); i++)
 			{
-				FreeAligned(mvUsedBlocks[i]);
+				FreeAligned(mUsedBlocks[i]);
 			}
 
-			for (uint i = 0; i < mvAvailableBlocks.size(); i++)
+			for (uint i = 0; i < mAvailableBlocks.size(); i++)
 			{
-				FreeAligned(mvAvailableBlocks[i]);
+				FreeAligned(mAvailableBlocks[i]);
 			}
 		}
 
@@ -90,38 +90,38 @@ namespace EDX
 			uiSize = (uiSize + 15) & (~15);
 
 			// Handle situation where the current block is used up
-			if (miCurrOffset + uiSize > miBlockSize)
+			if (mCurrOffset + uiSize > mBlockSize)
 			{
 				// Cache the current block for future use
-				mvUsedBlocks.push_back(mpCurrentBlock);
+				mUsedBlocks.push_back(mpCurrentBlock);
 
 				// Use previously allocated blocks if the requested size is within block size
-				if (mvAvailableBlocks.size() > 0 && uiSize < miBlockSize)
+				if (mAvailableBlocks.size() > 0 && uiSize < mBlockSize)
 				{
-					mpCurrentBlock = mvAvailableBlocks.back();
-					mvAvailableBlocks.pop_back();
+					mpCurrentBlock = mAvailableBlocks.back();
+					mAvailableBlocks.pop_back();
 				}
 				else // Else allocate new block in requested size
 				{
-					mpCurrentBlock = AllocAligned<byte>(Math::Max(uiSize, miBlockSize));
+					mpCurrentBlock = AllocAligned<byte>(Math::Max(uiSize, mBlockSize));
 				}
 				// Clear the current block offset
-				miCurrOffset = 0;
+				mCurrOffset = 0;
 			}
 
-			T* pRet = (T*)(mpCurrentBlock + miCurrOffset);
-			miCurrOffset += uiSize;
+			T* pRet = (T*)(mpCurrentBlock + mCurrOffset);
+			mCurrOffset += uiSize;
 
 			return pRet;
 		}
 
 		inline void FreeAll()
 		{
-			miCurrOffset = 0;
-			while (mvUsedBlocks.size())
+			mCurrOffset = 0;
+			while (mUsedBlocks.size())
 			{
-				mvAvailableBlocks.push_back(mvUsedBlocks.back());
-				mvUsedBlocks.pop_back();
+				mAvailableBlocks.push_back(mUsedBlocks.back());
+				mUsedBlocks.pop_back();
 			}
 		}
 	};
