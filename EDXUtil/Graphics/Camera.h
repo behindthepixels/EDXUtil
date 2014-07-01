@@ -26,8 +26,6 @@ namespace EDX
 		float mNearClip;
 		float mFarClip;
 
-		float mImagePlaneDist;
-
 	protected:
 		float mFOV_2;
 
