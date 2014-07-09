@@ -160,6 +160,7 @@ namespace EDX
 		}
 		inline float DistanceSquared(const Vector2& p1, const Vector2& p2)
 		{
-			return LengthSquared(p1 - p2); 
+			return LengthSquared(p1 - p2);
 		}
+	}
 }
