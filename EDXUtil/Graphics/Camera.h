@@ -2,7 +2,6 @@
 
 #include "../Windows/Base.h"
 
-#include "../Math/Vec3.h"
 #include "../Math/Matrix.h"
 
 namespace EDX

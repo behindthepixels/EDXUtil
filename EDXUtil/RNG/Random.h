@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////// 
 #pragma once
 
-#include "emntrin.h"
+#include "emmintrin.h"
 
 #include "../EDXPrerequisites.h"
 #include "../Math/EDXMath.h"
@@ -74,14 +74,14 @@ namespace EDX
 			multiplier = _mm_load_si128((__m128i*) mult);
 			mod_mask = _mm_load_si128((__m128i*) mask);
 			sra_mask = _mm_load_si128((__m128i*) masklo);
-			cur_seed_split = _mm_shuffle_epi32(*mpCurSeed, _mm_SHUFFLE(2, 3, 0, 1));
+			cur_seed_split = _mm_shuffle_epi32(*mpCurSeed, _MM_SHUFFLE(2, 3, 0, 1));
 
 			*mpCurSeed = _mm_mul_epu32(*mpCurSeed, multiplier);
-			multiplier = _mm_shuffle_epi32(multiplier, _mm_SHUFFLE(2, 3, 0, 1));
+			multiplier = _mm_shuffle_epi32(multiplier, _MM_SHUFFLE(2, 3, 0, 1));
 			cur_seed_split = _mm_mul_epu32(cur_seed_split, multiplier);
 			*mpCurSeed = _mm_and_si128(*mpCurSeed, mod_mask);
 			cur_seed_split = _mm_and_si128(cur_seed_split, mod_mask);
-			cur_seed_split = _mm_shuffle_epi32(cur_seed_split, _mm_SHUFFLE(2, 3, 0, 1));
+			cur_seed_split = _mm_shuffle_epi32(cur_seed_split, _MM_SHUFFLE(2, 3, 0, 1));
 			*mpCurSeed = _mm_or_si128(*mpCurSeed, cur_seed_split);
 			*mpCurSeed = _mm_add_epi32(*mpCurSeed, adder);
 
