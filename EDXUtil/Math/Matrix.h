@@ -93,7 +93,7 @@ namespace EDX
 
 		static inline Vector3 TransformPoint(const Vector3& ptPt, const Matrix& mat);
 		static inline Vector4 TransformPoint(const Vector4& ptPt, const Matrix& mat);
-		static inline Vector3 Transformector(const Vector3& vVec, const Matrix& mat);
+		static inline Vector3 TransformVector(const Vector3& vVec, const Matrix& mat);
 		static inline Vector3 TransformNormal(const Vector3& nNorm, const Matrix& mat);
 		static inline Ray TransformRay(const Ray& rRay, const Matrix& mat);
 		static inline RayDifferential TransformRayDiff(const RayDifferential& rRay, const Matrix& mat);
@@ -132,7 +132,7 @@ namespace EDX
 		return Vector4(xp, yp, zp, wp);
 	}
 
-	inline Vector3 Matrix::Transformector(const Vector3& vVec, const Matrix& mat)
+	inline Vector3 Matrix::TransformVector(const Vector3& vVec, const Matrix& mat)
 	{
 		float x = vVec.x, y = vVec.y, z = vVec.z;
 		return Vector3(mat.m[0][0] * x + mat.m[0][1] * y + mat.m[0][2] * z,
@@ -153,7 +153,7 @@ namespace EDX
 	{
 		Ray ray = rRay;
 		ray.mOrg = TransformPoint(ray.mOrg, mat);
-		ray.mDir = Transformector(ray.mDir, mat);
+		ray.mDir = TransformVector(ray.mDir, mat);
 
 		return ray;
 	}
@@ -163,8 +163,8 @@ namespace EDX
 		RayDifferential ray = RayDifferential(TransformRay(Ray(rRay), mat));
 		ray.mDxOrg = TransformPoint(rRay.mDxOrg, mat);
 		ray.mDyOrg = TransformPoint(rRay.mDyOrg, mat);
-		ray.mDxDir = Transformector(rRay.mDxDir, mat);
-		ray.mDyDir = Transformector(rRay.mDyDir, mat);
+		ray.mDxDir = TransformVector(rRay.mDxDir, mat);
+		ray.mDyDir = TransformVector(rRay.mDyDir, mat);
 		ray.mbHasDifferential = rRay.mbHasDifferential;
 
 		return ray;

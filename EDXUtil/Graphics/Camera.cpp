@@ -73,8 +73,8 @@ namespace EDX
 		Vector3 vWorldUp, vWorldAhead;
 		Vector3 vLocalUp = Vector3::UNIT_Y, vLocalAhead = Vector3::UNIT_Z;
 
-		vWorldUp = Matrix::Transformector(vLocalUp, mCamRotate);
-		vWorldAhead = Matrix::Transformector(vLocalAhead, mCamRotate);
+		vWorldUp = Matrix::TransformVector(vLocalUp, mCamRotate);
+		vWorldAhead = Matrix::TransformVector(vLocalAhead, mCamRotate);
 
 		Vector3 vVelocity = Vector3::ZERO;
 		if (Math::Length(mDirKB) > 0.0f)
@@ -82,7 +82,7 @@ namespace EDX
 			vVelocity = Math::Normalize(mDirKB) * mMoveScaler;
 		}
 
-		Vector3 vWorldPosDelta = Matrix::Transformector(vVelocity, mCamRotate);
+		Vector3 vWorldPosDelta = Matrix::TransformVector(vVelocity, mCamRotate);
 
 		mPos += vWorldPosDelta;
 		mTarget = mPos + vWorldAhead;

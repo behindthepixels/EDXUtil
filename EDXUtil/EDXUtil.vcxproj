@@ -31,6 +31,8 @@
     <ClInclude Include="Math\Vec3.h" />
     <ClInclude Include="Math\Vec4.h" />
     <ClInclude Include="Math\VecBase.h" />
+    <ClInclude Include="Math\Vector.h" />
+    <ClInclude Include="Memory\Array.h" />
     <ClInclude Include="Memory\Memory.h" />
     <ClInclude Include="Memory\RefPtr.h" />
     <ClInclude Include="RNG\Random.h" />

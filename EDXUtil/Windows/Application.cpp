@@ -9,12 +9,12 @@ namespace EDX
 
 	int Application::Run(Window* pWindow)
 	{
-		HWND hWnd = pWindow->GetHandle();
 		pMainWindow = pWindow;
+		HWND hWnd = pMainWindow->GetHandle();
+		pMainWindow->mInitializeEvent.Invoke(pMainWindow, EventArgs());
+
 		ShowWindow(hWnd, SW_SHOW);
 		UpdateWindow(hWnd);
-
-		pMainWindow->mInitializeEvent.Invoke(pMainWindow, EventArgs());
 
 		MSG msg;
 		while (true)
