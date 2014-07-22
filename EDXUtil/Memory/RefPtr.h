@@ -2,27 +2,34 @@
 
 namespace EDX
 {
-	class RefPtrDefaultDestructor
+	template<class T>
+	class RefPtrDestructorBase
 	{
 	public:
-		template<class T>
-		static void Free(T* ptr)
+		virtual void Free(T* ptr) = 0;
+	};
+
+	template<class T>
+	class RefPtrDefaultDestructor : public RefPtrDestructorBase<T>
+	{
+	public:
+		virtual void Free(T* ptr)
 		{
 			delete ptr;
 		}
 	};
 
-	class RefPtrArrayDestructor
+	template<class T>
+	class RefPtrArrayDestructor : public RefPtrDestructorBase<T>
 	{
 	public:
-		template<class T>
-		static void Free(T* ptr)
+		virtual void Free(T* ptr)
 		{
 			delete[] ptr;
 		}
 	};
 
-	template<class T, class Destructor = RefPtrDefaultDestructor>
+	template<class T, class Destructor = RefPtrDefaultDestructor<T>>
 	class RefPtr
 	{
 	private:
@@ -30,13 +37,15 @@ namespace EDX
 		friend class RefPtr;
 
 		T* pPointer;
+		RefPtrDestructorBase<T>* pDestructor;
 		size_t* piRefCount;
 
 	public:
 		RefPtr()
+			: pPointer(nullptr)
+			, pDestructor(nullptr)
+			, piRefCount(nullptr)
 		{
-			pPointer = NULL;
-			piRefCount = NULL;
 		}
 
 		~RefPtr()
@@ -54,33 +63,42 @@ namespace EDX
 				}
 				else
 				{
-					Destructor::Free(pPointer);
+					pDestructor->Free(pPointer);
+					delete pDestructor;
 					delete piRefCount;
 				}
 			}
 		}
 
 		RefPtr(T* ptr)
-			: pPointer(NULL), piRefCount(0)
+			: pPointer(nullptr)
+			, pDestructor(nullptr)
+			, piRefCount(nullptr)
 		{
 			this->operator=(ptr);
 		}
 
 		template<typename T1>
 		RefPtr(T1* ptr)
-			: pPointer(NULL), piRefCount(NULL)
+			: pPointer(nullptr)
+			, pDestructor(nullptr)
+			, piRefCount(nullptr)
 		{
 			this->operator=(ptr);
 		}
 
 		RefPtr(const RefPtr<T, Destructor>& ptr)
-			: pPointer(NULL), piRefCount(NULL)
+			: pPointer(nullptr)
+			, pDestructor(nullptr)
+			, piRefCount(nullptr)
 		{
 			this->operator=(ptr);
 		}
 
 		RefPtr(RefPtr<T, Destructor>&& ptr)
-			: pPointer(NULL), piRefCount(NULL)
+			: pPointer(nullptr)
+			, pDestructor(nullptr)
+			, piRefCount(nullptr)
 		{
 			this->operator=(std::move(ptr));
 		}
@@ -90,13 +108,17 @@ namespace EDX
 			Dereference();
 
 			pPointer = ptr;
-			if (ptr)
+			if (pPointer)
 			{
+				pDestructor = new Destructor;
 				piRefCount = new size_t;
 				(*piRefCount) = 1;
 			}
 			else
-				piRefCount = NULL;
+			{
+				pDestructor = nullptr;
+				piRefCount = nullptr;
+			}
 
 			return *this;
 		}
@@ -107,13 +129,17 @@ namespace EDX
 			Dereference();
 
 			pPointer = dynamc_cast<T*>(ptr);
-			if (ptr)
+			if (pPointer)
 			{
+				pDestructor = new Destructor;
 				piRefCount = new size_t;
 				(*piRefCount) = 1;
 			}
 			else
-				piRefCount = NULL;
+			{
+				pDestructor = nullptr;
+				piRefCount = nullptr;
+			}
 
 			return *this;
 		}
@@ -124,16 +150,28 @@ namespace EDX
 			{
 				Dereference();
 				pPointer = ptr.pPointer;
-				piRefCount = ptr.piRefCount;
-				if (piRefCount)
-					(*piRefCount)++;
+				if (pPointer)
+				{
+					pDestructor = ptr.pDestructor;
+					piRefCount = ptr.piRefCount;
+					if (piRefCount)
+						(*piRefCount)++;
+				}
+				else
+				{
+					pDestructor = nullptr;
+					piRefCount = nullptr;
+				}
+
 			}
 			return *this;
 		}
 
 		template<typename T1>
 		RefPtr(const RefPtr<T1>& ptr)
-			: pPointer(NULL), piRefCount(NULL)
+			: pPointer(nullptr)
+			, pDestructor(nullptr)
+			, piRefCount(nullptr)
 		{
 			this->operator=(ptr);
 		}
@@ -145,8 +183,18 @@ namespace EDX
 			{
 				Dereference();
 				pPointer = dynamc_cast<T*>(ptr.pPointer);
-				piRefCount = ptr.iRefCount;
-				(*piRefCount)++;
+				if (pPointer)
+				{
+					pDestructor = ptr.pDestructor;
+					piRefCount = ptr.piRefCount;
+					if (piRefCount)
+						(*piRefCount)++;
+				}
+				else
+				{
+					pDestructor = nullptr;
+					piRefCount = nullptr;
+				}
 			}
 			return *this;
 		}
@@ -184,8 +232,8 @@ namespace EDX
 				Dereference();
 				pPointer = ptr.pPointer;
 				piRefCount = ptr.piRefCount;
-				ptr.pPointer = NULL;
-				ptr.piRefCount = NULL;
+				ptr.pPointer = nullptr;
+				ptr.piRefCount = nullptr;
 			}
 			return *this;
 		}
@@ -209,12 +257,14 @@ namespace EDX
 				}
 				else
 				{
+					delete pDestructor;
 					delete piRefCount;
 				}
 			}
 			auto ret = pPointer;
-			pPointer = NULL;
-			piRefCount = NULL;
+			pPointer = nullptr;
+			pDestructor = nullptr;
+			piRefCount = nullptr;
 			return ret;
 		}
 		T* Ptr() const
