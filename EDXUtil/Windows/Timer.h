@@ -17,8 +17,8 @@ namespace EDX
 		double mStopTime;
 		bool mbTimerStopped;
 
-		wchar_t mstrFrameRate[16];
-		dword mdwNumrames;
+		wchar_t mFrameRate[16];
+		dword mNumFrames;
 		double mLastFPSTime;
 
 		LARGE_INTEGER mPerfFreq;
@@ -36,8 +36,8 @@ namespace EDX
 			mLastElapsedTime = fTime;
 			mbTimerStopped = false;
 
-			mstrFrameRate[0] = L'\0';
-			mdwNumrames = 0;
+			mFrameRate[0] = L'\0';
+			mNumFrames = 0;
 			mLastFPSTime = fTime;
 		}
 
@@ -116,7 +116,7 @@ namespace EDX
 
 		void MarkFrame()
 		{
-			mdwNumrames++;
+			mNumFrames++;
 		}
 
 		wchar_t* GetFrameRate()
@@ -126,12 +126,12 @@ namespace EDX
 			// Only re-compute the FPS (frames per second) once per second
 			if (fTime - mLastFPSTime > 1.0)
 			{
-				double fFPS = mdwNumrames / (fTime - mLastFPSTime);
+				double fFPS = mNumFrames / (fTime - mLastFPSTime);
 				mLastFPSTime = fTime;
-				mdwNumrames = 0L;
-				swprintf_s(mstrFrameRate, L"%0.02f fps", (float)fFPS);
+				mNumFrames = 0L;
+				swprintf_s(mFrameRate, L"%0.02f fps", (float)fFPS);
 			}
-			return mstrFrameRate;
+			return mFrameRate;
 		}
 	};
 }
