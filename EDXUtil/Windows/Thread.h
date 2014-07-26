@@ -100,4 +100,11 @@ namespace EDX
 	protected:
 		EDXLock& mLock;
 	};
+
+	inline int DetectCPUCount()
+	{
+		SYSTEM_INFO info;
+		GetSystemInfo(&info);
+		return static_cast<int>(info.dwNumberOfProcessors);
+	}
 }
