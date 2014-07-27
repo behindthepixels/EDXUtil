@@ -114,6 +114,9 @@
     <ClInclude Include="Memory\Array.h">
       <Filter>Source Files\Memory</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\ObjMesh.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">
@@ -132,6 +135,9 @@
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Color.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\ObjMesh.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>

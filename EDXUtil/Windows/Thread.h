@@ -2,6 +2,7 @@
 
 #include "../EDXPrerequisites.h"
 #include "Base.h"
+#include <atomic>
 
 namespace EDX
 {
@@ -45,7 +46,12 @@ namespace EDX
 			}
 		}
 
-		inline void SelfTermnate() { SetEvent(mStopEvent); CloseHandle(mhThreadHandle); }
+		inline void SelfTermnate()
+		{
+			SetEvent(mStopEvent);
+			CloseHandle(mhThreadHandle);
+			mbRunning = false;
+		}
 		inline bool IsRunning() { return mbRunning; }
 		inline HANDLE GetThreadHandle() { return mhThreadHandle; }
 
