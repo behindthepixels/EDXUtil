@@ -50,7 +50,11 @@ namespace EDX
 
 		~RandomGen()
 		{
-			_aligned_free(mpCurSeed);
+			if (mpCurSeed)
+			{
+				_aligned_free(mpCurSeed);
+				mpCurSeed = nullptr;
+			}
 		}
 
 		inline unsigned int UnsignedInt()

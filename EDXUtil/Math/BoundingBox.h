@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Vec3.h"
+#include "Vector.h"
+#include "Ray.h"
 #include "EDXMath.h"
 
 namespace EDX

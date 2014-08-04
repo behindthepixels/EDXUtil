@@ -449,21 +449,19 @@ namespace EDX
 		mbNormaled = mbTextured = true;
 	}
 
-	void ObjMesh::LoadSphere(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float fRadius)
+	void ObjMesh::LoadSphere(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float fRadius, const int slices, const int stacks)
 	{
 		Matrix mWorld, mWorldInv;
 		Matrix::CalcTransform(pos, scl, rot, &mWorld, &mWorldInv);
 
-		const int SLICE_COUNT = 32;
-		const int STACK_COUNT = 32;
-		const float fThetaItvl = float(Math::EDX_PI) / float(STACK_COUNT);
-		const float fPhiItvl = float(Math::EDX_TWO_PI) / float(SLICE_COUNT);
+		const float fThetaItvl = float(Math::EDX_PI) / float(stacks);
+		const float fPhiItvl = float(Math::EDX_TWO_PI) / float(slices);
 
 		float fTheta = 0.0f;
-		for (int i = 0; i <= STACK_COUNT; i++)
+		for (int i = 0; i <= stacks; i++)
 		{
 			float fPhi = 0.0f;
-			for (int j = 0; j <= SLICE_COUNT; j++)
+			for (int j = 0; j <= slices; j++)
 			{
 				Vector3 vDir = Math::SphericalDirection(Math::Sin(fTheta), Math::Cos(fTheta), fPhi);
 				mVertices.push_back(MeshVertex(
@@ -477,17 +475,17 @@ namespace EDX
 			fTheta += fThetaItvl;
 		}
 
-		for (int i = 0; i < STACK_COUNT; i++)
+		for (int i = 0; i < stacks; i++)
 		{
-			for (int j = 0; j < SLICE_COUNT; j++)
+			for (int j = 0; j < slices; j++)
 			{
-				mIndices.push_back(i * (SLICE_COUNT + 1) + j);
-				mIndices.push_back(i * (SLICE_COUNT + 1) + j + 1);
-				mIndices.push_back((i + 1) * (SLICE_COUNT + 1) + j);
+				mIndices.push_back(i * (slices + 1) + j);
+				mIndices.push_back(i * (slices + 1) + j + 1);
+				mIndices.push_back((i + 1) * (slices + 1) + j);
 
-				mIndices.push_back(i * (SLICE_COUNT + 1) + j + 1);
-				mIndices.push_back((i + 1) * (SLICE_COUNT + 1) + j + 1);
-				mIndices.push_back((i + 1) * (SLICE_COUNT + 1) + j);
+				mIndices.push_back(i * (slices + 1) + j + 1);
+				mIndices.push_back((i + 1) * (slices + 1) + j + 1);
+				mIndices.push_back((i + 1) * (slices + 1) + j);
 			}
 		}
 

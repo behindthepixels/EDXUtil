@@ -29,11 +29,16 @@ namespace EDX
 		}
 	};
 
-	template<class T, bool isArray = false>
+	enum class PtrType
+	{
+		Default, Array
+	};
+
+	template<class T, PtrType ptrType = PtrType::Default>
 	class RefPtr
 	{
 	private:
-		template<class T1, bool _isArray>
+		template<class T1, PtrType _ptrType>
 		friend class RefPtr;
 
 		T* pPointer;
@@ -87,7 +92,7 @@ namespace EDX
 			this->operator=(ptr);
 		}
 
-		RefPtr(const RefPtr<T, isArray>& ptr)
+		RefPtr(const RefPtr<T, ptrType>& ptr)
 			: pPointer(nullptr)
 			, pDestructor(nullptr)
 			, piRefCount(nullptr)
@@ -95,7 +100,7 @@ namespace EDX
 			this->operator=(ptr);
 		}
 
-		RefPtr(RefPtr<T, isArray>&& ptr)
+		RefPtr(RefPtr<T, ptrType>&& ptr)
 			: pPointer(nullptr)
 			, pDestructor(nullptr)
 			, piRefCount(nullptr)
@@ -103,14 +108,14 @@ namespace EDX
 			this->operator=(std::move(ptr));
 		}
 
-		RefPtr<T, isArray>& operator = (T* ptr)
+		RefPtr<T, ptrType>& operator = (T* ptr)
 		{
 			Dereference();
 
 			pPointer = ptr;
 			if (pPointer)
 			{
-				if (!isArray)
+				if (ptrType == PtrType::Default)
 					pDestructor = new RefPtrDefaultDestructor<T>;
 				else
 					pDestructor = new RefPtrArrayDestructor<T>;
@@ -128,14 +133,14 @@ namespace EDX
 		}
 
 		template<typename T1>
-		RefPtr<T, isArray>& operator = (T1* ptr)
+		RefPtr<T, ptrType>& operator = (T1* ptr)
 		{
 			Dereference();
 
 			pPointer = dynamc_cast<T*>(ptr);
 			if (pPointer)
 			{
-				if (!isArray)
+				if (ptrType == PtrType::Default)
 					pDestructor = new RefPtrDefaultDestructor<T>;
 				else
 					pDestructor = new RefPtrArrayDestructor<T>;
@@ -152,7 +157,7 @@ namespace EDX
 			return *this;
 		}
 
-		RefPtr<T, isArray>& operator = (const RefPtr<T, isArray>& ptr)
+		RefPtr<T, ptrType>& operator = (const RefPtr<T, ptrType>& ptr)
 		{
 			if (ptr.pPointer != pPointer)
 			{
@@ -185,7 +190,7 @@ namespace EDX
 		}
 
 		template<typename T1>
-		RefPtr<T, isArray>& operator = (const RefPtr<T1, isArray>& ptr)
+		RefPtr<T, ptrType>& operator = (const RefPtr<T1, ptrType>& ptr)
 		{
 			if (ptr.pPointer != pPointer)
 			{
@@ -215,11 +220,11 @@ namespace EDX
 		{
 			return pPointer != ptr;
 		}
-		bool operator == (const RefPtr<T, isArray>& ptr) const
+		bool operator == (const RefPtr<T, ptrType>& ptr) const
 		{
 			return pPointer == ptr.pPointer;
 		}
-		bool operator != (const RefPtr<T, isArray>& ptr) const
+		bool operator != (const RefPtr<T, ptrType>& ptr) const
 		{
 			return pPointer != ptr.pPointer;
 		}
@@ -233,7 +238,7 @@ namespace EDX
 			return *(pPointer + idx);
 		}
 
-		RefPtr<T, isArray>& operator=(RefPtr<T, isArray>&& ptr)
+		RefPtr<T, ptrType>& operator=(RefPtr<T, ptrType>&& ptr)
 		{
 			if (ptr.pPointer != pPointer)
 			{

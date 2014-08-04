@@ -93,7 +93,9 @@ namespace EDX
 		void LoadSphere(const Vector3& pos,
 			const Vector3& scl,
 			const Vector3& rot,
-			const float radius);
+			const float radius,
+			const int slices = 64,
+			const int stacks = 64);
 
 		void ComputeVertexNormals();
 		void LoadMaterialsFromMtl(const char* path);
