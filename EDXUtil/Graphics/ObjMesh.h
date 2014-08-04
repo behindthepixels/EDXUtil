@@ -82,21 +82,21 @@ namespace EDX
 		{
 		}
 
-		bool LoadFromObj(const Vector3& ptPos,
-			const Vector3& vScl,
-			const Vector3& vRot,
-			const char* strPath);
-		void LoadPlane(const Vector3& ptPos,
-			const Vector3& vScl,
-			const Vector3& vRot,
-			const float fLength);
-		void LoadSphere(const Vector3& ptPos,
-			const Vector3& vScl,
-			const Vector3& vRot,
-			const float fRadius);
+		bool LoadFromObj(const Vector3& pos,
+			const Vector3& scl,
+			const Vector3& rot,
+			const char* path);
+		void LoadPlane(const Vector3& pos,
+			const Vector3& scl,
+			const Vector3& rot,
+			const float length);
+		void LoadSphere(const Vector3& pos,
+			const Vector3& scl,
+			const Vector3& rot,
+			const float radius);
 
 		void ComputeVertexNormals();
-		void LoadMaterialsFromMtl(const char* strPath);
+		void LoadMaterialsFromMtl(const char* path);
 		uint AddVertex(uint iHash, const MeshVertex* pVertex);
 
 		inline const uint* GetIndexAt(int iNum) const { return mIndices.data() + 3 * iNum; }

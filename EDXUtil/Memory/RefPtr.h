@@ -29,11 +29,11 @@ namespace EDX
 		}
 	};
 
-	template<class T, class Destructor = RefPtrDefaultDestructor<T>>
+	template<class T, bool isArray = false>
 	class RefPtr
 	{
 	private:
-		template<class T1, class Destructor1>
+		template<class T1, bool _isArray>
 		friend class RefPtr;
 
 		T* pPointer;
@@ -87,7 +87,7 @@ namespace EDX
 			this->operator=(ptr);
 		}
 
-		RefPtr(const RefPtr<T, Destructor>& ptr)
+		RefPtr(const RefPtr<T, isArray>& ptr)
 			: pPointer(nullptr)
 			, pDestructor(nullptr)
 			, piRefCount(nullptr)
@@ -95,7 +95,7 @@ namespace EDX
 			this->operator=(ptr);
 		}
 
-		RefPtr(RefPtr<T, Destructor>&& ptr)
+		RefPtr(RefPtr<T, isArray>&& ptr)
 			: pPointer(nullptr)
 			, pDestructor(nullptr)
 			, piRefCount(nullptr)
@@ -103,14 +103,18 @@ namespace EDX
 			this->operator=(std::move(ptr));
 		}
 
-		RefPtr<T, Destructor>& operator = (T* ptr)
+		RefPtr<T, isArray>& operator = (T* ptr)
 		{
 			Dereference();
 
 			pPointer = ptr;
 			if (pPointer)
 			{
-				pDestructor = new Destructor;
+				if (!isArray)
+					pDestructor = new RefPtrDefaultDestructor<T>;
+				else
+					pDestructor = new RefPtrArrayDestructor<T>;
+
 				piRefCount = new size_t;
 				(*piRefCount) = 1;
 			}
@@ -124,14 +128,18 @@ namespace EDX
 		}
 
 		template<typename T1>
-		RefPtr<T, Destructor>& operator = (T1* ptr)
+		RefPtr<T, isArray>& operator = (T1* ptr)
 		{
 			Dereference();
 
 			pPointer = dynamc_cast<T*>(ptr);
 			if (pPointer)
 			{
-				pDestructor = new Destructor;
+				if (!isArray)
+					pDestructor = new RefPtrDefaultDestructor<T>;
+				else
+					pDestructor = new RefPtrArrayDestructor<T>;
+
 				piRefCount = new size_t;
 				(*piRefCount) = 1;
 			}
@@ -144,7 +152,7 @@ namespace EDX
 			return *this;
 		}
 
-		RefPtr<T, Destructor>& operator = (const RefPtr<T, Destructor>& ptr)
+		RefPtr<T, isArray>& operator = (const RefPtr<T, isArray>& ptr)
 		{
 			if (ptr.pPointer != pPointer)
 			{
@@ -177,7 +185,7 @@ namespace EDX
 		}
 
 		template<typename T1>
-		RefPtr<T, Destructor>& operator = (const RefPtr<T1, Destructor>& ptr)
+		RefPtr<T, isArray>& operator = (const RefPtr<T1, isArray>& ptr)
 		{
 			if (ptr.pPointer != pPointer)
 			{
@@ -207,11 +215,11 @@ namespace EDX
 		{
 			return pPointer != ptr;
 		}
-		bool operator == (const RefPtr<T>& ptr) const
+		bool operator == (const RefPtr<T, isArray>& ptr) const
 		{
 			return pPointer == ptr.pPointer;
 		}
-		bool operator != (const RefPtr<T>& ptr) const
+		bool operator != (const RefPtr<T, isArray>& ptr) const
 		{
 			return pPointer != ptr.pPointer;
 		}
@@ -225,14 +233,16 @@ namespace EDX
 			return *(pPointer + idx);
 		}
 
-		RefPtr<T, Destructor>& operator=(RefPtr<T, Destructor>&& ptr)
+		RefPtr<T, isArray>& operator=(RefPtr<T, isArray>&& ptr)
 		{
-			if (ptr.pointer != pPointer)
+			if (ptr.pPointer != pPointer)
 			{
 				Dereference();
 				pPointer = ptr.pPointer;
+				pDestructor = ptr.pDestructor;
 				piRefCount = ptr.piRefCount;
 				ptr.pPointer = nullptr;
+				ptr.pDestructor = nullptr;
 				ptr.piRefCount = nullptr;
 			}
 			return *this;

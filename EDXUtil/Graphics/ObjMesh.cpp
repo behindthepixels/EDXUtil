@@ -4,12 +4,12 @@
 
 namespace EDX
 {
-	bool ObjMesh::LoadFromObj(const Vector3& ptPos,
-		const Vector3& vScl,
-		const Vector3& vRot,
+	bool ObjMesh::LoadFromObj(const Vector3& pos,
+		const Vector3& scl,
+		const Vector3& rot,
 		const char* strPath)
 	{
-		vector<Vector3> vPosition;
+		vector<Vector3> position;
 		vector<Vector3> vNormal;
 		vector<float> vTexCoord;
 		int iSmoothingGroup = 0;
@@ -17,7 +17,7 @@ namespace EDX
 		char strMaterialFilename[MAX_PATH] = { 0 };
 
 		Matrix mWorld, mWorldInv;
-		Matrix::CalcTransform(ptPos, vScl, vRot, &mWorld, &mWorldInv);
+		Matrix::CalcTransform(pos, scl, rot, &mWorld, &mWorldInv);
 
 		char strCommand[MAX_PATH] = { 0 };
 		std::ifstream InFile(strPath);
@@ -38,7 +38,7 @@ namespace EDX
 				// Vertex Position
 				float x, y, z;
 				InFile >> x >> y >> z;
-				vPosition.push_back(Matrix::TransformPoint(Vector3(x, y, z), mWorld));
+				position.push_back(Matrix::TransformPoint(Vector3(x, y, z), mWorld));
 			}
 			else if (0 == strcmp(strCommand, "vt"))
 			{
@@ -69,7 +69,7 @@ namespace EDX
 					SafeClear(&Vertex, 1);
 
 					InFile >> iPosition;
-					Vertex.position = vPosition[iPosition - 1];
+					Vertex.position = position[iPosition - 1];
 
 					if ('/' == InFile.peek())
 					{
@@ -417,23 +417,23 @@ namespace EDX
 		mbNormaled = true;
 	}
 
-	void ObjMesh::LoadPlane(const Vector3& ptPos, const Vector3& vScl, const Vector3& vRot, const float fLength)
+	void ObjMesh::LoadPlane(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float length)
 	{
 		Matrix mWorld, mWorldInv;
-		Matrix::CalcTransform(ptPos, vScl, vRot, &mWorld, &mWorldInv);
+		Matrix::CalcTransform(pos, scl, rot, &mWorld, &mWorldInv);
 
-		float fLength_2 = fLength * 0.5f;
+		float length_2 = length * 0.5f;
 
-		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(-fLength_2, 0.0f, fLength_2), mWorld),
+		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(-length_2, 0.0f, length_2), mWorld),
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			0.0f, 0.0f));
-		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(-fLength_2, 0.0f, -fLength_2), mWorld),
+		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(-length_2, 0.0f, -length_2), mWorld),
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			0.0f, 1.0f));
-		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(fLength_2, 0.0f, -fLength_2), mWorld),
+		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(length_2, 0.0f, -length_2), mWorld),
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			1.0f, 1.0f));
-		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(fLength_2, 0.0f, fLength_2), mWorld),
+		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(length_2, 0.0f, length_2), mWorld),
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			1.0f, 0.0f));
 
@@ -449,13 +449,13 @@ namespace EDX
 		mbNormaled = mbTextured = true;
 	}
 
-	void ObjMesh::LoadSphere(const Vector3& ptPos, const Vector3& vScl, const Vector3& vRot, const float fRadius)
+	void ObjMesh::LoadSphere(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float fRadius)
 	{
 		Matrix mWorld, mWorldInv;
-		Matrix::CalcTransform(ptPos, vScl, vRot, &mWorld, &mWorldInv);
+		Matrix::CalcTransform(pos, scl, rot, &mWorld, &mWorldInv);
 
-		const int SLICE_COUNT = 64;
-		const int STACK_COUNT = 64;
+		const int SLICE_COUNT = 32;
+		const int STACK_COUNT = 32;
 		const float fThetaItvl = float(Math::EDX_PI) / float(STACK_COUNT);
 		const float fPhiItvl = float(Math::EDX_TWO_PI) / float(SLICE_COUNT);
 
