@@ -28,23 +28,23 @@ namespace EDX
 		inline Vec(const T& tx, const T& ty, const T& tz, const T& tw)
 			: x(tx), y(ty), z(tz), w(tw) {}
 
-		inline Vec(const Vec<2, T>& vCopyFrom, T valZ = T(Math::EDX_ZERO), T valW = T(Math::EDX_ZERO))
-			: x(vCopyFrom.x), y(vCopyFrom.y), z(valZ), w(valW) {}
+		//inline Vec(const Vec<2, T>& vCopyFrom, T valZ = T(Math::EDX_ZERO), T valW = T(Math::EDX_ZERO))
+		//	: x(vCopyFrom.x), y(vCopyFrom.y), z(valZ), w(valW) {}
 
-		inline Vec(const Vec<3, T>& vCopyFrom, T val = T(Math::EDX_ZERO))
-			: x(vCopyFrom.x), y(vCopyFrom.y), z(vCopyFrom.z), w(val) {}
+		//inline Vec(const Vec<3, T>& vCopyFrom, T val = T(Math::EDX_ZERO))
+		//	: x(vCopyFrom.x), y(vCopyFrom.y), z(vCopyFrom.z), w(val) {}
 
 		template<class T1>
 		inline Vec(const Vec<4, T1>& vConvertFrom)
 			: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(vConvertFrom.z)), w(T(vConvertFrom.w)) {}
 
-		template<class T1>
-		inline Vec(const Vec<2, T1>& vConvertFrom, T1 valZ, T1 valW)
-			: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(valZ)), w(T1(valW)) {}
+		//template<class T1>
+		//inline Vec(const Vec<2, T1>& vConvertFrom, T1 valZ, T1 valW)
+		//	: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(valZ)), w(T1(valW)) {}
 
-		template<class T1>
-		inline Vec(const Vec<3, T1>& vConvertFrom, T1 valW)
-			: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(vConvertFrom.z)), w(T1(valW)) {}
+		//template<class T1>
+		//inline Vec(const Vec<3, T1>& vConvertFrom, T1 valW)
+		//	: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(vConvertFrom.z)), w(T1(valW)) {}
 
 		template<class T1>
 		inline Vec& operator = (const Vec<4, T1>& vOther)

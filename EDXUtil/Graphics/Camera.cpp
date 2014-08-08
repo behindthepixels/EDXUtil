@@ -27,7 +27,6 @@ namespace EDX
 		mMoveScaler = 0.25f;
 		mRotateScaler = 0.03f;
 
-		mRatio = mFilmResX / float(mFilmResY);
 		mFOV_2 = mFOV / 2.0f;
 
 		mDir = Math::Normalize(mTarget - mPos);
@@ -37,14 +36,17 @@ namespace EDX
 
 		mView = Matrix::LookAt(mPos, mTarget, mUp);
 		mViewInv = Matrix::Inverse(mView);
-		mProj = Matrix::Perspective(mFOV, mRatio, mNearClip, mFarClip);
-		mScreenToRaster = Matrix::Scale(float(mFilmResX), float(mFilmResY), 1.0f) *
-			Matrix::Scale(0.5f, -0.5f, 1.0f) *
-			Matrix::Translate(Vector3(1.0f, -1.0f, 0.0f));
-		mRasterToCamera = Matrix::Mul(Matrix::Inverse(mProj), Matrix::Inverse(mScreenToRaster));
-		mCameraToRaster = Matrix::Inverse(mRasterToCamera);
-		mRasterToWorld = Matrix::Mul(mViewInv, mRasterToCamera);
-		mWorldToRaster = Matrix::Inverse(mRasterToWorld);
+
+		Resize(mFilmResX, mFilmResY);
+		//mRatio = mFilmResX / float(mFilmResY);
+		//mProj = Matrix::Perspective(mFOV, mRatio, mNearClip, mFarClip);
+		//mScreenToRaster = Matrix::Scale(float(mFilmResX), float(mFilmResY), 1.0f) *
+		//	Matrix::Scale(0.5f, -0.5f, 1.0f) *
+		//	Matrix::Translate(Vector3(1.0f, -1.0f, 0.0f));
+		//mRasterToCamera = Matrix::Mul(Matrix::Inverse(mProj), Matrix::Inverse(mScreenToRaster));
+		//mCameraToRaster = Matrix::Inverse(mRasterToCamera);
+		//mRasterToWorld = Matrix::Mul(mViewInv, mRasterToCamera);
+		//mWorldToRaster = Matrix::Inverse(mRasterToWorld);
 
 		Transform();
 	}
@@ -55,7 +57,6 @@ namespace EDX
 		mFilmResY = iHeight;
 
 		mRatio = mFilmResX / float(mFilmResY);
-
 		mProj = Matrix::Perspective(mFOV, mRatio, mNearClip, mFarClip);
 		mScreenToRaster = Matrix::Scale(float(mFilmResX), float(mFilmResY), 1.0f) *
 			Matrix::Scale(0.5f, -0.5f, 1.0f) *

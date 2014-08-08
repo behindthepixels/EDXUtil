@@ -56,11 +56,11 @@ namespace EDX
 		{
 		}
 
-		void Init(const Vector3& ptPos, const Vector3& ptTar, const Vector3& vUp, int iResX, int iResY,
+		virtual void Init(const Vector3& ptPos, const Vector3& ptTar, const Vector3& vUp, int iResX, int iResY,
 			float fFOV = 35.0f, float fNear = 0.1f, float fFar = 1000.0f);
 
 		// Handling the resize event
-		void Resize(int iWidth, int iHeight);
+		virtual void Resize(int width, int height);
 
 		// Getters
 		const Matrix& GetViewMatrix() const { return mView; }

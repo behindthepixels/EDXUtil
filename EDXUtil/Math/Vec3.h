@@ -29,16 +29,16 @@ namespace EDX
 		inline Vec(const T& tx, const T& ty, const T& tz)
 			: x(tx), y(ty), z(tz) {}
 
-		inline Vec(const Vec<2, T>& vCopyFrom, T val = T(Math::EDX_ZERO))
-			: x(vCopyFrom.x), y(vCopyFrom.y), z(val) {}
+		//inline Vec(const Vec<2, T>& vCopyFrom, T val = T(Math::EDX_ZERO))
+		//	: x(vCopyFrom.x), y(vCopyFrom.y), z(val) {}
 
 		template<class T1>
 		inline Vec(const Vec<3, T1>& vConvertFrom)
 			: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(vConvertFrom.z)) {}
 
-		template<class T1>
-		inline Vec(const Vec<2, T1>& vConvertFrom, T1 val)
-			: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(val)) {}
+		//template<class T1>
+		//inline Vec(const Vec<2, T1>& vConvertFrom, T1 val)
+		//	: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(val)) {}
 
 		template<class T1>
 		inline Vec& operator = (const Vec<3, T1>& vOther)

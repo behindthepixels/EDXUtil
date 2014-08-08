@@ -1,15 +1,19 @@
-#include <Windows.h>
-#include <gl/GL.h>
-
 #include "Windows/Window.h"
 #include "Windows/Application.h"
 
 #include "Windows/Thread.h"
 
+#include "SIMD/SSE.h"
+
+#include <Windows.h>
+#include <gl/GL.h>
+
 using namespace EDX;
 
 void OnInit(Object* pSender, EventArgs args)
 {
+	Vec3f_SSE v;
+
 	glClearColor(0.4f, 0.5f, 0.65f, 1.0f);
 }
 
