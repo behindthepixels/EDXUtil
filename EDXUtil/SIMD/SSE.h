@@ -1,6 +1,6 @@
 #pragma once
 
-#include <smntrin.h>
+#include <smmintrin.h>
 
 #include "../EDXPrerequisites.h"
 #include "../Math/Constants.h"
@@ -10,8 +10,7 @@
 
 #include <intrin.h>
 
-typedef unsigned __int64 uint64;
-typedef __int64 int64;
+using namespace EDX;
 
 __forceinline uint64 __rdpmc(int i)
 {
@@ -97,9 +96,7 @@ __forceinline int64 atomc_cmpxchg(volatile int64* m, const int64 v, const int64 
 #include "IntSSE.h"
 #include "FloatSSE.h"
 
-#include "../Math/Vec2.h"
-#include "../Math/Vec3.h"
-#include "../Math/Vec4.h"
+#include "../Math/Vector.h"
 
 namespace EDX
 {

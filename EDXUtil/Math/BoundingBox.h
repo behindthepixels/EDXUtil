@@ -46,7 +46,7 @@ namespace EDX
 				mMin.z <= bbox.mMax.z && mMax.z >= bbox.mMin.x;
 		}
 
-		inline int mMaximumExtent() const
+		inline int MaximumExtent() const
 		{
 			Vector3 vDiag = mMax - mMin;
 			if (vDiag.x > vDiag.y && vDiag.x > vDiag.z)

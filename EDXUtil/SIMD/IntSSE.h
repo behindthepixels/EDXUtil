@@ -38,7 +38,7 @@ namespace EDX
 		//__forceinline ssei(int32 a) : m128(_mm_set1_epi32(a)) {}
 
 		__forceinline IntSSE(const int32& a)
-			: m128(_mm_shuffle_epi32(_mm_castps_si128(_mm_load_ss((float*)&a)), _mm_SHUFFLE(0, 0, 0, 0))) {}
+			: m128(_mm_shuffle_epi32(_mm_castps_si128(_mm_load_ss((float*)&a)), _MM_SHUFFLE(0, 0, 0, 0))) {}
 
 		__forceinline IntSSE(int32 a, int32 b)
 			: m128(_mm_set_epi32(b, a, b, a)) {}
@@ -158,9 +158,9 @@ namespace EDX
 		__forceinline const IntSSE srlhs (const IntSSE& lhs, const int32& rhs) { return _mm_srai_epi32(lhs.m128, rhs); }
 		__forceinline const IntSSE srl (const IntSSE& lhs, const int32& rhs) { return _mm_srli_epi32(lhs.m128, rhs); }
 
-		__forceinline const IntSSE mn(const IntSSE& lhs, const IntSSE& rhs) { return _mm_mn_epi32(lhs.m128, rhs.m128); }
-		__forceinline const IntSSE mn(const IntSSE& lhs, const int32& rhs) { return mn(lhs, IntSSE(rhs)); }
-		__forceinline const IntSSE mn(const int32& lhs, const IntSSE& rhs) { return mn(IntSSE(lhs), rhs); }
+		__forceinline const IntSSE Min(const IntSSE& lhs, const IntSSE& rhs) { return _mm_min_epi32(lhs.m128, rhs.m128); }
+		__forceinline const IntSSE Min(const IntSSE& lhs, const int32& rhs) { return Min(lhs, IntSSE(rhs)); }
+		__forceinline const IntSSE Min(const int32& lhs, const IntSSE& rhs) { return Min(IntSSE(lhs), rhs); }
 
 		__forceinline const IntSSE Max(const IntSSE& lhs, const IntSSE& rhs) { return _mm_max_epi32(lhs.m128, rhs.m128); }
 		__forceinline const IntSSE Max(const IntSSE& lhs, const int32& rhs) { return Max(lhs, IntSSE(rhs)); }
@@ -180,12 +180,12 @@ namespace EDX
 
 		template<size_t i0, size_t i1, size_t i2, size_t i3> __forceinline const IntSSE Shuffle(const IntSSE& lhs)
 		{
-			return _mm_shuffle_epi32(lhs, _mm_SHUFFLE(i3, i2, i1, i0));
+			return _mm_shuffle_epi32(lhs, _MM_SHUFFLE(i3, i2, i1, i0));
 		}
 
 		template<size_t i0, size_t i1, size_t i2, size_t i3> __forceinline const IntSSE Shuffle(const IntSSE& lhs, const IntSSE& rhs)
 		{
-			return _mm_castps_si128(_mm_Shuffle_ps(_mm_castsi128_ps(lhs), _mm_castsi128_ps(rhs), _mm_SHUFFLE(i3, i2, i1, i0)));
+			return _mm_castps_si128(_MM_SHUFFLE_ps(_mm_castsi128_ps(lhs), _mm_castsi128_ps(rhs), _MM_SHUFFLE(i3, i2, i1, i0)));
 		}
 
 		template<> __forceinline const IntSSE Shuffle<0, 0, 2, 2>(const IntSSE& lhs) { return _mm_castps_si128(_mm_moveldup_ps(_mm_castsi128_ps(lhs))); }
@@ -198,18 +198,18 @@ namespace EDX
 		//----------------------------------------------------------------------------------------------
 		// Reductions
 		//----------------------------------------------------------------------------------------------
-		__forceinline const IntSSE VReducemn(const IntSSE& v) { IntSSE h = mn(Shuffle<1,0,3,2>(v),v); return mn(Shuffle<2,3,0,1>(h),h); }
+		__forceinline const IntSSE VReduceMin(const IntSSE& v) { IntSSE h = Min(Shuffle<1, 0, 3, 2>(v), v); return Min(Shuffle<2, 3, 0, 1>(h), h); }
 		__forceinline const IntSSE VReduceMax(const IntSSE& v) { IntSSE h = Max(Shuffle<1,0,3,2>(v),v); return Max(Shuffle<2,3,0,1>(h),h); }
 		__forceinline const IntSSE vReduceAdd(const IntSSE& v) { IntSSE h = Shuffle<1,0,3,2>(v) + v ; return Shuffle<2,3,0,1>(h) + h ; }
 
-		__forceinline int Reducemn(const IntSSE& v) { return Extract<0>(VReducemn(v)); }
+		__forceinline int Reducemn(const IntSSE& v) { return Extract<0>(VReduceMin(v)); }
 		__forceinline int ReduceMax(const IntSSE& v) { return Extract<0>(VReduceMax(v)); }
 		__forceinline int ReduceAdd(const IntSSE& v) { return Extract<0>(vReduceAdd(v)); }
 
-		__forceinline size_t Selectmn(const IntSSE& v) { return __bsf(_mm_movemask_ps(v == VReducemn(v))); }
+		__forceinline size_t SelectMin(const IntSSE& v) { return __bsf(_mm_movemask_ps(v == VReduceMin(v))); }
 		__forceinline size_t SelectMax(const IntSSE& v) { return __bsf(_mm_movemask_ps(v == VReduceMax(v))); }
 
-		__forceinline size_t Selectmn(const BoolSSE& valid, const IntSSE& v) { const IntSSE tmp = Select(valid,v,IntSSE(Math::EDX_INFINITY)); return __bsf(_mm_movemask_ps(valid & (tmp == VReducemn(tmp)))); }
+		__forceinline size_t SelectMin(const BoolSSE& valid, const IntSSE& v) { const IntSSE tmp = Select(valid,v,IntSSE(Math::EDX_INFINITY)); return __bsf(_mm_movemask_ps(valid & (tmp == VReduceMin(tmp)))); }
 		__forceinline size_t SelectMax(const BoolSSE& valid, const IntSSE& v) { const IntSSE tmp = Select(valid,v,IntSSE(Math::EDX_NEG_INFINITY)); return __bsf(_mm_movemask_ps(valid & (tmp == VReduceMax(tmp)))); }
 
 	}
