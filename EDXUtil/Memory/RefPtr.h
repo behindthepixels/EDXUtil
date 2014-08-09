@@ -137,7 +137,7 @@ namespace EDX
 		{
 			Dereference();
 
-			pPointer = dynamc_cast<T*>(ptr);
+			pPointer = dynamic_cast<T*>(ptr);
 			if (pPointer)
 			{
 				if (ptrType == PtrType::Default)
@@ -287,12 +287,17 @@ namespace EDX
 			return pPointer;
 		}
 
-		operator void * () const
+		__forceinline operator void*() const
 		{
 			if (pPointer)
 				return (void*)(pPointer);
 			else
-				return NULL;
+				return nullptr;
+		}
+
+		__forceinline operator bool() const
+		{
+			return pPointer != nullptr;
 		}
 	};
 }
