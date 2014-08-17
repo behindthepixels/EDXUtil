@@ -72,6 +72,22 @@ namespace EDX
 
 	bool Window::ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
+		auto InvokeMouseEvent = [&]
+		{
+			MouseEventArgs mouseArgs;
+			mouseArgs.Action = MouseAction(msg);
+			mMousePt = MAKEPOINTS(lParam);
+			mouseArgs.x = mMousePt.x;
+			mouseArgs.y = mMousePt.y;
+			mouseArgs.motionX = mMousePt.x - mMousePrevPt.x;
+			mouseArgs.motionY = mMousePt.y - mMousePrevPt.y;
+			mouseArgs.lDown = mLBtnDown;
+			mouseArgs.rDown = mRBtnDown;
+			mMouseEvent.Invoke(Application::GetMainWindow(), mouseArgs);
+
+			mMousePrevPt = mMousePt;
+		};
+
 		switch (msg)
 		{
 		case WM_ACTIVATE:
@@ -83,6 +99,54 @@ namespace EDX
 		case WM_SIZE:
 			mResizeEvent.Invoke(Application::GetMainWindow(), ResizeEventArgs(LOWORD(lParam), HIWORD(lParam)));
 			return true;
+
+
+		case WM_MOUSEMOVE:
+			InvokeMouseEvent();
+			return true;
+		case WM_LBUTTONDOWN:
+			mLBtnDown = true;
+			InvokeMouseEvent();
+			return true;
+		case WM_LBUTTONUP:
+			mLBtnDown = false;
+			InvokeMouseEvent();
+			return true;
+		case WM_LBUTTONDBLCLK:
+			InvokeMouseEvent();
+			return true;
+		case WM_RBUTTONDOWN:
+			mRBtnDown = true;
+			InvokeMouseEvent();
+			return true;
+		case WM_RBUTTONUP:
+			mRBtnDown = false;
+			InvokeMouseEvent();
+			return true;
+		case WM_RBUTTONDBLCLK:
+			InvokeMouseEvent();
+			return true;
+		case WM_MBUTTONDOWN:
+			InvokeMouseEvent();
+			return true;
+		case WM_MBUTTONUP:
+			InvokeMouseEvent();
+			return true;
+		case WM_MBUTTONDBLCLK:
+			InvokeMouseEvent();
+			return true;
+		case WM_MOUSEWHEEL:
+			InvokeMouseEvent();
+			return true;
+		case WM_KEYDOWN:
+		{
+			KeyboardEventArgs kbArgs;
+			kbArgs.ctrlDown = GetKeyState(VK_CONTROL) & 0x80;
+			kbArgs.key = wParam;
+			mKeyboardEvent.Invoke(Application::GetMainWindow(), kbArgs);
+
+			return true;
+		}
 		case WM_DESTROY:
 			Destroy();
 			PostQuitMessage(0);

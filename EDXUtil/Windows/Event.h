@@ -205,17 +205,34 @@ namespace EDX
 
 	enum class MouseAction
 	{
-		LButtonDown, RBottonDown, LButtonUp, RButtonUp
+		LButtonDown = WM_LBUTTONDOWN,
+		LButtonUp = WM_LBUTTONUP,
+		LButtonDbClick = WM_LBUTTONDBLCLK,
+		RBottonDown = WM_RBUTTONDOWN,
+		RButtonUp = WM_RBUTTONUP,
+		RButtonDbClick = WM_RBUTTONDBLCLK,
+		Move = WM_MOUSEMOVE,
+		Wheel = WM_MOUSEHWHEEL
 	};
 
 	class MouseEventArgs : public EventArgs
 	{
 	public:
-		int X, Y;
+		int x, y;
+		int motionX, motionY;
+		bool lDown, rDown;
 		MouseAction Action;
 	};
 
-	typedef Event<Object*, EventArgs>		NotifyEvent;
-	typedef Event<Object*, ResizeEventArgs>	ResizeEvent;
-	typedef Event<Object*, MouseEventArgs>	MouseEvent;
+	class KeyboardEventArgs : public EventArgs
+	{
+	public:
+		bool ctrlDown;
+		char key;
+	};
+
+	typedef Event<Object*, EventArgs>			NotifyEvent;
+	typedef Event<Object*, ResizeEventArgs>		ResizeEvent;
+	typedef Event<Object*, MouseEventArgs>		MouseEvent;
+	typedef Event<Object*, KeyboardEventArgs>	KeyboardEvent;
 }

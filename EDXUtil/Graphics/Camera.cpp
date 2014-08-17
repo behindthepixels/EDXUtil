@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "../Windows/Event.h"
 
 namespace EDX
 {
@@ -96,80 +97,54 @@ namespace EDX
 		mWorldToRaster = Matrix::Inverse(mRasterToWorld);
 	}
 
-	bool Camera::HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	void Camera::HandleMouseMsg(const MouseEventArgs& args)
 	{
-		static POINTS ptOldMousePos;
-		static bool bIsLBtnDown = false;
-		mDirKB = Vector3::ZERO;
-		bool bViewChanged = false;
-
-		switch (msg)
+		switch (args.Action)
 		{
-		case WM_LBUTTONDOWN:
-			ptOldMousePos = MAKEPOINTS(lParam);
-			bIsLBtnDown = true;
-			break;
-		case WM_LBUTTONUP:
-			ptOldMousePos = MAKEPOINTS(lParam);
-			bIsLBtnDown = false;
-			break;
-		case WM_MOUSEMOVE:
-			if (bIsLBtnDown)
+		case MouseAction::Move:
+			if (args.lDown)
 			{
-				POINTS ptCurMousePos;
-				ptCurMousePos = MAKEPOINTS(lParam);
+				Vector2 vMouseDelta;
+				vMouseDelta.x = float(args.motionX);
+				vMouseDelta.y = float(args.motionY);
 
-				Vector3 vMouseDelta;
-				vMouseDelta.x = float(ptCurMousePos.x - ptOldMousePos.x);
-				vMouseDelta.y = float(ptCurMousePos.y - ptOldMousePos.y);
-
-				ptOldMousePos = ptCurMousePos;
-
-				Vector3 vRotateVel = vMouseDelta * mRotateScaler;
+				Vector2 vRotateVel = vMouseDelta * mRotateScaler;
 				mYaw -= -vRotateVel.x;
 				mPitch -= -vRotateVel.y;
 
 				mPitch = Math::Max(mPitch, -180);
 				mPitch = Math::Min(mPitch, float(Math::EDX_PI_2));
-
-				bViewChanged = true;
 			}
-			break;
-		case WM_KEYDOWN:
-		{
-			switch (wParam)
-			{
-			case 'W':
-				mDirKB.z -= 1.0f;
-				bViewChanged = true;
-				break;
-			case 'S':
-				mDirKB.z += 1.0f;
-				bViewChanged = true;
-				break;
-			case 'A':
-				mDirKB.x += 1.0f;
-				bViewChanged = true;
-				break;
-			case 'D':
-				mDirKB.x -= 1.0f;
-				bViewChanged = true;
-				break;
-			case 'Q':
-				mDirKB.y -= 1.0f;
-				bViewChanged = true;
-				break;
-			case 'E':
-				mDirKB.y += 1.0f;
-				bViewChanged = true;
-				break;
-			}
-		}
 			break;
 		}
 
 		Transform();
+	}
 
-		return bViewChanged;
+	void Camera::HandleKeyboardMsg(const KeyboardEventArgs& args)
+	{
+		switch (args.key)
+		{
+		case 'W':
+			mDirKB.z -= 1.0f;
+			break;
+		case 'S':
+			mDirKB.z += 1.0f;
+			break;
+		case 'A':
+			mDirKB.x += 1.0f;
+			break;
+		case 'D':
+			mDirKB.x -= 1.0f;
+			break;
+		case 'Q':
+			mDirKB.y -= 1.0f;
+			break;
+		case 'E':
+			mDirKB.y += 1.0f;
+			break;
+		}
+
+		Transform();
 	}
 }

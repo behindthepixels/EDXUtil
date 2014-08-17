@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Windows/Base.h"
-
+#include "../Windows/Event.h"
 #include "../Math/Matrix.h"
 
 namespace EDX
@@ -69,7 +69,8 @@ namespace EDX
 		const Matrix& GetRasterMatrix() const { return mScreenToRaster; }
 
 		// Hanlding the first person movement msg
-		bool HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+		void HandleMouseMsg(const MouseEventArgs& args);
+		void HandleKeyboardMsg(const KeyboardEventArgs& args);
 		void Transform();
 
 		// Given a point in world space, return the raster coordinate

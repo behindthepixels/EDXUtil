@@ -14,15 +14,21 @@ namespace EDX
 		wstring mstrTitle;
 		bool mbActive;
 
+		POINTS mMousePt, mMousePrevPt;
+		bool mLBtnDown, mRBtnDown;
+
 	public:
 		NotifyEvent mMainLoopEvent;
 		NotifyEvent mInitializeEvent;
 		NotifyEvent mReleaseEvent;
 		ResizeEvent	mResizeEvent;
-		MouseEvent mouseEvent;
+		MouseEvent mMouseEvent;
+		KeyboardEvent mKeyboardEvent;
 
 	public:
 		Window()
+			: mLBtnDown(false)
+			, mRBtnDown(false)
 		{
 		}
 
@@ -44,6 +50,8 @@ namespace EDX
 		void SetInit(const NotifyEvent& initEvent) { mInitializeEvent = initEvent; }
 		void SetResize(const ResizeEvent& resizeEvent) { mResizeEvent = resizeEvent; }
 		void SetRelease(const NotifyEvent& releaseEvent) { mReleaseEvent = releaseEvent; }
+		void SetMouseHandler(const MouseEvent& mouseEvent) { mMouseEvent = mouseEvent; }
+		void SetkeyboardHandler(const KeyboardEvent& keyboardEvent) { mKeyboardEvent = keyboardEvent; }
 
 		virtual bool ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
