@@ -2,18 +2,22 @@
 
 #include "../EDXPrerequisites.h"
 #include "Base.h"
+#include <deque>
 #include <atomic>
 
 namespace EDX
 {
+	class ThreadScheduler;
 	class EDXThread
 	{
 	protected:
 		HANDLE	mhThreadHandle;
-		DWORD	mdwThreadID;
+		DWORD	mThreadID;
 		bool	mbRunning;
 
 		HANDLE	mStopEvent;
+
+		ThreadScheduler* mpScheduler;
 
 	public:
 		EDXThread();
@@ -56,12 +60,15 @@ namespace EDX
 		inline HANDLE GetThreadHandle() { return mhThreadHandle; }
 
 	private:
-		static DWORD WINAPI WorkThreadProc(LPVOID lpParam);
+		static DWORD WINAPI ThreadProc(LPVOID lpParam);
+		static DWORD WINAPI WorkerThreadProc(LPVOID lpParam);
 	};
 
+	class EDXConditionVar;
 	class EDXLock
 	{
 	public:
+		friend class EDXConditionVar;
 		EDXLock()
 		{
 			InitializeCriticalSection(&mCriticalSection);
@@ -105,6 +112,47 @@ namespace EDX
 
 	protected:
 		EDXLock& mLock;
+	};
+
+	class EDXConditionVar
+	{
+	public:
+		CONDITION_VARIABLE mCond;
+
+	public:
+		EDXConditionVar()
+		{
+			InitializeConditionVariable(&mCond);
+		}
+
+		void Wait(EDXLock& lock)
+		{
+			SleepConditionVariableCS(&mCond, &lock.mCriticalSection, INFINITE);
+		}
+	};
+
+
+	class Task
+	{
+	public:
+		typedef void(*TaskFunc)(void* pArgs, int idx);
+
+		Task(TaskFunc run, void* pArgs)
+			: Run(run)
+			, pRunArgs(pArgs)
+		{
+		}
+
+		TaskFunc Run;
+		void* pRunArgs;
+	};
+
+	class ThreadScheduler
+	{
+	public:
+		std::deque<Task> mTasks;
+		EDXLock mTaskLock;
+		EDXConditionVar mTaskCond;
 	};
 
 	inline int DetectCPUCount()
