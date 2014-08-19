@@ -23,7 +23,7 @@ namespace EDX
 		mhThreadHandle = CreateThread(
 			NULL,
 			0,
-			reinterpret_cast<LPTHREAD_START_ROUTINE>(&ThreadProc),
+			reinterpret_cast<LPTHREAD_START_ROUTINE>(&WorkerThreadProc),
 			this,
 			0,
 			&dwThreadId);
@@ -56,13 +56,13 @@ namespace EDX
 		{
 			pThread->mpScheduler->mTaskLock.Lock();
 
-			while (pThread->mpScheduler->mTasks.empty())
+			while (pThread->mpScheduler->mTiles.empty())
 			{
 				pThread->mpScheduler->mTaskCond.Wait(pThread->mpScheduler->mTaskLock);
 			}
 
-			Task& task = pThread->mpScheduler->mTasks.front();
-			pThread->mpScheduler->mTasks.pop_front();
+			Task& task = pThread->mpScheduler->mTiles.front();
+			pThread->mpScheduler->mTiles.pop_front();
 
 			pThread->mpScheduler->mTaskLock.Unlock();
 

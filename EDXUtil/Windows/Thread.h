@@ -17,9 +17,9 @@ namespace EDX
 
 		HANDLE	mStopEvent;
 
-		ThreadScheduler* mpScheduler;
 
 	public:
+		ThreadScheduler* mpScheduler;
 		EDXThread();
 
 		virtual ~EDXThread()
@@ -129,6 +129,14 @@ namespace EDX
 		{
 			SleepConditionVariableCS(&mCond, &lock.mCriticalSection, INFINITE);
 		}
+		void Signal()
+		{
+			WakeConditionVariable(&mCond);
+		}
+		void Broadcast()
+		{
+			WakeAllConditionVariable(&mCond);
+		}
 	};
 
 
@@ -150,9 +158,15 @@ namespace EDX
 	class ThreadScheduler
 	{
 	public:
-		std::deque<Task> mTasks;
+		std::deque<Task> mTiles;
 		EDXLock mTaskLock;
 		EDXConditionVar mTaskCond;
+
+		void AddTasks(const Task& task)
+		{
+			mTiles.push_back(task);
+			mTaskCond.Broadcast();
+		}
 	};
 
 	inline int DetectCPUCount()
