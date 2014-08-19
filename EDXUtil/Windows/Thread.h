@@ -7,7 +7,6 @@
 
 namespace EDX
 {
-	class ThreadScheduler;
 	class EDXThread
 	{
 	protected:
@@ -19,8 +18,24 @@ namespace EDX
 
 
 	public:
-		ThreadScheduler* mpScheduler;
 		EDXThread();
+
+		EDXThread(EDXThread&& other)
+		{
+			operator=(std::move(other));
+		}
+		EDXThread& operator = (EDXThread&& rhs)
+		{
+			mhThreadHandle = rhs.mhThreadHandle;
+			mThreadID = rhs.mThreadID;
+			mbRunning = rhs.mbRunning;
+			mStopEvent = rhs.mStopEvent;
+
+			rhs.mhThreadHandle = NULL;
+			rhs.mStopEvent = NULL;
+
+			return *this;
+		}
 
 		virtual ~EDXThread()
 		{
@@ -30,7 +45,8 @@ namespace EDX
 				mbRunning = false;
 			}
 
-			CloseHandle(mStopEvent);
+			if (mStopEvent)
+				CloseHandle(mStopEvent);
 		}
 
 		virtual void WorkLoop() = 0;
@@ -61,7 +77,36 @@ namespace EDX
 
 	private:
 		static DWORD WINAPI ThreadProc(LPVOID lpParam);
-		static DWORD WINAPI WorkerThreadProc(LPVOID lpParam);
+	};
+
+	class ThreadScheduler;
+	class WorkerThread : public EDXThread
+	{
+	private:
+		ThreadScheduler* mpScheduler;
+		uint mId;
+
+	public:
+		WorkerThread()
+		{
+		}
+
+		void Init(ThreadScheduler* pSche, const uint id)
+		{
+			mpScheduler = pSche;
+			mId = id;
+		}
+
+		WorkerThread(WorkerThread&& other)
+			: EDXThread(std::move(other))
+		{
+			mpScheduler = other.mpScheduler;
+			mId = other.mId;
+			other.mpScheduler = nullptr;
+			other.mId = 0;
+		}
+
+		void WorkLoop();
 	};
 
 	class EDXConditionVar;
@@ -158,13 +203,25 @@ namespace EDX
 	class ThreadScheduler
 	{
 	public:
-		std::deque<Task> mTiles;
+		std::deque<Task> mTasks;
+		vector<WorkerThread> mThreads;
+
+		int mNumThreads;
 		EDXLock mTaskLock;
 		EDXConditionVar mTaskCond;
 
+		void InitTAndLaunchThreads();
+		int GetThreadCount() const
+		{
+			return mNumThreads;
+		}
+
 		void AddTasks(const Task& task)
 		{
-			mTiles.push_back(task);
+			mTaskLock.Lock();
+			mTasks.push_back(task);
+			mTaskLock.Unlock();
+
 			mTaskCond.Broadcast();
 		}
 	};

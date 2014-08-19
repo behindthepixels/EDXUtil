@@ -1,5 +1,6 @@
 
 #include "Thread.h"
+#include "../Memory/Memory.h"
 
 namespace EDX
 {
@@ -23,7 +24,7 @@ namespace EDX
 		mhThreadHandle = CreateThread(
 			NULL,
 			0,
-			reinterpret_cast<LPTHREAD_START_ROUTINE>(&WorkerThreadProc),
+			reinterpret_cast<LPTHREAD_START_ROUTINE>(&ThreadProc),
 			this,
 			0,
 			&dwThreadId);
@@ -48,27 +49,32 @@ namespace EDX
 		return 0;
 	}
 
-	DWORD WINAPI EDXThread::WorkerThreadProc(LPVOID lpParam)
+	void WorkerThread::WorkLoop()
 	{
-		EDXThread* pThread = (EDXThread*)(lpParam);
+		mpScheduler->mTaskLock.Lock();
 
-		while (WaitForSingleObject(pThread->mStopEvent, 0) == WAIT_TIMEOUT)
+		while (mpScheduler->mTasks.empty())
 		{
-			pThread->mpScheduler->mTaskLock.Lock();
-
-			while (pThread->mpScheduler->mTiles.empty())
-			{
-				pThread->mpScheduler->mTaskCond.Wait(pThread->mpScheduler->mTaskLock);
-			}
-
-			Task& task = pThread->mpScheduler->mTiles.front();
-			pThread->mpScheduler->mTiles.pop_front();
-
-			pThread->mpScheduler->mTaskLock.Unlock();
-
-			task.Run(task.pRunArgs, pThread->mThreadID);
+			mpScheduler->mTaskCond.Wait(mpScheduler->mTaskLock);
 		}
 
-		return 0;
+		Task& task = mpScheduler->mTasks.front();
+		mpScheduler->mTasks.pop_front();
+
+		mpScheduler->mTaskLock.Unlock();
+
+		task.Run(task.pRunArgs, mId);
+	}
+
+	void ThreadScheduler::InitTAndLaunchThreads()
+	{
+		mNumThreads = DetectCPUCount();
+
+		mThreads.resize(mNumThreads);
+		for (auto i = 0; i < mNumThreads; i++)
+		{
+			mThreads[i].Init(this, i);
+			mThreads[i].Launch();
+		}
 	}
 }
