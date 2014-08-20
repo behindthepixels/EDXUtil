@@ -28,7 +28,7 @@ using std::sort;
 namespace EDX
 {
 	typedef unsigned int	 uint;
-	typedef unsigned char	 byte;
+	typedef unsigned char	 _byte;
 	typedef unsigned long	 dword;
 	typedef			 __int8	 int8;
 	typedef unsigned __int8	 uint8;

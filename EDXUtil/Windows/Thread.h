@@ -85,6 +85,7 @@ namespace EDX
 	private:
 		ThreadScheduler* mpScheduler;
 		uint mId;
+		bool mWaiting;
 
 	public:
 		WorkerThread()
@@ -95,6 +96,7 @@ namespace EDX
 		{
 			mpScheduler = pSche;
 			mId = id;
+			mWaiting = true;
 		}
 
 		WorkerThread(WorkerThread&& other)
@@ -207,10 +209,47 @@ namespace EDX
 		vector<WorkerThread> mThreads;
 
 		int mNumThreads;
+		bool mTerminate;
 		EDXLock mTaskLock;
+		EDXLock mSystemLock;
+		EDXLock mFinishedLock;
 		EDXConditionVar mTaskCond;
+		EDXConditionVar mFinishedCond;
+		std::atomic_int mActiveTasks;
+
+
+	private:
+		ThreadScheduler()
+			: mNumThreads(0)
+			, mTerminate(true)
+		{
+			mActiveTasks = 0;
+		}
+
+		static ThreadScheduler* mpInstance;
+
+	public:
+		static ThreadScheduler* Instance()
+		{
+			if (!mpInstance)
+				mpInstance = new ThreadScheduler;
+
+			return mpInstance;
+		}
+
+		static void DeleteInstance()
+		{
+			if (mpInstance)
+			{
+				mpInstance->ReleaseAndStopThreads();
+
+				delete mpInstance;
+				mpInstance = nullptr;
+			}
+		}
 
 		void InitTAndLaunchThreads();
+		void ReleaseAndStopThreads();
 		int GetThreadCount() const
 		{
 			return mNumThreads;
@@ -222,7 +261,18 @@ namespace EDX
 			mTasks.push_back(task);
 			mTaskLock.Unlock();
 
+			mActiveTasks++;
 			mTaskCond.Broadcast();
+		}
+
+		void JoinAllTasks()
+		{
+			mFinishedLock.Lock();
+			while (mActiveTasks)
+			{
+				mFinishedCond.Wait(mFinishedLock);
+			}
+			mFinishedLock.Unlock();
 		}
 	};
 

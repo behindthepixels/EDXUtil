@@ -53,16 +53,16 @@ namespace EDX
 	private:
 		uint mBlockSize;
 		uint mCurrOffset;
-		byte* mpCurrentBlock;
+		_byte* mpCurrentBlock;
 
-		vector<byte*> mUsedBlocks, mAvailableBlocks;
+		vector<_byte*> mUsedBlocks, mAvailableBlocks;
 
 	public:
 		MemoryArena(uint uiSize = 32768)
 		{
 			mBlockSize = uiSize;
 			mCurrOffset = 0;
-			mpCurrentBlock = AllocAligned<byte>(mBlockSize);
+			mpCurrentBlock = AllocAligned<_byte>(mBlockSize);
 		}
 		~MemoryArena()
 		{
@@ -103,7 +103,7 @@ namespace EDX
 				}
 				else // Else allocate new block in requested size
 				{
-					mpCurrentBlock = AllocAligned<byte>(Math::Max(uiSize, mBlockSize));
+					mpCurrentBlock = AllocAligned<_byte>(Math::Max(uiSize, mBlockSize));
 				}
 				// Clear the current block offset
 				mCurrOffset = 0;

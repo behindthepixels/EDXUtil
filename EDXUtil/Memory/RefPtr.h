@@ -71,6 +71,10 @@ namespace EDX
 					pDestructor->Free(pPointer);
 					delete pDestructor;
 					delete piRefCount;
+
+					pPointer = nullptr;
+					pDestructor = nullptr;
+					piRefCount = nullptr;
 				}
 			}
 		}

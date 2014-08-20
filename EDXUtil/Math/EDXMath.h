@@ -13,84 +13,84 @@ namespace EDX
 		inline bool NumericValid(T num) { return !_isnan(num) && _finite(num); }
 
 		template <class T1, class T2, class T3>
-		inline T1 Clamp(T1 tVal, T2 tmn, T3 tMax)
+		inline T1 Clamp(T1 tVal, T2 tMin, T3 max)
 		{
-			if (tVal < tmn) return tmn;
-			if (tVal > tMax) return tMax;
+			if (tVal < tMin) return tMin;
+			if (tVal > max) return max;
 			return tVal;
 		}
-		inline float Saturate(float fVal) { return Clamp(fVal, 0.0f, 1.0f); }
-		inline float Pow(float fVal, float fPow) { return powf(fVal, fPow); }
-		//inline float Abs(float fVal) { return fabsf(fVal); }
+		inline float Saturate(float val) { return Clamp(val, 0.0f, 1.0f); }
+		inline float Pow(float val, float fPow) { return powf(val, fPow); }
+		//inline float Abs(float val) { return fabsf(val); }
 		template <class T> inline T Abs(T tVal) { return tVal >= 0 ? tVal : -tVal; }
-		inline float Sqrt(float fVal) { return sqrtf(fVal); }
+		inline float Sqrt(float val) { return sqrtf(val); }
 		inline float ToRadians(float fDeg) { return (fDeg / 180.0f) * float(Math::EDX_PI); }
 		inline float ToDegrees(float fRad) { return (fRad / float(Math::EDX_PI)) * 180.0f; }
-		inline float Sin(float fVal) { return sinf(fVal); }
-		inline float Cos(float fVal) { return cosf(fVal); }
-		inline void SinCos(float fVal, float& fSin, float& fCos) { fSin = sinf(fVal); fCos = cosf(fVal); }
-		inline float Tan(float fVal) { return tanf(fVal); }
-		inline float Exp(float fVal) { return expf(fVal); }
-		inline float Atan2(float fVal1, float fVal2) { return atan2f(fVal1, fVal2); }
+		inline float Sin(float val) { return sinf(val); }
+		inline float Cos(float val) { return cosf(val); }
+		inline void SinCos(float val, float& fSin, float& fCos) { fSin = sinf(val); fCos = cosf(val); }
+		inline float Tan(float val) { return tanf(val); }
+		inline float Exp(float val) { return expf(val); }
+		inline float Atan2(float val1, float val2) { return atan2f(val1, val2); }
 
-		inline int FloorToInt(float fVal) { return (int)fVal; }
-		inline int CeilToInt(float fVal)
+		inline int FloorToInt(float val) { return (int)val; }
+		inline int CeilToInt(float val)
 		{
-			int iVal = (int)fVal;
-			if (fVal - iVal > 1e-5f)
+			int ceil = (int)val;
+			if (val - ceil > 1e-5f)
 			{
-				return iVal + 1;
+				return ceil + 1;
 			}
 			else
 			{
-				return iVal;
+				return ceil;
 			}
 		}
-		inline int RoundToInt(float fVal) { return FloorToInt(fVal + 0.5f); }
+		inline int RoundToInt(float val) { return FloorToInt(val + 0.5f); }
 
 		template <class T1, class T2>
-		inline float LinStep(const T1& tVal, const T2& tmn, const T2& tMax)
+		inline float LinStep(const T1& tVal, const T2& min, const T2& max)
 		{
-			if (tmn == tMax)
+			if (min == max)
 			{
 				return 0.0f;
 			}
-			return Saturate((tVal - tmn) / (tMax - tmn));
+			return Saturate((tVal - min) / (max - min));
 		}
-		template<class T1, class T2> inline auto Lerp(const T1& min, const T2& eMax, const float fVal) -> decltype(min + eMax) { return min * (1 - fVal) + eMax * fVal; }
+		template<class T1, class T2> inline auto Lerp(const T1& min, const T2& max, const float val) -> decltype(min + max) { return min * (1 - val) + max * val; }
 		template<class T1, class T2> inline auto Max(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 > e2 ? e1 : e2; }
 		template<class T1, class T2> inline auto AbsMax(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return Abs(e1) > Abs(e2) ? e1 : e2; }
 		template<class T1, class T2> inline auto Min(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 < e2 ? e1 : e2; }
 		template<class T1, class T2> inline auto AbsMin(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return Abs(e1) < Abs(e2) ? e1 : e2; }
 
 		template<class T1, class T2, class T3, class T4>
-		inline auto BiLerp(const T1& e00, const T2& e01, const T3& e10, const T4& e11, const float fVal1, const float fVal2) -> decltype(e00 + e01 + e10 + e11)
+		inline auto BiLerp(const T1& e00, const T2& e01, const T3& e10, const T4& e11, const float val1, const float val2) -> decltype(e00 + e01 + e10 + e11)
 		{
-			return Lerp(Lerp(e00, e01, fVal1), Lerp(e10, e11, fVal1), fVal2);
+			return Lerp(Lerp(e00, e01, val1), Lerp(e10, e11, val1), val2);
 		}
 		template<class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8>
-		inline auto TriLerp(const T1& e000, const T2& e001, const T3& e010, const T4& e011, const T5& e100, const T6& e101, const T7& e110, const T8& e111, const float fVal1, const float fVal2, const float fVal3) -> decltype(e000 + e001 + e010 + e011 + e100 + e101 + e110 + e111)
+		inline auto TriLerp(const T1& e000, const T2& e001, const T3& e010, const T4& e011, const T5& e100, const T6& e101, const T7& e110, const T8& e111, const float val1, const float val2, const float val3) -> decltype(e000 + e001 + e010 + e011 + e100 + e101 + e110 + e111)
 		{
-			return Lerp(BiLerp(e000, e001, e010, e011, fVal1, fVal2), BiLerp(e100, e101, e110, e111, fVal1, fVal2), fVal3);
+			return Lerp(BiLerp(e000, e001, e010, e011, val1, val2), BiLerp(e100, e101, e110, e111, val1, val2), val3);
 		}
 
-		inline bool IsPowOfTwo(const int iVal)
+		inline bool IsPowOfTwo(const int val)
 		{
-			return (iVal & (iVal - 1)) == 0;
+			return (val & (val - 1)) == 0;
 		}
-		inline int RoundUpPowTwo(uint iVal)
+		inline int RoundUpPowTwo(uint val)
 		{
-			iVal--;
-			iVal |= iVal >> 1;
-			iVal |= iVal >> 2;
-			iVal |= iVal >> 4;
-			iVal |= iVal >> 8;
-			iVal |= iVal >> 16;
-			return iVal + 1;
+			val--;
+			val |= val >> 1;
+			val |= val >> 2;
+			val |= val >> 4;
+			val |= val >> 8;
+			val |= val >> 16;
+			return val + 1;
 		}
-		inline int RoundUpTo(const uint iVal, const uint iRound)
+		inline int RoundUpTo(const uint val, const uint round)
 		{
-			uint iRet = iVal + iRound - (iVal % iRound);
+			uint iRet = val + round - (val % round);
 			return iRet;
 		}
 

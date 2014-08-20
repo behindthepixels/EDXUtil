@@ -53,9 +53,14 @@ namespace EDX
 	{
 		mpScheduler->mTaskLock.Lock();
 
-		while (mpScheduler->mTasks.empty())
+		while (mpScheduler->mTasks.empty() && !mpScheduler->mTerminate)
 		{
 			mpScheduler->mTaskCond.Wait(mpScheduler->mTaskLock);
+		}
+		if (mpScheduler->mTerminate)
+		{
+			mpScheduler->mTaskLock.Unlock();
+			return;
 		}
 
 		Task& task = mpScheduler->mTasks.front();
@@ -64,17 +69,38 @@ namespace EDX
 		mpScheduler->mTaskLock.Unlock();
 
 		task.Run(task.pRunArgs, mId);
+		if (--mpScheduler->mActiveTasks == 0)
+		{
+			mpScheduler->mFinishedCond.Signal();
+		}
 	}
+
+	ThreadScheduler* ThreadScheduler::mpInstance = nullptr;
 
 	void ThreadScheduler::InitTAndLaunchThreads()
 	{
 		mNumThreads = DetectCPUCount();
+		mTerminate = false;
 
 		mThreads.resize(mNumThreads);
 		for (auto i = 0; i < mNumThreads; i++)
 		{
 			mThreads[i].Init(this, i);
 			mThreads[i].Launch();
+		}
+	}
+
+	void ThreadScheduler::ReleaseAndStopThreads()
+	{
+		mTerminate = true;
+
+		mTaskLock.Lock();
+		mTaskCond.Broadcast();
+		mTaskLock.Unlock();
+
+		for (auto i = 0; i < mNumThreads; i++)
+		{
+			mThreads[i].StopThread();
 		}
 	}
 }
