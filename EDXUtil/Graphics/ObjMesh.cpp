@@ -446,6 +446,7 @@ namespace EDX
 
 		mTriangleCount = mIndices.size() / 3;
 		mVertexCount = mVertices.size();
+		mMaterialIdx.assign(mTriangleCount, 0);
 		mbNormaled = mbTextured = true;
 	}
 
@@ -491,6 +492,7 @@ namespace EDX
 
 		mTriangleCount = mIndices.size() / 3;
 		mVertexCount = mVertices.size();
+		mMaterialIdx.assign(mTriangleCount, 0);
 		mbNormaled = mbTextured = true;
 	}
 
