@@ -73,7 +73,7 @@ namespace EDX
 		Matrix mCamRotate = Matrix::YawPitchRow(Math::ToDegrees(mYaw), Math::ToDegrees(mPitch), 0.0f);
 
 		Vector3 vWorldUp, vWorldAhead;
-		Vector3 vLocalUp = Vector3::UNIT_Y, vLocalAhead = Vector3::UNIT_Z;
+		Vector3 vLocalUp = Vector3(0.0f, 1.0f, 0.0f), vLocalAhead = Vector3(0.0f, 0.0f, 1.0f);
 
 		vWorldUp = Matrix::TransformVector(vLocalUp, mCamRotate);
 		vWorldAhead = Matrix::TransformVector(vLocalAhead, mCamRotate);
@@ -82,6 +82,7 @@ namespace EDX
 		if (Math::Length(mDirKB) > 0.0f)
 		{
 			vVelocity = Math::Normalize(mDirKB) * mMoveScaler;
+			mDirKB = Vector3::ZERO;
 		}
 
 		Vector3 vWorldPosDelta = Matrix::TransformVector(vVelocity, mCamRotate);
@@ -126,16 +127,16 @@ namespace EDX
 		switch (args.key)
 		{
 		case 'W':
-			mDirKB.z -= 1.0f;
-			break;
-		case 'S':
 			mDirKB.z += 1.0f;
 			break;
+		case 'S':
+			mDirKB.z -= 1.0f;
+			break;
 		case 'A':
-			mDirKB.x += 1.0f;
+			mDirKB.x -= 1.0f;
 			break;
 		case 'D':
-			mDirKB.x -= 1.0f;
+			mDirKB.x += 1.0f;
 			break;
 		case 'Q':
 			mDirKB.y -= 1.0f;
