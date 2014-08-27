@@ -172,6 +172,10 @@ namespace EDX
 					iCurrentMtl = mMaterials.size();
 					mMaterials.push_back(currMtl);
 				}
+
+				mSubsetStartIdx.push_back(mIndices.size());
+				mSubsetMtlIdx.push_back(iCurrentMtl);
+				mNumSubsets++;
 			}
 			else
 			{
@@ -182,6 +186,16 @@ namespace EDX
 		}
 
 		InFile.close();
+
+		// Correct subsets index
+		if (mNumSubsets == 0)
+		{
+			mSubsetStartIdx.push_back(0);
+			mNumSubsets = 1;
+			mSubsetMtlIdx.push_back(0);
+		}
+
+		mSubsetStartIdx.push_back(mIndices.size());
 
 		mVertexCount = mVertices.size();
 		mTriangleCount = mIndices.size() / 3;

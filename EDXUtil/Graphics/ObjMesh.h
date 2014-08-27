@@ -69,6 +69,9 @@ namespace EDX
 
 		vector<ObjMaterial> mMaterials;
 		vector<uint> mMaterialIdx;
+		vector<uint> mSubsetStartIdx;
+		vector<uint> mSubsetMtlIdx;
+		uint mNumSubsets;
 
 		bool mbNormaled;
 		bool mbTextured;
