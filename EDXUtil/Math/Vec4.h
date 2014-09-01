@@ -58,6 +58,11 @@ namespace EDX
 		inline T Sum() const { return x + y + z + w; }
 		inline T Product() const { return x * y * z * w; }
 		inline Vec<3, T> xyz() const { return Vec<3, T>(x, y, z); }
+		inline Vec<3, T> HomogeneousProject() const
+		{
+			float invW = 1.0f / w;
+			return Vec<3, T>(x * invW, y * invW, z * invW);
+		}
 
 		inline const T& operator [] (const size_t idx) const { assert(idx < 4); return (&x)[idx]; }
 		inline		 T& operator [] (const size_t idx)		 { assert(idx < 4); return (&x)[idx]; }
