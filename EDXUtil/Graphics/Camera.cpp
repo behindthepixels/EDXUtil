@@ -113,7 +113,7 @@ namespace EDX
 				mYaw -= -vRotateVel.x;
 				mPitch -= -vRotateVel.y;
 
-				mPitch = Math::Max(mPitch, -180);
+				mPitch = Math::Max(mPitch, -float(Math::EDX_PI_2));
 				mPitch = Math::Min(mPitch, float(Math::EDX_PI_2));
 			}
 			break;

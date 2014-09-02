@@ -54,8 +54,8 @@ namespace EDX
 		//----------------------------------------------------------------------------------------------
 		__forceinline IntSSE(Math::Zero)		: m128(_mm_setzero_si128()) {}
 		__forceinline IntSSE(Math::One)			: m128(_mm_set_epi32(1, 1, 1, 1)) {}
-		__forceinline IntSSE(Math::PosInf)		: m128(_mm_set_epi32(Math::EDX_INFINITY,Math::EDX_INFINITY,Math::EDX_INFINITY,Math::EDX_INFINITY)) {}
-		__forceinline IntSSE(Math::NegInf)		: m128(_mm_set_epi32(Math::EDX_NEG_INFINITY,Math::EDX_NEG_INFINITY,Math::EDX_NEG_INFINITY,Math::EDX_NEG_INFINITY)) {}
+		__forceinline IntSSE(Math::PosInf)		: m128(_mm_set_epi32(Math::EDX_INFINITY, Math::EDX_INFINITY, Math::EDX_INFINITY, Math::EDX_INFINITY)) {}
+		__forceinline IntSSE(Math::NegInf)		: m128(_mm_set_epi32(Math::EDX_NEG_INFINITY, Math::EDX_NEG_INFINITY, Math::EDX_NEG_INFINITY, Math::EDX_NEG_INFINITY)) {}
 		__forceinline IntSSE(Math::Step)		: m128(_mm_set_epi32(3, 2, 1, 0)) {}
 
 		//----------------------------------------------------------------------------------------------

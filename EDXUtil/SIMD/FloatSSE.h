@@ -54,9 +54,9 @@ namespace EDX
 		// Constants
 		//----------------------------------------------------------------------------------------------
 		__forceinline FloatSSE(Math::Zero)		: m128(_mm_setzero_ps()) {}
-		__forceinline FloatSSE(Math::One)		: m128(_mm_set_ps(1.0f,1.0f,1.0f,1.0f)) {}
-		__forceinline FloatSSE(Math::PosInf)	: m128(_mm_set_ps(Math::EDX_INFINITY,Math::EDX_INFINITY,Math::EDX_INFINITY,Math::EDX_INFINITY)) {}
-		__forceinline FloatSSE(Math::NegInf)	: m128(_mm_set_ps(Math::EDX_NEG_INFINITY,Math::EDX_NEG_INFINITY,Math::EDX_NEG_INFINITY,Math::EDX_NEG_INFINITY)) {}
+		__forceinline FloatSSE(Math::One)		: m128(_mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f)) {}
+		__forceinline FloatSSE(Math::PosInf)	: m128(_mm_set_ps(Math::EDX_INFINITY, Math::EDX_INFINITY, Math::EDX_INFINITY, Math::EDX_INFINITY)) {}
+		__forceinline FloatSSE(Math::NegInf)	: m128(_mm_set_ps(Math::EDX_NEG_INFINITY, Math::EDX_NEG_INFINITY, Math::EDX_NEG_INFINITY, Math::EDX_NEG_INFINITY)) {}
 		__forceinline FloatSSE(Math::Step)		: m128(_mm_set_ps(3.0f, 2.0f, 1.0f, 0.0f)) {}
 		__forceinline FloatSSE(Math::NaN)		: m128(_mm_set1_ps(Math::EDX_NAN)) {}
 
@@ -178,11 +178,11 @@ namespace EDX
 		// Rounding Functions
 		//----------------------------------------------------------------------------------------------
 		__forceinline const FloatSSE RoundEven(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_NEAREST_INT); }
-		__forceinline const FloatSSE RoundDown(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_NEG_INF  ); }
-		__forceinline const FloatSSE RoundUp(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_POS_INF  ); }
-		__forceinline const FloatSSE RoundZero(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_ZERO   ); }
-		__forceinline const FloatSSE Floor(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_NEG_INF  ); }
-		__forceinline const FloatSSE Ceil(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_POS_INF  ); }
+		__forceinline const FloatSSE RoundDown(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_NEG_INF); }
+		__forceinline const FloatSSE RoundUp(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_POS_INF); }
+		__forceinline const FloatSSE RoundZero(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_ZERO); }
+		__forceinline const FloatSSE Floor(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_NEG_INF); }
+		__forceinline const FloatSSE Ceil(const FloatSSE& lhs) { return _mm_round_ps(lhs, _MM_FROUND_TO_POS_INF); }
 
 		//----------------------------------------------------------------------------------------------
 		// Movement/Shifting/Shuffling Functions

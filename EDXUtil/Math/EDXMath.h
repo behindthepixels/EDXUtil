@@ -10,10 +10,10 @@ namespace EDX
 	namespace Math
 	{
 		template <typename T>
-		inline bool NumericValid(T num) { return !_isnan(num) && _finite(num); }
+		inline bool NumericValid(const T& num) { return !_isnan(num) && _finite(num); }
 
 		template <class T1, class T2, class T3>
-		inline T1 Clamp(T1 tVal, T2 tMin, T3 max)
+		inline T1 Clamp(const T1& tVal, const T2& tMin, const T3& max)
 		{
 			if (tVal < tMin) return tMin;
 			if (tVal > max) return max;
