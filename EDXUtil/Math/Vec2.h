@@ -13,8 +13,8 @@ namespace EDX
 	public:
 		union
 		{
-			struct { T x, y; };
 			struct { T u, v; };
+			struct { T x, y; };
 		};
 
 	public:

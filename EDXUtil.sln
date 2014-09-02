@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUIViewer", "GUIViewer\GUIV
 		{197C330A-0EBC-47DC-8A32-0F05F315F0C1} = {197C330A-0EBC-47DC-8A32-0F05F315F0C1}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "UnitTest\UnitTest.vcxproj", "{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -34,6 +36,14 @@ Global
 		{CBE4E3F0-C9E7-4DDB-B039-945595C3C41E}.Release|Win32.Build.0 = Release|Win32
 		{CBE4E3F0-C9E7-4DDB-B039-945595C3C41E}.Release|x64.ActiveCfg = Release|x64
 		{CBE4E3F0-C9E7-4DDB-B039-945595C3C41E}.Release|x64.Build.0 = Release|x64
+		{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}.Debug|Win32.Build.0 = Debug|Win32
+		{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}.Debug|x64.ActiveCfg = Debug|x64
+		{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}.Debug|x64.Build.0 = Debug|x64
+		{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}.Release|Win32.ActiveCfg = Release|Win32
+		{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}.Release|Win32.Build.0 = Release|Win32
+		{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}.Release|x64.ActiveCfg = Release|x64
+		{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

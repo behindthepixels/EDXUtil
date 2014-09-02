@@ -202,7 +202,7 @@ namespace EDX
 		__forceinline const IntSSE VReduceMax(const IntSSE& v) { IntSSE h = Max(Shuffle<1,0,3,2>(v),v); return Max(Shuffle<2,3,0,1>(h),h); }
 		__forceinline const IntSSE vReduceAdd(const IntSSE& v) { IntSSE h = Shuffle<1,0,3,2>(v) + v ; return Shuffle<2,3,0,1>(h) + h ; }
 
-		__forceinline int Reducemn(const IntSSE& v) { return Extract<0>(VReduceMin(v)); }
+		__forceinline int ReduceMin(const IntSSE& v) { return Extract<0>(VReduceMin(v)); }
 		__forceinline int ReduceMax(const IntSSE& v) { return Extract<0>(VReduceMax(v)); }
 		__forceinline int ReduceAdd(const IntSSE& v) { return Extract<0>(vReduceAdd(v)); }
 

@@ -251,7 +251,7 @@ namespace EDX
 		__forceinline const FloatSSE VReduceMax(const FloatSSE& v) { FloatSSE h = Max(Shuffle<1,0,3,2>(v),v); return Max(Shuffle<2,3,0,1>(h),h); }
 		__forceinline const FloatSSE vReduceAdd(const FloatSSE& v) { FloatSSE h = Shuffle<1,0,3,2>(v) + v ; return Shuffle<2,3,0,1>(h) + h ; }
 
-		__forceinline float Reducemn(const FloatSSE& v) { return _mm_cvtss_f32(VReduceMin(v)); }
+		__forceinline float ReduceMin(const FloatSSE& v) { return _mm_cvtss_f32(VReduceMin(v)); }
 		__forceinline float ReduceMax(const FloatSSE& v) { return _mm_cvtss_f32(VReduceMax(v)); }
 		__forceinline float ReduceAdd(const FloatSSE& v) { return _mm_cvtss_f32(vReduceAdd(v)); }
 
