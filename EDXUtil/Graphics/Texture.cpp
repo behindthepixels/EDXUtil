@@ -31,7 +31,7 @@ namespace EDX
 	template<class T>
 	T ImageTexture<T>::Sample(const Vector2& texCoord) const
 	{
-		int iU = Math::FloorToInt(texCoord.u * mTexWidth);
+		int iU = Math::FloorToInt((1.0f - texCoord.u) * mTexWidth);
 		int iV = Math::FloorToInt((1.0f - texCoord.v) * mTexHeight);
 
 		iU = iU % mTexWidth;
