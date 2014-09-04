@@ -112,6 +112,7 @@ namespace EDX
 		inline bool IsTextured() const { return mbTextured; }
 
 		const vector<ObjMaterial>& GetMaterialInfo() const { return mMaterials; }
+		inline const vector<uint>& GetMaterialIdxBuf() const { return mMaterialIdx; }
 		inline uint GetMaterialIdx(int iTri) const { return mMaterialIdx[iTri]; }
 
 		void Release();
