@@ -26,6 +26,8 @@ namespace EDX
 			mpTexels[i].b = pRawTex[4 * i + 2] * 0.00390625f;
 			mpTexels[i].a = 1.0f;
 		}
+
+		SafeDeleteArray(pRawTex);
 	}
 
 	template<class T>
