@@ -4,6 +4,23 @@
 
 namespace EDX
 {
+	void ParseFace(const char* str, const uint length)
+	{
+		// Face
+		uint iPosition, iTexCoord, iNormal;
+		MeshVertex Vertex;
+		MeshFace Face, quadFace;
+
+		for (auto i = 0; i < length; i++)
+		{
+			if (str[i] == ' ' || str[i] == '\t' || str[i] == '\n')
+				continue;
+
+			if (str[i] >= '0')
+
+		}
+	}
+
 	bool ObjMesh::LoadFromObj(const Vector3& pos,
 		const Vector3& scl,
 		const Vector3& rot,
@@ -23,14 +40,13 @@ namespace EDX
 		Matrix::CalcTransform(pos, scl * leftHandedScl, rot, &mWorld, &mWorldInv);
 
 		char strCommand[MAX_PATH] = { 0 };
-		std::ifstream InFile(strPath);
+		FILE* InFile = 0;
+		fopen_s(&InFile, strPath, "rt");
 		assert(InFile);
 
-		while (true)
+		while (!feof(InFile))
 		{
-			InFile >> strCommand;
-			if (!InFile)
-				break;
+			fscanf_s(InFile, "%s", strCommand, MAX_PATH);
 
 			if (0 == strcmp(strCommand, "#"))
 			{
@@ -40,14 +56,14 @@ namespace EDX
 			{
 				// Vertex Position
 				float x, y, z;
-				InFile >> x >> y >> z;
+				fscanf_s(InFile, "%f %f %f", &x, &y, &z);
 				position.push_back(Matrix::TransformPoint(Vector3(x, y, z), mWorld));
 			}
 			else if (0 == strcmp(strCommand, "vt"))
 			{
 				// Vertex TexCoord
 				float u, v;
-				InFile >> u >> v;
+				fscanf_s(InFile, "%f %f", &u, &v);
 				vTexCoord.push_back(u);
 				vTexCoord.push_back(v);
 				mbTextured = true;
@@ -56,7 +72,7 @@ namespace EDX
 			{
 				// Vertex Normal
 				float x, y, z;
-				InFile >> x >> y >> z;
+				fscanf_s(InFile, "%f %f %f", &x, &y, &z);
 				vNormal.push_back(Matrix::TransformNormal(Vector3(x, y, z), mWorldInv));
 				mbNormaled = true;
 			}
@@ -67,11 +83,13 @@ namespace EDX
 				MeshVertex Vertex;
 				MeshFace Face, quadFace;
 
+				fgets(strCommand, MAX_PATH, InFile);
+
 				auto ReadNextVertex = [&]() -> uint
 				{
 					SafeClear(&Vertex, 1);
 
-					InFile >> iPosition;
+					fscanf_s(InFile, "%d", &iPosition);
 					Vertex.position = position[iPosition - 1];
 
 					if ('/' == InFile.peek())
