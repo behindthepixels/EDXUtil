@@ -7,7 +7,8 @@ namespace EDX
 	bool ObjMesh::LoadFromObj(const Vector3& pos,
 		const Vector3& scl,
 		const Vector3& rot,
-		const char* strPath)
+		const char* strPath,
+		const bool makeLeftHanded)
 	{
 		vector<Vector3> position;
 		vector<Vector3> vNormal;
@@ -17,7 +18,9 @@ namespace EDX
 		char strMaterialFilename[MAX_PATH] = { 0 };
 
 		Matrix mWorld, mWorldInv;
-		Matrix::CalcTransform(pos, scl, rot, &mWorld, &mWorldInv);
+
+		Vector3 leftHandedScl = makeLeftHanded ? Vector3(-1.0f, 1.0f, 1.0f) : Vector3::UNIT_SCALE;
+		Matrix::CalcTransform(pos, scl * leftHandedScl, rot, &mWorld, &mWorldInv);
 
 		char strCommand[MAX_PATH] = { 0 };
 		std::ifstream InFile(strPath);
@@ -96,15 +99,32 @@ namespace EDX
 					return AddVertex(iPosition - 1, &Vertex);
 				};
 
+				uint faceIdx[4] = { 0, 0, 0, 0 };
 				for (int iFace = 0; iFace < 3; iFace++)
 				{
 					auto iIndex = ReadNextVertex();
 					if (iIndex == uint(-1))
 						return false;
 
-					mIndices.push_back(iIndex);
-					Face.aiIndices[iFace] = iIndex;
+					faceIdx[iFace] = iIndex;
 				}
+
+				if (makeLeftHanded)
+				{
+					Face.aiIndices[0] = faceIdx[0];
+					Face.aiIndices[1] = faceIdx[2];
+					Face.aiIndices[2] = faceIdx[1];
+				}
+				else
+				{
+					Face.aiIndices[0] = faceIdx[0];
+					Face.aiIndices[1] = faceIdx[1];
+					Face.aiIndices[2] = faceIdx[2];
+				}
+
+				mIndices.push_back(Face.aiIndices[0]);
+				mIndices.push_back(Face.aiIndices[1]);
+				mIndices.push_back(Face.aiIndices[2]);
 
 				// Add face
 				Face.iSmoothingGroup = iSmoothingGroup;
@@ -127,9 +147,18 @@ namespace EDX
 
 					// Triangularize quad
 					{
-						quadFace.aiIndices[0] = index;
-						quadFace.aiIndices[1] = Face.aiIndices[0];
-						quadFace.aiIndices[2] = Face.aiIndices[2];
+						if (makeLeftHanded)
+						{
+							quadFace.aiIndices[0] = index;
+							quadFace.aiIndices[1] = Face.aiIndices[1];
+							quadFace.aiIndices[2] = Face.aiIndices[0];
+						}
+						else
+						{
+							quadFace.aiIndices[0] = index;
+							quadFace.aiIndices[1] = Face.aiIndices[0];
+							quadFace.aiIndices[2] = Face.aiIndices[2];
+						}
 
 						mIndices.push_back(quadFace.aiIndices[0]);
 						mIndices.push_back(quadFace.aiIndices[1]);

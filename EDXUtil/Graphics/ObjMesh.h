@@ -88,7 +88,8 @@ namespace EDX
 		bool LoadFromObj(const Vector3& pos,
 			const Vector3& scl,
 			const Vector3& rot,
-			const char* path);
+			const char* path,
+			const bool makeLeftHanded = true);
 		void LoadPlane(const Vector3& pos,
 			const Vector3& scl,
 			const Vector3& rot,
