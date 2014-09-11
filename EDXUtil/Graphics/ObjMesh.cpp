@@ -4,32 +4,15 @@
 
 namespace EDX
 {
-	void ParseFace(const char* str, const uint length)
-	{
-		// Face
-		uint iPosition, iTexCoord, iNormal;
-		MeshVertex Vertex;
-		MeshFace Face, quadFace;
-
-		for (auto i = 0; i < length; i++)
-		{
-			if (str[i] == ' ' || str[i] == '\t' || str[i] == '\n')
-				continue;
-
-			if (str[i] >= '0')
-
-		}
-	}
-
 	bool ObjMesh::LoadFromObj(const Vector3& pos,
 		const Vector3& scl,
 		const Vector3& rot,
 		const char* strPath,
 		const bool makeLeftHanded)
 	{
-		vector<Vector3> position;
-		vector<Vector3> vNormal;
-		vector<float> vTexCoord;
+		vector<Vector3> positionBuf;
+		vector<Vector3> normalBuf;
+		vector<float> texCoordBuf;
 		int iSmoothingGroup = 0;
 		int iCurrentMtl = 0;
 		char strMaterialFilename[MAX_PATH] = { 0 };
@@ -40,13 +23,13 @@ namespace EDX
 		Matrix::CalcTransform(pos, scl * leftHandedScl, rot, &mWorld, &mWorldInv);
 
 		char strCommand[MAX_PATH] = { 0 };
-		FILE* InFile = 0;
-		fopen_s(&InFile, strPath, "rt");
-		assert(InFile);
+		FILE* pInFile = 0;
+		fopen_s(&pInFile, strPath, "rt");
+		assert(pInFile);
 
-		while (!feof(InFile))
+		while (!feof(pInFile))
 		{
-			fscanf_s(InFile, "%s", strCommand, MAX_PATH);
+			fscanf_s(pInFile, "%s", strCommand, MAX_PATH);
 
 			if (0 == strcmp(strCommand, "#"))
 			{
@@ -56,75 +39,124 @@ namespace EDX
 			{
 				// Vertex Position
 				float x, y, z;
-				fscanf_s(InFile, "%f %f %f", &x, &y, &z);
-				position.push_back(Matrix::TransformPoint(Vector3(x, y, z), mWorld));
+				fscanf_s(pInFile, "%f %f %f", &x, &y, &z);
+				positionBuf.push_back(Matrix::TransformPoint(Vector3(x, y, z), mWorld));
 			}
 			else if (0 == strcmp(strCommand, "vt"))
 			{
 				// Vertex TexCoord
 				float u, v;
-				fscanf_s(InFile, "%f %f", &u, &v);
-				vTexCoord.push_back(u);
-				vTexCoord.push_back(v);
-				mbTextured = true;
+				fscanf_s(pInFile, "%f %f", &u, &v);
+				texCoordBuf.push_back(u);
+				texCoordBuf.push_back(v);
+				mTextured = true;
 			}
 			else if (0 == strcmp(strCommand, "vn"))
 			{
 				// Vertex Normal
 				float x, y, z;
-				fscanf_s(InFile, "%f %f %f", &x, &y, &z);
-				vNormal.push_back(Matrix::TransformNormal(Vector3(x, y, z), mWorldInv));
-				mbNormaled = true;
+				fscanf_s(pInFile, "%f %f %f", &x, &y, &z);
+				normalBuf.push_back(Matrix::TransformNormal(Vector3(x, y, z), mWorldInv));
+				mNormaled = true;
 			}
 			else if (0 == strcmp(strCommand, "f"))
 			{
+				// Parse face
+				fgets(strCommand, MAX_PATH, pInFile);
+				int length = strlen(strCommand);
+
 				// Face
-				uint iPosition, iTexCoord, iNormal;
+				int posIdx, texIdx, normalIdx;
 				MeshVertex Vertex;
 				MeshFace Face, quadFace;
 
-				fgets(strCommand, MAX_PATH, InFile);
+				uint faceIdx[4] = { 0, 0, 0, 0 };
+				int vertexCount = 0;
 
-				auto ReadNextVertex = [&]() -> uint
+				int slashCount = -1;
+				bool doubleSlash = false;
+				auto startIdx = 0;
+				for (auto i = 0; i < length; i++)
 				{
-					SafeClear(&Vertex, 1);
-
-					fscanf_s(InFile, "%d", &iPosition);
-					Vertex.position = position[iPosition - 1];
-
-					if ('/' == InFile.peek())
+					auto c = strCommand[i];
+					if (strCommand[i] != ' ' && strCommand[i] != '\t' && strCommand[i] != '\n' && strCommand[i] != '\0')
+						continue;
+					if (startIdx == i)
 					{
-						InFile.ignore();
+						startIdx++;
+						continue;
+					}
 
-						if ('/' != InFile.peek())
+					if (slashCount == -1)
+					{
+						slashCount = 0;
+						bool prevIsSlash = false;
+						for (auto cur = startIdx; cur < i; cur++)
 						{
-							// Optional texture coordinate
-							InFile >> iTexCoord;
-							Vertex.fU = vTexCoord[2 * iTexCoord - 2];
-							Vertex.fV = vTexCoord[2 * iTexCoord - 1];
-						}
+							if (strCommand[cur] == '/')
+							{
+								if (prevIsSlash)
+									doubleSlash = true;
 
-						if ('/' == InFile.peek())
-						{
-							InFile.ignore();
-
-							// Optional Vertex normal
-							InFile >> iNormal;
-							Vertex.normal = vNormal[iNormal - 1];
+								slashCount++;
+								prevIsSlash = true;
+							}
+							else
+							{
+								prevIsSlash = false;
+							}
 						}
 					}
 
-					return AddVertex(iPosition - 1, &Vertex);
-				};
+					if (!doubleSlash)
+					{
+						if (slashCount == 0)
+						{
+							sscanf_s(strCommand + startIdx, "%d", &posIdx);
+							if (posIdx < 0)
+								posIdx = positionBuf.size() + posIdx + 1;
+							Vertex.position = positionBuf[posIdx - 1];
+						}
+						else if (slashCount == 1)
+						{
+							sscanf_s(strCommand + startIdx, "%d/%d", &posIdx, &texIdx);
+							if (posIdx < 0)
+								posIdx = positionBuf.size() + posIdx + 1;
+							if (texIdx < 0)
+								texIdx = texCoordBuf.size() / 2 + texIdx + 1;
+							Vertex.position = positionBuf[posIdx - 1];
+							Vertex.fU = texCoordBuf[2 * texIdx - 2];
+							Vertex.fV = texCoordBuf[2 * texIdx - 1];
+						}
+						else if (slashCount == 2)
+						{
+							sscanf_s(strCommand + startIdx, "%d/%d/%d", &posIdx, &texIdx, &normalIdx);
+							if (posIdx < 0)
+								posIdx = positionBuf.size() + posIdx + 1;
+							if (texIdx < 0)
+								texIdx = texCoordBuf.size() / 2 + texIdx + 1;
+							if (normalIdx < 0)
+								normalIdx = normalBuf.size() + normalIdx + 1;
+							Vertex.position = positionBuf[posIdx - 1];
+							Vertex.fU = texCoordBuf[2 * texIdx - 2];
+							Vertex.fV = texCoordBuf[2 * texIdx - 1];
+							Vertex.normal = normalBuf[normalIdx - 1];
+						}
+					}
+					else
+					{
+						sscanf_s(strCommand + startIdx, "%d//%d", &posIdx, &normalIdx);
+						if (posIdx < 0)
+							posIdx = positionBuf.size() + posIdx + 1;
+						if (normalIdx < 0)
+							normalIdx = normalBuf.size() + normalIdx + 1;
+						Vertex.position = positionBuf[posIdx - 1];
+						Vertex.normal = normalBuf[normalIdx - 1];
+					}
 
-				uint faceIdx[4] = { 0, 0, 0, 0 };
-				for (int iFace = 0; iFace < 3; iFace++)
-				{
-					auto iIndex = ReadNextVertex();
-					if (iIndex == uint(-1))
-						return false;
-
-					faceIdx[iFace] = iIndex;
+					faceIdx[vertexCount] = AddVertex(posIdx - 1, &Vertex);
+					vertexCount++;
+					startIdx = i + 1;
 				}
 
 				if (makeLeftHanded)
@@ -149,31 +181,19 @@ namespace EDX
 				mFaces.push_back(Face);
 				mMaterialIdx.push_back(iCurrentMtl);
 
-				bool bQuad = false;
-				while ((InFile.peek() < '0' || InFile.peek() > '9') && InFile.peek() != '\n')
+				if (vertexCount == 4)
 				{
-					InFile.ignore();
-				}
-				if (InFile.peek() >= '0' && InFile.peek() <= '9')
-					bQuad = true;
-				else
-					bQuad = false;
-
-				if (bQuad)
-				{
-					auto index = ReadNextVertex();
-
 					// Triangularize quad
 					{
 						if (makeLeftHanded)
 						{
-							quadFace.aiIndices[0] = index;
+							quadFace.aiIndices[0] = faceIdx[3];
 							quadFace.aiIndices[1] = Face.aiIndices[1];
 							quadFace.aiIndices[2] = Face.aiIndices[0];
 						}
 						else
 						{
-							quadFace.aiIndices[0] = index;
+							quadFace.aiIndices[0] = faceIdx[3];
 							quadFace.aiIndices[1] = Face.aiIndices[0];
 							quadFace.aiIndices[2] = Face.aiIndices[2];
 						}
@@ -190,23 +210,23 @@ namespace EDX
 			}
 			else if (0 == strcmp(strCommand, "s")) // Handle smoothing group for normal computation
 			{
-				InFile.ignore();
+				fscanf_s(pInFile, "%s", strCommand, MAX_PATH);
 
-				if (InFile.peek() >= '0' && InFile.peek() <= '9')
-					InFile >> iSmoothingGroup;
+				if (strCommand[0] >= '0' && strCommand[0] <= '9')
+					sscanf_s(strCommand, "%d", &iSmoothingGroup);
 				else
 					iSmoothingGroup = 0;
 			}
 			else if (0 == strcmp(strCommand, "mtllib"))
 			{
 				// Material library
-				InFile >> strMaterialFilename;
+				fscanf_s(pInFile, "%s", strMaterialFilename, MAX_PATH);
 			}
 			else if (0 == strcmp(strCommand, "usemtl"))
 			{
 				// Material
 				char strName[MAX_PATH] = { 0 };
-				InFile >> strName;
+				fscanf_s(pInFile, "%s", strName, MAX_PATH);
 
 				ObjMaterial currMtl = ObjMaterial(strName);
 				auto itMtl = find(mMaterials.begin(), mMaterials.end(), currMtl);
@@ -226,13 +246,11 @@ namespace EDX
 			}
 			else
 			{
-				// Unimplemented.
+				while (!feof(pInFile) && fgetc(pInFile) != '\n');
 			}
-
-			InFile.ignore(1000, '\n');
 		}
 
-		InFile.close();
+		fclose(pInFile);
 
 		// Correct subsets index
 		if (mNumSubsets == 0)
@@ -248,7 +266,8 @@ namespace EDX
 		mTriangleCount = mIndices.size() / 3;
 
 		// Recompute per-vertex normals
-		ComputeVertexNormals();
+		if (iSmoothingGroup != 0 || !mNormaled)
+			ComputeVertexNormals();
 
 		// Delete cache
 		for (uint i = 0; i < mCache.size(); i++)
@@ -272,6 +291,9 @@ namespace EDX
 
 			LoadMaterialsFromMtl(strMtlPath);
 		}
+
+		if (mMaterials.empty())
+			mMaterials.push_back(ObjMaterial(""));
 
 		return true;
 	}
@@ -333,15 +355,14 @@ namespace EDX
 	void ObjMesh::LoadMaterialsFromMtl(const char* strPath)
 	{
 		char strCommand[MAX_PATH] = { 0 };
-		std::ifstream InFile(strPath);
-		assert(InFile);
+		FILE* pInFile = 0;
+		fopen_s(&pInFile, strPath, "rt");
+		assert(pInFile);
 
 		auto itCurrMaterial = mMaterials.end();
-		while (true)
+		while (!feof(pInFile))
 		{
-			InFile >> strCommand;
-			if (!InFile)
-				break;
+			fscanf_s(pInFile, "%s", strCommand, MAX_PATH);
 
 			if (0 == strcmp(strCommand, "#"))
 			{
@@ -351,7 +372,7 @@ namespace EDX
 			{
 				// Switching active materials
 				char strName[MAX_PATH] = { 0 };
-				InFile >> strName;
+				fscanf_s(pInFile, "%s", strName, MAX_PATH);
 
 				ObjMaterial tmpMtl = ObjMaterial(strName);
 
@@ -365,13 +386,13 @@ namespace EDX
 			{
 				// Diffuse color
 				float r, g, b;
-				InFile >> r >> g >> b;
+				fscanf_s(pInFile, "%f %f %f", &r, &g, &b);
 				itCurrMaterial->color = Color(r, g, b);
 			}
 			else if (0 == strcmp(strCommand, "d") || 0 == strcmp(strCommand, "Tr"))
 			{
 				// Alpha
-				InFile >> itCurrMaterial->color.a;
+				fscanf_s(pInFile, "%f", &itCurrMaterial->color.a);
 			}
 			else if (0 == strcmp(strCommand, "map_Kd"))
 			{
@@ -379,24 +400,24 @@ namespace EDX
 				{
 					// Texture
 					char strTexName[MAX_PATH] = { 0 };
-					InFile >> strTexName; // TODO: Fix it to read the entire line to include space in the path
+					fgets(strTexName, MAX_PATH, pInFile);
+
+					if (strTexName[strlen(strTexName) - 1] == '\n')
+						strTexName[strlen(strTexName) - 1] = '\0';
 
 					int idx = strrchr(strPath, '/') - strPath + 1;
 					char strMtlPath[MAX_PATH] = { 0 };
 					strncpy_s(itCurrMaterial->strTexturePath, MAX_PATH, strPath, idx);
-					strcat_s(itCurrMaterial->strTexturePath, MAX_PATH, strTexName);
+					strcat_s(itCurrMaterial->strTexturePath, MAX_PATH, strTexName + 1);
 				}
 			}
-
 			else
 			{
-				// Unimplemented or unrecognized command
+				while (!feof(pInFile) && fgetc(pInFile) != '\n');
 			}
-
-			InFile.ignore(1000, '\n');
 		}
 
-		InFile.close();
+		fclose(pInFile);
 		return;
 	}
 
@@ -475,7 +496,7 @@ namespace EDX
 		}
 
 		mVertexCount = mVertices.size();
-		mbNormaled = true;
+		mNormaled = true;
 	}
 
 	void ObjMesh::LoadPlane(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float length)
@@ -508,7 +529,7 @@ namespace EDX
 		mTriangleCount = mIndices.size() / 3;
 		mVertexCount = mVertices.size();
 		mMaterialIdx.assign(mTriangleCount, 0);
-		mbNormaled = mbTextured = true;
+		mNormaled = mTextured = true;
 	}
 
 	void ObjMesh::LoadSphere(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float fRadius, const int slices, const int stacks)
@@ -554,7 +575,7 @@ namespace EDX
 		mTriangleCount = mIndices.size() / 3;
 		mVertexCount = mVertices.size();
 		mMaterialIdx.assign(mTriangleCount, 0);
-		mbNormaled = mbTextured = true;
+		mNormaled = mTextured = true;
 	}
 
 	void ObjMesh::Release()

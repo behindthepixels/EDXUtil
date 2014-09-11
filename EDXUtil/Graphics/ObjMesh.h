@@ -73,15 +73,15 @@ namespace EDX
 		vector<uint> mSubsetMtlIdx;
 		uint mNumSubsets;
 
-		bool mbNormaled;
-		bool mbTextured;
+		bool mNormaled;
+		bool mTextured;
 
 	public:
 		ObjMesh()
 			: mVertexCount(0)
 			, mTriangleCount(0)
-			, mbNormaled(false)
-			, mbTextured(false)
+			, mNormaled(false)
+			, mTextured(false)
 		{
 		}
 
@@ -109,8 +109,8 @@ namespace EDX
 		inline const MeshVertex& GetVertexAt(int iIndex) const { return mVertices[iIndex]; }
 		inline uint GetVertexCount() const { return mVertexCount; }
 		inline uint GetTriangleCount() const { return mTriangleCount; }
-		inline bool IsNormaled() const { return mbNormaled; }
-		inline bool IsTextured() const { return mbTextured; }
+		inline bool IsNormaled() const { return mNormaled; }
+		inline bool IsTextured() const { return mTextured; }
 
 		const vector<ObjMaterial>& GetMaterialInfo() const { return mMaterials; }
 		inline const vector<uint>& GetMaterialIdxBuf() const { return mMaterialIdx; }
