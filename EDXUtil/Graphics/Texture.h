@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../EDXPrerequisites.h"
+#include "../Graphics/Color.h"
 #include "../Math/Vector.h"
 #include "../Memory/Memory.h"
 
@@ -30,31 +31,35 @@ namespace EDX
 		}
 	};
 
-	template<class T>
-	class ImageTexture : public Texture<T>
+	template<typename TRet, typename TMem>
+	class ImageTexture : public Texture<TRet>
 	{
 	private:
 		int mTexWidth;
 		int mTexHeight;
 
-		T* mpTexels;
+		TMem* mpTexels;
 
 	public:
 		ImageTexture(const char* strFile);
 		~ImageTexture()
 		{
-			SafeDeleteArray(mpTexels);
+			FreeAligned(mpTexels);
 		}
 
-		T Sample(const Vector2& texCoord) const;
+		TRet Sample(const Vector2& texCoord) const;
 
-		static T GammaCorrect(T tIn, float fGamma = 2.2f)
-		{
-			return Math::Pow(tIn, fGamma);
-		}
-		static T ConvertIn(_byte _In)
-		{
-			return GammaCorrect(_In * 0.00390625f);
-		}
+		//static T GammaCorrect(T tIn, float fGamma = 2.2f)
+		//{
+		//	return Math::Pow(tIn, fGamma);
+		//}
+		//static Color ConvertOut(const Color4b& in)
+		//{
+		//	return in * 0.00390625f;
+		//}
+		//static Color4b ConvertIn(const Color4b& in)
+		//{
+		//	return in;
+		//}
 	};
 }

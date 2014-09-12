@@ -8,6 +8,14 @@ namespace EDX
 	const Color Color::GREEN(0.0f, 1.0f, 0.0f);
 	const Color Color::BLUE(0.0f, 0.0f, 1.0f);
 
+	Color::Color(const Color4b& c)
+		: r(c.r * 0.00390625f)
+		, g(c.g * 0.00390625f)
+		, b(c.b * 0.00390625f)
+		, a(c.a * 0.00390625f)
+	{
+	}
+
 	namespace Math
 	{
 		Color Pow(const Color& color, float pow)

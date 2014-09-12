@@ -16,6 +16,7 @@ namespace EDX
 			: r(fR), g(fG), b(fB), a(fA) {}
 		Color(float val)
 			: r(val), g(val), b(val), a(1.0f) {}
+		Color(const class Color4b& c);
 
 		explicit Color(const Vector3& vVec)
 			: r(vVec.x), g(vVec.y), b(vVec.z), a(1.0f) {}
@@ -104,4 +105,25 @@ namespace EDX
 	{
 		Color Pow(const Color& color, float fP);
 	}
+
+	class Color4b
+	{
+	public:
+		_byte r, g, b, a;
+
+	public:
+		Color4b()
+			: r(0), g(0), b(0), a(255) {}
+		Color4b(_byte R, _byte G, _byte B, _byte A = 255)
+			: r(R), g(G), b(B), a(A) {}
+		Color4b(_byte val)
+			: r(val), g(val), b(val), a(255) {}
+		Color4b(const Color& c)
+		{
+			r = Math::Clamp(Math::RoundToInt(255 * c.r), 0, 255);
+			g = Math::Clamp(Math::RoundToInt(255 * c.g), 0, 255);
+			b = Math::Clamp(Math::RoundToInt(255 * c.b), 0, 255);
+			a = Math::Clamp(Math::RoundToInt(255 * c.a), 0, 255);
+		}
+	};
 }
