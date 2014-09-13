@@ -21,7 +21,6 @@ namespace EDX
 		}
 		inline float Saturate(float val) { return Clamp(val, 0.0f, 1.0f); }
 		inline float Pow(float val, float fPow) { return powf(val, fPow); }
-		//inline float Abs(float val) { return fabsf(val); }
 		template <class T> inline T Abs(T tVal) { return tVal >= 0 ? tVal : -tVal; }
 		inline float Sqrt(float val) { return sqrtf(val); }
 		inline float ToRadians(float fDeg) { return (fDeg / 180.0f) * float(Math::EDX_PI); }
@@ -92,6 +91,16 @@ namespace EDX
 		{
 			uint iRet = val + round - (val % round);
 			return iRet;
+		}
+		inline int CeilLog2(int val)
+		{
+			int ret = 0;
+			while (val)
+			{
+				val >>= 1;
+				ret++;
+			}
+			return ret;
 		}
 
 		template<uint Dim> class Pow2

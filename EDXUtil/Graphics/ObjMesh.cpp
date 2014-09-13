@@ -48,7 +48,7 @@ namespace EDX
 				float u, v;
 				fscanf_s(pInFile, "%f %f", &u, &v);
 				texCoordBuf.push_back(u);
-				texCoordBuf.push_back(v);
+				texCoordBuf.push_back(1.0f - v);
 				mTextured = true;
 			}
 			else if (0 == strcmp(strCommand, "vn"))

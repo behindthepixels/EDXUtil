@@ -63,7 +63,7 @@ namespace EDX
 			assert(mArraySize == oldSize);
 		}
 
-		inline void Clear()
+		__forceinline void Clear()
 		{
 			SafeClear(mpData, mArraySize);
 		}
@@ -90,7 +90,7 @@ namespace EDX
 			return *this;
 		}
 
-		inline size_t LinearIndex(const Vec<Dimension, uint>& idx) const
+		__forceinline size_t LinearIndex(const Vec<Dimension, uint>& idx) const
 		{
 			size_t ret = 0;
 			for (auto i = 0; i < Dimension; i++)
@@ -100,7 +100,7 @@ namespace EDX
 			assert(ret < mArraySize);
 			return ret;
 		}
-		inline Vec<Dimension, uint> Index(size_t linearIdx) const
+		__forceinline Vec<Dimension, uint> Index(size_t linearIdx) const
 		{
 			assert(linearIdx < mArraySize);
 			Vec<Dimension, uint> vRet;
@@ -111,31 +111,31 @@ namespace EDX
 			}
 			return vRet;
 		}
-		inline size_t LinearSize() const
+		__forceinline size_t LinearSize() const
 		{
 			return mArraySize;
 		}
-		inline size_t Size(uint iDim) const
+		__forceinline size_t Size(uint iDim) const
 		{
 			assert(iDim < Dimension);
 			return mDim[iDim];
 		}
-		inline Vec<Dimension, uint> Size() const
+		__forceinline Vec<Dimension, uint> Size() const
 		{
 			return mDim;
 		}
-		inline size_t Stride(uint iDim) const
+		__forceinline size_t Stride(uint iDim) const
 		{
 			assert(iDim < Dimension);
 			return mStrides[iDim];
 		}
 
-		inline T& operator [] (const Vec<Dimension, uint>& idx) { return mpData[LinearIndex(idx)]; }
-		inline const T operator [] (const Vec<Dimension, uint>& idx) const { return mpData[LinearIndex(idx)]; }
-		inline T& operator [] (const size_t idx) { assert(idx < mArraySize); return mpData[idx]; }
-		inline const T operator [] (const size_t idx) const { assert(idx < mArraySize); return mpData[idx]; }
-		inline const T* Data() const { return mpData; }
-		inline T* ModifiableData() { return mpData; }
+		__forceinline T& operator [] (const Vec<Dimension, uint>& idx) { return mpData[LinearIndex(idx)]; }
+		__forceinline const T operator [] (const Vec<Dimension, uint>& idx) const { return mpData[LinearIndex(idx)]; }
+		__forceinline T& operator [] (const size_t idx) { assert(idx < mArraySize); return mpData[idx]; }
+		__forceinline const T operator [] (const size_t idx) const { assert(idx < mArraySize); return mpData[idx]; }
+		__forceinline const T* Data() const { return mpData; }
+		__forceinline T* ModifiableData() { return mpData; }
 
 		void Free()
 		{

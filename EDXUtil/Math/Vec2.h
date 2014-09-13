@@ -67,6 +67,8 @@ namespace EDX
 		__forceinline Vec operator * (const T& rhs) const { return Vec(x * rhs, y * rhs); }
 		__forceinline Vec operator / (const Vec& rhs) const { return Vec(x / rhs.x, y / rhs.y); }
 		__forceinline Vec operator / (const T& rhs) const { return Vec(x / rhs, y / rhs); }
+		__forceinline Vec operator << (const int shift) const { return Vec(x << shift, y << shift); }
+		__forceinline Vec operator >> (const int shift) const { return Vec(x >> shift, y >> shift); }
 
 		//----------------------------------------------------------------------------------------------
 		// Assignment Operators
@@ -77,6 +79,8 @@ namespace EDX
 		__forceinline const Vec& operator /= (const T& rhs) { x /= rhs; y /= rhs; return *this; }
 		__forceinline const Vec& operator *= (const Vec& rhs) { x *= rhs.x; y *= rhs.y; return *this; }
 		__forceinline const Vec& operator /= (const Vec& rhs) { x /= rhs.x; y /= rhs.y; return *this; }
+		__forceinline const Vec& operator <<= (const int shift) { x <<= shift; y <<= shift; return *this; }
+		__forceinline const Vec& operator >>= (const int shift) { x >>= shift; y >>= shift; return *this; }
 
 		//----------------------------------------------------------------------------------------------
 		// Comparison Operators
@@ -121,20 +125,20 @@ namespace EDX
 	namespace Math
 	{
 		template<class T>
-		__forceinline T Dot(const Vec<2, T>& vVec1, const Vec<2, T>& vVec2)
+		__forceinline T Dot(const Vec<2, T>& vec1, const Vec<2, T>& vec2)
 		{
-			return vVec1.x * vVec2.x + vVec1.y * vVec2.y;
+			return vec1.x * vec2.x + vec1.y * vec2.y;
 		}
 		template<class T>
-		__forceinline T AbsDot(const Vec<2, T>& vVec1, const Vec<2, T>& vVec2)
+		__forceinline T AbsDot(const Vec<2, T>& vec1, const Vec<2, T>& vec2)
 		{
-			T ret = Dot(vVec1, vVec2);
+			T ret = Dot(vec1, vec2);
 			return ret >= 0 ? ret : -ret;
 		}
 		template<class T>
-		__forceinline T Cross(const Vec<2, T>& vVec1, const Vec<2, T>& vVec2)
+		__forceinline T Cross(const Vec<2, T>& vec1, const Vec<2, T>& vec2)
 		{
-			return vVec1.x * vVec2.y - vVec1.y * vVec2.x;
+			return vec1.x * vec2.y - vec1.y * vec2.x;
 		}
 		template<class T>
 		__forceinline T Curl(const Vec<2, T>& vDvdx, const Vec<2, T>& vDvdy)
@@ -142,13 +146,14 @@ namespace EDX
 			return vDvdx.y - vDvdy.x;
 		}
 		template<class T>
-		__forceinline T LengthSquared(const Vec<2, T>& vVec)
+		__forceinline T LengthSquared(const Vec<2, T>& vec)
 		{
-			return Dot(vVec, vVec);
+			return Dot(vec, vec);
 		}
-		__forceinline float Length(const Vector2& vVec)
+		template<class T>
+		__forceinline float Length(const Vec<2, T>& vec)
 		{
-			return Math::Sqrt(LengthSquared(vVec));
+			return Math::Sqrt(LengthSquared(vec));
 		}
 		__forceinline Vector2 Normalize(const Vector2& v)
 		{
@@ -161,6 +166,16 @@ namespace EDX
 		__forceinline float DistanceSquared(const Vector2& p1, const Vector2& p2)
 		{
 			return LengthSquared(p1 - p2);
+		}
+		template<class T>
+		__forceinline T Min(const Vec<2, T>& v)
+		{
+			return Math::Min(v.x, v.y);
+		}
+		template<class T>
+		__forceinline T Max(const Vec<2, T>& v)
+		{
+			return Math::Max(v.x, v.y);
 		}
 	}
 }

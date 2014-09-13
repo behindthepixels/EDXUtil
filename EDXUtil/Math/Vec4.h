@@ -82,6 +82,8 @@ namespace EDX
 		__forceinline Vec operator * (const T& rhs) const { return Vec(x * rhs, y * rhs, z * rhs, w * rhs); }
 		__forceinline Vec operator / (const Vec& rhs) const { return Vec(x / rhs.x, y / rhs.y, z / rhs.z, w / rhs.w); }
 		__forceinline Vec operator / (const T& rhs) const { return Vec(x / rhs, y / rhs, z / rhs, w / rhs); }
+		__forceinline Vec operator << (const int shift) const { return Vec(x << shift, y << shift, z << shift, w << shift); }
+		__forceinline Vec operator >> (const int shift) const { return Vec(x >> shift, y >> shift, z >> shift, w >> shift); }
 
 		//----------------------------------------------------------------------------------------------
 		// Assignment Operators
@@ -92,6 +94,8 @@ namespace EDX
 		__forceinline const Vec& operator /= (const T& rhs) { x /= rhs; y /= rhs; z /= rhs; w /= rhs; return *this; }
 		__forceinline const Vec& operator *= (const Vec& rhs) { x *= rhs.x; y *= rhs.y; z *= rhs.z; w *= rhs.w; return *this; }
 		__forceinline const Vec& operator /= (const Vec& rhs) { x /= rhs.x; y /= rhs.y; z /= rhs.z; w /= rhs.w; return *this; }
+		__forceinline const Vec& operator <<= (const int shift) { x <<= shift; y <<= shift; z <<= shift; w <<= shift; return *this; }
+		__forceinline const Vec& operator >>= (const int shift) { x >>= shift; y >>= shift; z >>= shift; w >>= shift; return *this; }
 
 		//----------------------------------------------------------------------------------------------
 		// Comparison Operators
@@ -138,4 +142,18 @@ namespace EDX
 	typedef Vec<4, float>	Vector4;
 	typedef Vec<4, int>		Vector4i;
 	typedef Vec<4, bool>	Vector4b;
+
+	namespace Math
+	{
+		template<class T>
+		__forceinline T Min(const Vec<4, T>& v)
+		{
+			return Math::Min(Math::Min(Math::Min(v.x, v.y), v.z), v.w);
+		}
+		template<class T>
+		__forceinline T Max(const Vec<4, T>& v)
+		{
+			return Math::Max(Math::Max(Math::Max(v.x, v.y), v.z), v.w);
+		}
+	}
 }

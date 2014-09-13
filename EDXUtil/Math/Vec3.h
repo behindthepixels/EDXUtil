@@ -70,6 +70,8 @@ namespace EDX
 		__forceinline Vec operator * (const T& rhs) const { return Vec(x * rhs, y * rhs, z * rhs); }
 		__forceinline Vec operator / (const Vec& rhs) const { return Vec(x / rhs.x, y / rhs.y, z / rhs.z); }
 		__forceinline Vec operator / (const T& rhs) const { return Vec(x / rhs, y / rhs, z / rhs); }
+		__forceinline Vec operator << (const int shift) const { return Vec(x << shift, y << shift, z << shift); }
+		__forceinline Vec operator >> (const int shift) const { return Vec(x >> shift, y >> shift, z >> shift); }
 
 		//----------------------------------------------------------------------------------------------
 		// Assignment Operators
@@ -80,6 +82,8 @@ namespace EDX
 		__forceinline const Vec& operator /= (const T& rhs) { x /= rhs; y /= rhs; z /= rhs; return *this; }
 		__forceinline const Vec& operator *= (const Vec& rhs) { x *= rhs.x; y *= rhs.y; z *= rhs.z; return *this; }
 		__forceinline const Vec& operator /= (const Vec& rhs) { x /= rhs.x; y /= rhs.y; z /= rhs.z; return *this; }
+		__forceinline const Vec& operator <<= (const int shift) { x <<= shift; y <<= shift; z <<= shift; return *this; }
+		__forceinline const Vec& operator >>= (const int shift) { x >>= shift; y >>= shift; z >>= shift; return *this; }
 
 		//----------------------------------------------------------------------------------------------
 		// Comparison Operators
@@ -127,21 +131,21 @@ namespace EDX
 	namespace Math
 	{
 		template<class T>
-		__forceinline T Dot(const Vec<3, T>& vVec1, const Vec<3, T>& vVec2)
+		__forceinline T Dot(const Vec<3, T>& vec1, const Vec<3, T>& vec2)
 		{
-			return vVec1.x * vVec2.x + vVec1.y * vVec2.y + vVec1.z * vVec2.z;
+			return vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z;
 		}
 		template<class T>
-		__forceinline T AbsDot(const Vec<3, T>& vVec1, const Vec<3, T>& vVec2)
+		__forceinline T AbsDot(const Vec<3, T>& vec1, const Vec<3, T>& vec2)
 		{
-			T ret = Dot(vVec1, vVec2); return ret >= 0 ? ret : -ret;
+			T ret = Dot(vec1, vec2); return ret >= 0 ? ret : -ret;
 		}
 		template<class T>
-		__forceinline Vec<3, T> Cross(const Vec<3, T>& vVec1, const Vec<3, T>& vVec2)
+		__forceinline Vec<3, T> Cross(const Vec<3, T>& vec1, const Vec<3, T>& vec2)
 		{
-			return Vec<3, T>(vVec1.y * vVec2.z - vVec1.z * vVec2.y,
-				vVec1.z * vVec2.x - vVec1.x * vVec2.z,
-				vVec1.x * vVec2.y - vVec1.y * vVec2.x);
+			return Vec<3, T>(vec1.y * vec2.z - vec1.z * vec2.y,
+				vec1.z * vec2.x - vec1.x * vec2.z,
+				vec1.x * vec2.y - vec1.y * vec2.x);
 		}
 		template<class T>
 		__forceinline Vec<3, T> Curl(const Vec<3, T>& vDvdx, const Vec<3, T>& vDvdy, const Vec<3, T>& vDvdz)
@@ -149,13 +153,24 @@ namespace EDX
 			return Vec<3, T>(vDvdy.z - vDvdz.y, vDvdz.x - vDvdx.z, vDvdx.y - vDvdy.x);
 		}
 		template<class T>
-		__forceinline T LengthSquared(const Vec<3, T>& vVec)
+		__forceinline T LengthSquared(const Vec<3, T>& vec)
 		{
-			return Dot(vVec, vVec);
+			return Dot(vec, vec);
 		}
-		__forceinline float Length(const Vector3& vVec)
+		template<class T>
+		__forceinline T Min(const Vec<3, T>& v)
 		{
-			return Math::Sqrt(LengthSquared(vVec));
+			return Math::Min(Math::Min(v.x, v.y), v.z);
+		}
+		template<class T>
+		__forceinline T Max(const Vec<3, T>& v)
+		{
+			return Math::Max(Math::Max(v.x, v.y), v.z);
+		}
+		template<class T>
+		__forceinline float Length(const Vec<3, T>& vec)
+		{
+			return Math::Sqrt(LengthSquared(vec));
 		}
 		__forceinline Vector3 Normalize(const Vector3& v)
 		{
@@ -199,13 +214,13 @@ namespace EDX
 			return fSinTheta * Math::Cos(fPhi) * vX +
 				fCosTheta * vY + fSinTheta * Math::Sin(fPhi) * vZ;
 		}
-		__forceinline float SphericalTheta(const Vector3& vVec)
+		__forceinline float SphericalTheta(const Vector3& vec)
 		{
-			return Math::Sin(Math::Clamp(vVec.y, -1.0f, 1.0f));
+			return Math::Sin(Math::Clamp(vec.y, -1.0f, 1.0f));
 		}
-		__forceinline float SphericalPhi(const Vector3& vVec)
+		__forceinline float SphericalPhi(const Vector3& vec)
 		{
-			float p = Math::Atan2(vVec.z, vVec.x);
+			float p = Math::Atan2(vec.z, vec.x);
 			return (p < 0.0f) ? p + 2.0f * float(float(Math::EDX_PI)) : p;
 		}
 
@@ -226,19 +241,19 @@ namespace EDX
 			return vRet;
 		}
 
-		__forceinline void CoordinateSystem(const Vector3& vVec1, Vector3* vVec2, Vector3* vVec3)
+		__forceinline void CoordinateSystem(const Vector3& vec1, Vector3* vec2, Vector3* vec3)
 		{
-			if (Math::Abs(vVec1.x) > Math::Abs(vVec1.y))
+			if (Math::Abs(vec1.x) > Math::Abs(vec1.y))
 			{
-				float fInvLen = 1.0f / Math::Sqrt(vVec1.x * vVec1.x + vVec1.z * vVec1.z);
-				*vVec2 = Vector3(-vVec1.z * fInvLen, 0.0f, vVec1.x * fInvLen);
+				float fInvLen = 1.0f / Math::Sqrt(vec1.x * vec1.x + vec1.z * vec1.z);
+				*vec2 = Vector3(-vec1.z * fInvLen, 0.0f, vec1.x * fInvLen);
 			}
 			else
 			{
-				float fInvLen = 1.0f / Math::Sqrt(vVec1.y * vVec1.y + vVec1.z * vVec1.z);
-				*vVec2 = Vector3(0.0f, vVec1.z * fInvLen, -vVec1.y * fInvLen);
+				float fInvLen = 1.0f / Math::Sqrt(vec1.y * vec1.y + vec1.z * vec1.z);
+				*vec2 = Vector3(0.0f, vec1.z * fInvLen, -vec1.y * fInvLen);
 			}
-			*vVec3 = Cross(vVec1, *vVec2);
+			*vec3 = Cross(vec1, *vec2);
 		}
 	}
 }
