@@ -69,6 +69,8 @@ namespace EDX
 		__forceinline Vec operator / (const T& rhs) const { return Vec(x / rhs, y / rhs); }
 		__forceinline Vec operator << (const int shift) const { return Vec(x << shift, y << shift); }
 		__forceinline Vec operator >> (const int shift) const { return Vec(x >> shift, y >> shift); }
+		__forceinline Vec operator & (const int bits) const { return Vec(x & bits, y & bits); }
+		__forceinline Vec operator | (const int bits) const { return Vec(x | bits, y | bits); }
 
 		//----------------------------------------------------------------------------------------------
 		// Assignment Operators
@@ -81,6 +83,8 @@ namespace EDX
 		__forceinline const Vec& operator /= (const Vec& rhs) { x /= rhs.x; y /= rhs.y; return *this; }
 		__forceinline const Vec& operator <<= (const int shift) { x <<= shift; y <<= shift; return *this; }
 		__forceinline const Vec& operator >>= (const int shift) { x >>= shift; y >>= shift; return *this; }
+		__forceinline const Vec& operator &= (const int bits) const { x &= bits, y &= bits; return *this; }
+		__forceinline const Vec& operator |= (const int bits) const { x |= bits, y |= bits; return *this; }
 
 		//----------------------------------------------------------------------------------------------
 		// Comparison Operators

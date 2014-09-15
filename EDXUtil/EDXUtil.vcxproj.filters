@@ -123,6 +123,9 @@
     <ClInclude Include="Windows\Bitmap.h">
       <Filter>Source Files\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="Memory\BlockedArray.h">
+      <Filter>Source Files\Memory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">

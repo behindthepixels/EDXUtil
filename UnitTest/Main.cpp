@@ -1,22 +1,22 @@
 #include "EDXPrerequisites.h"
 
-#include "SIMD/SSE.h"
 
-IntSSE TopLeftEdge(const Vec2i_SSE& v1, const Vec2i_SSE& v2)
-{
-	return ((v2.y > v1.y) | ((v1.y == v2.y) & (v1.x > v2.x)));
-}
+#include "Memory/BlockedArray.h"
+using namespace EDX;
 
 int main()
 {
-	Vec2i_SSE v1 = Vec2i_SSE(IntSSE(1, 2, 3, 4), IntSSE(4, 3, 2, 1));
-	Vec2i_SSE v2 = Vec2i_SSE(IntSSE(4, 3, 2, 1), IntSSE(1, 2, 3, 4));
+	BlockedArray<2, int> a;
+	a.Init(Vector2i(5, 5));
+	int b;
+	int arr[25] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 };
+	a.SetData(arr);
+	for (auto i = 0; i < a.LinearSize(); i++)
+	{
+		auto v = a.Index(i);
+		b = a[v];
 
-	IntSSE ret = TopLeftEdge(v1, v2);
-	IntSSE a;
-	a += ret;
-
-	BoolSSE inside = (IntSSE(0, 1, -1, -1) | IntSSE(0, 0, -1, -1) | IntSSE(-1, 1, -1, -2)) >= IntSSE(Math::EDX_ZERO);
-
+		b = b;
+	}
 	return 0;
 }
