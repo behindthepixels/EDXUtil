@@ -7,12 +7,30 @@
 
 namespace EDX
 {
+	enum class TextureFilter
+	{
+		Nearest = 0,
+		Linear = 1,
+		TriLinear = 2,
+		Anisotropic4x = 4,
+		Anisotropic8x = 8,
+		Anisotropic16x = 16
+	};
+
+	enum class TextureWrapMode
+	{
+		Clamp, Repeat, Mirror
+	};
+
 	template<uint Dim, class T>
 	class Texture
 	{
 	public:
 		virtual ~Texture() {}
-		virtual T Sample(const Vec<Dim, float>& texCoord) const = 0;
+		virtual T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const = 0;
+		virtual void SetFilter(const TextureFilter filter)
+		{
+		}
 	};
 
 	template<class T>
@@ -30,7 +48,7 @@ namespace EDX
 		ConstantTexture(const T& val)
 			: mVal(val) {}
 
-		T Sample(const Vec<Dim, float>& texCoord) const
+		T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const
 		{
 			return mVal;
 		}
@@ -47,6 +65,7 @@ namespace EDX
 	private:
 		Vec<Dim, int> mOffsetTable[Math::Pow2<Dim>::Value];
 		Vec<Dim, int> mTexDims;
+		Vec<Dim, float> mTexInvDims;
 		int mNumLevels;
 
 	public:
@@ -65,7 +84,11 @@ namespace EDX
 
 		void Generate(const Vec<Dim, int>& dims, const T* pRawTex);
 
-		T Sample(const Vec<Dim, float>& texCoord, const int lod) const;
+		T TrilinearSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const;
+		Color AnisotropicSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim], const int maxRate) const;
+
+		T SampleLevel_Linear(const Vec<Dim, float>& texCoord, const int level) const;
+		T Sample_Nearest(const Vec<Dim, float>& texCoord) const;
 	};
 
 	template<class T>
@@ -79,19 +102,20 @@ namespace EDX
 	private:
 		int mTexWidth;
 		int mTexHeight;
-
-		TMem* mpTexels;
-
+		TextureFilter mTexFilter;
 		Mipmap2D<TMem> mTexels;
 
 	public:
 		ImageTexture(const char* strFile);
 		~ImageTexture()
 		{
-			FreeAligned(mpTexels);
 		}
 
-		TRet Sample(const Vector2& texCoord) const;
+		TRet Sample(const Vector2& texCoord, const Vector2 differentials[2]) const;
+		void SetFilter(const TextureFilter filter)
+		{
+			mTexFilter = filter;
+		}
 
 		//static T GammaCorrect(T tIn, float fGamma = 2.2f)
 		//{

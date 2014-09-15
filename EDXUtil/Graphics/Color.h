@@ -125,5 +125,28 @@ namespace EDX
 			b = Math::Clamp(Math::RoundToInt(255 * c.b), 0, 255);
 			a = Math::Clamp(Math::RoundToInt(255 * c.a), 0, 255);
 		}
+
+	public:
+		Color4b operator * (float val) const
+		{
+			return Color4b(val * r, val * g, val * b);
+		}
+
+		Color4b operator + (const Color4b& color) const
+		{
+			return Color4b(r + color.r, g + color.g, b + color.b);
+		}
+
+		Color4b& operator += (const Color4b& color)
+		{
+			r += color.r; g += color.g; b += color.b; a = 1.0f;
+			return *this;
+		}
+
+		Color4b operator / (float val) const
+		{
+			float fInv = 1.0f / val;
+			return Color4b(r * fInv, g * fInv, b * fInv);
+		}
 	};
 }
