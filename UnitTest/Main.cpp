@@ -7,16 +7,20 @@ using namespace EDX;
 int main()
 {
 	BlockedArray<2, int> a;
-	a.Init(Vector2i(5, 5));
+	Array<2, int> aa;
+	a.Init(Vector2i(129, 516));
+	aa.Init(Vector2i(129, 516));
 	int b;
-	int arr[25] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 };
+	int arr[129 * 516];
+	for (auto i = 0; i < 129 * 516; i++)
+		arr[i] = rand();
+	memcpy(aa.ModifiableData(), arr, 129 * 516 * 4);
 	a.SetData(arr);
+
 	for (auto i = 0; i < a.LinearSize(); i++)
 	{
-		auto v = a.Index(i);
-		b = a[v];
-
-		b = b;
+		auto v = aa.Index(i);
+		assert(a[v] == aa[v]);
 	}
 	return 0;
 }

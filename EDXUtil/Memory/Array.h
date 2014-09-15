@@ -27,8 +27,8 @@ namespace EDX
 
 		__forceinline size_t LinearIndex(const Vec<Dimension, uint>& idx) const
 		{
-			size_t ret = 0;
-			for (auto i = 0; i < Dimension; i++)
+			size_t ret = idx[0];
+			for (auto i = 1; i < Dimension; i++)
 			{
 				ret += idx[i] * mStrides[i];
 			}
@@ -96,8 +96,6 @@ namespace EDX
 	{
 	protected:
 		ArrayIndex<Dimension> mIndex;
-
-	public:
 		T* mpData;
 
 	public:
@@ -122,6 +120,11 @@ namespace EDX
 				Clear();
 		}
 
+		void SetData(const T* pData)
+		{
+			memcpy(mpData, pData, LinearSize() * sizeof(T));
+		}
+
 		void SetDim(const Vec<Dimension, uint>& size)
 		{
 			mIndex.SetDim(size);
@@ -134,20 +137,20 @@ namespace EDX
 
 		Array& operator = (const Array& rhs)
 		{
-			if (mDim != rhs.Size())
+			if (Size() != rhs.Size())
 			{
 				Free();
-				mIndex.Init(rhs.Size());
+				Init(rhs.Size());
 			}
 			memcpy(mpData, rhs.mpData, mArraySize * sizeof(T));
 			return *this;
 		}
 		Array& operator = (Array&& rhs)
 		{
-			if (mDim != rhs.Size())
+			if (Size() != rhs.Size())
 			{
 				Free();
-				mIndex.Init(rhs.Size());
+				Init(rhs.Size());
 			}
 			mpData = rhs.mpData;
 			rhs.mpData = NULL;

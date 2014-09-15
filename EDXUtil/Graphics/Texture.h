@@ -3,7 +3,7 @@
 #include "../EDXPrerequisites.h"
 #include "../Graphics/Color.h"
 #include "../Math/Vector.h"
-#include "../Memory/Array.h"
+#include "../Memory/BlockedArray.h"
 
 namespace EDX
 {
@@ -59,17 +59,16 @@ namespace EDX
 	template<class T>
 	using ConstantTexture3D = ConstantTexture < 3, T >;
 
-	template<uint Dim, typename T>
+	template<uint Dim, typename T, typename Container = Array<Dim, T>>
 	class Mipmap
 	{
 	private:
 		Vec<Dim, int> mOffsetTable[Math::Pow2<Dim>::Value];
 		Vec<Dim, int> mTexDims;
-		Vec<Dim, float> mTexInvDims;
 		int mNumLevels;
 
 	public:
-		Array<Dim, T>* mpLeveledTexels;
+		Container* mpLeveledTexels;
 		Mipmap()
 		{
 			for (uint i = 0; i < Math::Pow2<Dim>::Value; i++)
@@ -85,10 +84,13 @@ namespace EDX
 		void Generate(const Vec<Dim, int>& dims, const T* pRawTex);
 
 		T TrilinearSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const;
-		Color AnisotropicSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim], const int maxRate) const;
-
 		T SampleLevel_Linear(const Vec<Dim, float>& texCoord, const int level) const;
 		T Sample_Nearest(const Vec<Dim, float>& texCoord) const;
+
+		const int GetNumLevels() const
+		{
+			return mNumLevels;
+		}
 	};
 
 	template<class T>
@@ -102,6 +104,7 @@ namespace EDX
 	private:
 		int mTexWidth;
 		int mTexHeight;
+		float mTexInvWidth, mTexInvHeight;
 		TextureFilter mTexFilter;
 		Mipmap2D<TMem> mTexels;
 
@@ -112,6 +115,8 @@ namespace EDX
 		}
 
 		TRet Sample(const Vector2& texCoord, const Vector2 differentials[2]) const;
+		TRet AnisotropicSample(const Vector2& texCoord, const Vector2 differentials[2], const int maxRate) const;
+
 		void SetFilter(const TextureFilter filter)
 		{
 			mTexFilter = filter;

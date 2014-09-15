@@ -5,18 +5,15 @@
 
 namespace EDX
 {
-	template<uint Dim, typename T>
-	void Mipmap<Dim, T>::Generate(const Vec<Dim, int>& dims, const T* pRawTex)
+	template<uint Dim, typename T, typename Container>
+	void Mipmap<Dim, T, Container>::Generate(const Vec<Dim, int>& dims, const T* pRawTex)
 	{
 		mTexDims = dims;
 		mNumLevels = Math::CeilLog2(Math::Max(mTexDims));
 
-		for (auto d = 0; d < Dim; d++)
-			mTexInvDims[d] = 1.0f / float(mTexDims[d]);
-
-		mpLeveledTexels = new Array<Dim, T>[mNumLevels];
+		mpLeveledTexels = new Container[mNumLevels];
 		mpLeveledTexels[0].Init(mTexDims);
-		memcpy(mpLeveledTexels[0].ModifiableData(), pRawTex, mpLeveledTexels[0].LinearSize() * sizeof(T));
+		mpLeveledTexels[0].SetData(pRawTex);
 
 		Vec<Dim, int> levelDims = mTexDims;
 		for (auto l = 1; l < mNumLevels; l++)
@@ -55,7 +52,7 @@ namespace EDX
 					sum += mpLeveledTexels[prevLevel][sampleIndex] / Math::Pow2<Dim>::Value;;
 				}
 
-				mpLeveledTexels[l][i] = sum;
+				mpLeveledTexels[l][idx] = sum;
 			}
 		}
 	}
@@ -74,8 +71,8 @@ namespace EDX
 		return (val + log_2);
 	}
 
-	template<uint Dim, typename T>
-	T Mipmap<Dim, T>::TrilinearSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const
+	template<uint Dim, typename T, typename Container>
+	T Mipmap<Dim, T, Container>::TrilinearSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const
 	{
 		float filterWidth = Math::EDX_NEG_INFINITY;
 		for (auto d = 0; d < Dim; d++)
@@ -94,8 +91,97 @@ namespace EDX
 		return Math::Lerp(SampleLevel_Linear(texCoord, lodBase), SampleLevel_Linear(texCoord, lodBase + 1), lod - lodBase);
 	}
 
-	// Specialization only for 2 dimensional Color4b array
-	Color Mipmap<2, Color4b>::AnisotropicSample(const Vector2& texCoord, const Vector2 differentials[2], const int maxRate) const
+	inline int FastFloor(float x)
+	{
+		int i = (int)x;
+		return i - (i > x);
+	}
+
+	template<uint Dim, typename T, typename Container>
+	T Mipmap<Dim, T, Container>::SampleLevel_Linear(const Vec<Dim, float>& texCoord, const int level) const
+	{
+		const Container& sampledLevel = mpLeveledTexels[level];
+
+		Vec<Dim, float> coord = texCoord * sampledLevel.Size() - Vec<Dim, float>(0.5f);
+
+		Vec<Dim, int> coordBase;
+		for (auto d = 0; d < Dim; d++)
+			coordBase[d] = FastFloor(coord[d]);
+
+		if (coord == coordBase)
+			return sampledLevel[coordBase];
+		
+		Color4b values[Math::Pow2<Dim>::Value];
+		for (uint i = 0; i < Math::Pow2<Dim>::Value; i++)
+		{
+			Vec<Dim, int> sampledCoord = coordBase + mOffsetTable[i];
+			for (auto d = 0; d < Dim; d++)
+				sampledCoord[d] = Math::Min(sampledCoord[d], sampledLevel.Size(d) - 1);
+
+			values[i] = sampledLevel[sampledCoord];
+		}
+
+		return Math::Lerp<Dim>(values, coord - coordBase);
+	}
+
+	template<uint Dim, typename T, typename Container>
+	T Mipmap<Dim, T, Container>::Sample_Nearest(const Vec<Dim, float>& texCoord) const
+	{
+		const Container& sampledLevel = mpLeveledTexels[0];
+		Vec<Dim, int> u = texCoord * sampledLevel.Size() - Vec<Dim, float>(0.5f);
+
+		return sampledLevel[u];
+	}
+
+
+	template<typename TRet, typename TMem>
+	ImageTexture<TRet, TMem>::ImageTexture(const char* strFile)
+		: mTexWidth(0)
+		, mTexHeight(0)
+	{
+		int iChannel;
+		_byte* pRawTex = Bitmap::ReadFromFileByte(strFile, &mTexWidth, &mTexHeight, &iChannel);
+		if (!pRawTex)
+		{
+			throw "Texture file load failed.";
+		}
+
+		mTexels.Generate(Vector2i(mTexWidth, mTexHeight), (TMem*)pRawTex);
+		mTexInvWidth = 1.0f / float(mTexWidth);
+		mTexInvHeight = 1.0f / float(mTexHeight);
+
+		SafeDeleteArray(pRawTex);
+	}
+
+	template<typename TRet, typename TMem>
+	TRet ImageTexture<TRet, TMem>::Sample(const Vector2& texCoord, const Vector2 differentials[2]) const
+	{
+		// TODO: Add more wrap modes
+		Vector2 wrappedTexCoord;
+		wrappedTexCoord.u = texCoord.u - FastFloor(texCoord.u);
+		wrappedTexCoord.v = texCoord.v - FastFloor(texCoord.v);
+
+		switch (mTexFilter)
+		{
+		case TextureFilter::Nearest:
+			return mTexels.Sample_Nearest(wrappedTexCoord);
+		case TextureFilter::Linear:
+			return mTexels.SampleLevel_Linear(wrappedTexCoord, 0);
+		case TextureFilter::TriLinear:
+			return mTexels.TrilinearSample(wrappedTexCoord, differentials);
+		case TextureFilter::Anisotropic4x:
+			return AnisotropicSample(wrappedTexCoord, differentials, 4);
+		case TextureFilter::Anisotropic8x:
+			return AnisotropicSample(wrappedTexCoord, differentials, 8);
+		case TextureFilter::Anisotropic16x:
+			return AnisotropicSample(wrappedTexCoord, differentials, 16);
+		}
+
+		return TRet(0);
+	}
+
+	template<typename TRet, typename TMem>
+	TRet ImageTexture<TRet, TMem>::AnisotropicSample(const Vector2& texCoord, const Vector2 differentials[2], const int maxRate) const
 	{
 		float dudx = differentials[0].u;
 		float dvdx = differentials[0].v;
@@ -111,8 +197,8 @@ namespace EDX
 		float q = A + C;
 		float t = sqrt(p * p + B * B);
 
-		dudx *= mTexDims[0]; dudy *= mTexDims[0];
-		dvdx *= mTexDims[1]; dvdy *= mTexDims[1];
+		dudx *= mTexWidth; dudy *= mTexWidth;
+		dvdx *= mTexHeight; dvdy *= mTexHeight;
 
 		float squaredLengthX = dudx*dudx + dvdx*dvdx;
 		float squaredLengthY = dudy*dudy + dvdy*dvdy;
@@ -149,120 +235,33 @@ namespace EDX
 			lengthMinor = 1.0f;
 		}
 
-		float LOD = log(lengthMinor) * 1.442695f;
+		float LOD = fast_log2(lengthMinor);
 		float invRate = 1.0f / (int)ratioOfAnisotropy;
-		float startU = texCoord.u * mTexDims[0] - lengthMajor * anisoDir.x * 0.5f;
-		float startV = texCoord.v * mTexDims[1] - lengthMajor * anisoDir.y * 0.5f;
+		float startU = texCoord.u * mTexWidth - lengthMajor * anisoDir.x * 0.5f;
+		float startV = texCoord.v * mTexHeight - lengthMajor * anisoDir.y * 0.5f;
 		float stepU = lengthMajor * anisoDir.x * invRate;
 		float stepV = lengthMajor * anisoDir.y * invRate;
 		int lod1, lod2;
-		lod1 = Math::Min(Math::FloorToInt(LOD), mNumLevels - 1);
-		lod2 = Math::Min(Math::CeilToInt(LOD), mNumLevels - 1);
+		lod1 = Math::Min(Math::FloorToInt(LOD), mTexels.GetNumLevels() - 1);
+		lod2 = Math::Min(Math::CeilToInt(LOD), mTexels.GetNumLevels() - 1);
 
-		Color4b ret;
+		TMem ret;
 		Vector2 uv;
 		for (int i = 0; i < (int)ratioOfAnisotropy; i++)
 		{
-			uv.u = (startU + stepU * (i + 0.5f)) * mTexInvDims[0];
-			uv.v = (startV + stepV * (i + 0.5f)) * mTexInvDims[1];
+			uv.u = (startU + stepU * (i + 0.5f)) * mTexInvWidth;
+			uv.v = (startV + stepV * (i + 0.5f)) * mTexInvHeight;
 			if (lod1 == lod2)
 			{
-				ret += SampleLevel_Linear(uv, lod1) * invRate;
+				ret += mTexels.SampleLevel_Linear(uv, lod1) * invRate;
 			}
 			else
 			{
-				ret += Math::Lerp(SampleLevel_Linear(uv, lod1), SampleLevel_Linear(uv, lod2), LOD - lod1) * invRate;
+				ret += Math::Lerp(mTexels.SampleLevel_Linear(uv, lod1), mTexels.SampleLevel_Linear(uv, lod2), LOD - lod1) * invRate;
 			}
 		}
 
 		return ret;
-	}
-
-	inline int FastFloor(float x)
-	{
-		int i = (int)x;
-		return i - (i > x);
-	}
-
-	template<uint Dim, typename T>
-	T Mipmap<Dim, T>::SampleLevel_Linear(const Vec<Dim, float>& texCoord, const int level) const
-	{
-		const Array<Dim, T>& sampledLevel = mpLeveledTexels[level];
-
-		Vec<Dim, float> coord = texCoord * sampledLevel.Size() - Vec<Dim, float>(0.5f);
-
-		Vec<Dim, int> coordBase;
-		for (auto d = 0; d < Dim; d++)
-			coordBase[d] = FastFloor(coord[d]);
-
-		if (coord == coordBase)
-			return sampledLevel[coordBase];
-		
-		Color4b values[Math::Pow2<Dim>::Value];
-		for (uint i = 0; i < Math::Pow2<Dim>::Value; i++)
-		{
-			Vec<Dim, int> sampledCoord = coordBase + mOffsetTable[i];
-			for (auto d = 0; d < Dim; d++)
-				sampledCoord[d] = Math::Min(sampledCoord[d], sampledLevel.Size(d) - 1);
-
-			values[i] = sampledLevel[sampledCoord];
-		}
-
-		return Math::Lerp<Dim>(values, coord - coordBase);
-	}
-
-	template<uint Dim, typename T>
-	T Mipmap<Dim, T>::Sample_Nearest(const Vec<Dim, float>& texCoord) const
-	{
-		const Array<Dim, T>& sampledLevel = mpLeveledTexels[0];
-		Vec<Dim, int> u = texCoord * sampledLevel.Size() - Vec<Dim, float>(0.5f);
-
-		return sampledLevel[u];
-	}
-
-
-	template<typename TRet, typename TMem>
-	ImageTexture<TRet, TMem>::ImageTexture(const char* strFile)
-		: mTexWidth(0)
-		, mTexHeight(0)
-	{
-		int iChannel;
-		_byte* pRawTex = Bitmap::ReadFromFileByte(strFile, &mTexWidth, &mTexHeight, &iChannel);
-		if (!pRawTex)
-		{
-			throw "Texture file load failed.";
-		}
-
-		mTexels.Generate(Vector2i(mTexWidth, mTexHeight), (TMem*)pRawTex);
-
-		SafeDeleteArray(pRawTex);
-	}
-
-	template<typename TRet, typename TMem>
-	TRet ImageTexture<TRet, TMem>::Sample(const Vector2& texCoord, const Vector2 differentials[2]) const
-	{
-		// TODO: Add more wrap modes
-		Vector2 wrappedTexCoord;
-		wrappedTexCoord.u = texCoord.u - FastFloor(texCoord.u);
-		wrappedTexCoord.v = texCoord.v - FastFloor(texCoord.v);
-
-		switch (mTexFilter)
-		{
-		case TextureFilter::Nearest:
-			return mTexels.Sample_Nearest(wrappedTexCoord);
-		case TextureFilter::Linear:
-			return mTexels.SampleLevel_Linear(wrappedTexCoord, 0);
-		case TextureFilter::TriLinear:
-			return mTexels.TrilinearSample(wrappedTexCoord, differentials);
-		case TextureFilter::Anisotropic4x:
-			return mTexels.AnisotropicSample(wrappedTexCoord, differentials, 4);
-		case TextureFilter::Anisotropic8x:
-			return mTexels.AnisotropicSample(wrappedTexCoord, differentials, 8);
-		case TextureFilter::Anisotropic16x:
-			return mTexels.AnisotropicSample(wrappedTexCoord, differentials, 16);
-		}
-
-		return TRet(0);
 	}
 
 	template class ImageTexture<Color, Color4b>;
