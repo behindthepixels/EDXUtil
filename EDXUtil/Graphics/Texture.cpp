@@ -85,10 +85,13 @@ namespace EDX
 			return mpLeveledTexels[mNumLevels - 1][0];
 
 		uint lodBase = Math::FloorToInt(lod);
-		if (lod == lodBase)
+		float lin = lod - lodBase;
+		if (lin < 0.2f)
 			return SampleLevel_Linear(texCoord, lodBase);
+		if (lin > 0.8f)
+			return SampleLevel_Linear(texCoord, lodBase + 1);
 
-		return Math::Lerp(SampleLevel_Linear(texCoord, lodBase), SampleLevel_Linear(texCoord, lodBase + 1), lod - lodBase);
+		return Math::Lerp(SampleLevel_Linear(texCoord, lodBase), SampleLevel_Linear(texCoord, lodBase + 1), lin);
 	}
 
 	inline int FastFloor(float x)
@@ -251,14 +254,13 @@ namespace EDX
 		{
 			uv.u = (startU + stepU * (i + 0.5f)) * mTexInvWidth;
 			uv.v = (startV + stepV * (i + 0.5f)) * mTexInvHeight;
-			if (lod1 == lod2)
-			{
+			float lin = LOD - lod1;
+			if (lin < 0.2f)
 				ret += mTexels.SampleLevel_Linear(uv, lod1) * invRate;
-			}
+			else if (lin > 0.8f)
+				ret += mTexels.SampleLevel_Linear(uv, lod2) * invRate;
 			else
-			{
 				ret += Math::Lerp(mTexels.SampleLevel_Linear(uv, lod1), mTexels.SampleLevel_Linear(uv, lod2), LOD - lod1) * invRate;
-			}
 		}
 
 		return ret;

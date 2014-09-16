@@ -2,6 +2,7 @@
 
 #include "../EDXPrerequisites.h"
 #include "../Math/Vector.h"
+#include "../Math/BoundingBox.h"
 #include "Color.h"
 #include <set>
 
@@ -73,6 +74,8 @@ namespace EDX
 		vector<uint> mSubsetMtlIdx;
 		uint mNumSubsets;
 
+		BoundingBox mBounds;
+
 		bool mNormaled;
 		bool mTextured;
 
@@ -115,6 +118,8 @@ namespace EDX
 		const vector<ObjMaterial>& GetMaterialInfo() const { return mMaterials; }
 		inline const vector<uint>& GetMaterialIdxBuf() const { return mMaterialIdx; }
 		inline uint GetMaterialIdx(int iTri) const { return mMaterialIdx[iTri]; }
+
+		inline const BoundingBox GetBounds() const { return mBounds; }
 
 		void Release();
 	};

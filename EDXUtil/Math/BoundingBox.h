@@ -81,7 +81,7 @@ namespace EDX
 			return vDiag.x * vDiag.y * vDiag.z;
 		}
 
-		inline void BoundingSphere(Vector3* pvCenter, float* pfRadius)
+		inline void BoundingSphere(Vector3* pvCenter, float* pfRadius) const
 		{
 			*pvCenter = 0.5f * (mMin + mMax);
 			*pfRadius = Inside(*pvCenter) ? Math::Distance(*pvCenter, mMax) : 0.0f;

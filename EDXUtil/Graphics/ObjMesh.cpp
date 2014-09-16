@@ -27,6 +27,8 @@ namespace EDX
 		fopen_s(&pInFile, strPath, "rt");
 		assert(pInFile);
 
+		Vector3 minPt = Math::EDX_INFINITY;
+		Vector3 maxPt = Math::EDX_NEG_INFINITY;
 		while (!feof(pInFile))
 		{
 			fscanf_s(pInFile, "%s", strCommand, MAX_PATH);
@@ -41,6 +43,19 @@ namespace EDX
 				float x, y, z;
 				fscanf_s(pInFile, "%f %f %f", &x, &y, &z);
 				positionBuf.push_back(Matrix::TransformPoint(Vector3(x, y, z), mWorld));
+
+				if (x > maxPt.x)
+					maxPt.x = x;
+				if (y > maxPt.y)
+					maxPt.y = y;
+				if (z > maxPt.z)
+					maxPt.z = z;
+				if (x < minPt.x)
+					minPt.x = x;
+				if (y < minPt.y)
+					minPt.y = y;
+				if (z < minPt.z)
+					minPt.z = z;
 			}
 			else if (0 == strcmp(strCommand, "vt"))
 			{
@@ -264,6 +279,9 @@ namespace EDX
 
 		mVertexCount = mVertices.size();
 		mTriangleCount = mIndices.size() / 3;
+
+		// Init bounds
+		mBounds = Matrix::TransformBBox(BoundingBox(minPt, maxPt), mWorld);
 
 		// Recompute per-vertex normals
 		if (iSmoothingGroup != 0 || !mNormaled)
@@ -511,16 +529,27 @@ namespace EDX
 
 		float length_2 = length * 0.5f;
 
-		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(-length_2, 0.0f, length_2), mWorld),
+		Vector3 pt = Matrix::TransformPoint(Vector3(-length_2, 0.0f, length_2), mWorld);
+		mBounds = Math::Union(mBounds, pt);
+		mVertices.push_back(MeshVertex(pt,
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			0.0f, 0.0f));
-		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(-length_2, 0.0f, -length_2), mWorld),
+
+		pt = Matrix::TransformPoint(Vector3(-length_2, 0.0f, -length_2), mWorld);
+		mBounds = Math::Union(mBounds, pt);
+		mVertices.push_back(MeshVertex(pt,
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			0.0f, 1.0f));
-		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(length_2, 0.0f, -length_2), mWorld),
+
+		pt = Matrix::TransformPoint(Vector3(length_2, 0.0f, -length_2), mWorld);
+		mBounds = Math::Union(mBounds, pt);
+		mVertices.push_back(MeshVertex(pt,
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			1.0f, 1.0f));
-		mVertices.push_back(MeshVertex(Matrix::TransformPoint(Vector3(length_2, 0.0f, length_2), mWorld),
+
+		pt = Matrix::TransformPoint(Vector3(length_2, 0.0f, length_2), mWorld);
+		mBounds = Math::Union(mBounds, pt);
+		mVertices.push_back(MeshVertex(pt,
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			1.0f, 0.0f));
 
@@ -535,6 +564,7 @@ namespace EDX
 		mVertexCount = mVertices.size();
 		mMaterialIdx.assign(mTriangleCount, 0);
 		mNormaled = mTextured = true;
+
 	}
 
 	void ObjMesh::LoadSphere(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float fRadius, const int slices, const int stacks)
@@ -552,8 +582,11 @@ namespace EDX
 			for (int j = 0; j <= slices; j++)
 			{
 				Vector3 vDir = Math::SphericalDirection(Math::Sin(fTheta), Math::Cos(fTheta), fPhi);
+
+				Vector3 pt = Matrix::TransformPoint(fRadius * vDir, mWorld);
+				mBounds = Math::Union(mBounds, pt);
 				mVertices.push_back(MeshVertex(
-					Matrix::TransformPoint(fRadius * vDir, mWorld),
+					pt,
 					Matrix::TransformNormal(vDir, mWorldInv),
 					fPhi / float(Math::EDX_TWO_PI), fTheta / float(Math::EDX_PI)));
 
