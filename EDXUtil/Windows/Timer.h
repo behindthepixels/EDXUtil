@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../EDXPrerequisites.h"
-
 #include "Base.h"
 
 namespace EDX
@@ -17,7 +16,7 @@ namespace EDX
 		double mStopTime;
 		bool mbTimerStopped;
 
-		wchar_t mFrameRate[16];
+		char mFrameRate[16];
 		dword mNumFrames;
 		double mLastFPSTime;
 
@@ -36,7 +35,7 @@ namespace EDX
 			mLastElapsedTime = fTime;
 			mbTimerStopped = false;
 
-			mFrameRate[0] = L'\0';
+			mFrameRate[0] = '\0';
 			mNumFrames = 0;
 			mLastFPSTime = fTime;
 		}
@@ -119,7 +118,7 @@ namespace EDX
 			mNumFrames++;
 		}
 
-		wchar_t* GetFrameRate()
+		char* GetFrameRate()
 		{
 			double fTime = GetAbsoluteTime();
 
@@ -129,7 +128,7 @@ namespace EDX
 				double fFPS = mNumFrames / (fTime - mLastFPSTime);
 				mLastFPSTime = fTime;
 				mNumFrames = 0L;
-				swprintf_s(mFrameRate, L"%0.02f fps", (float)fFPS);
+				sprintf_s(mFrameRate, "FPS: %0.02f", (float)fFPS);
 			}
 			return mFrameRate;
 		}

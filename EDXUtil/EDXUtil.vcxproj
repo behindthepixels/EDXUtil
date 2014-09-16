@@ -22,6 +22,7 @@
     <ClInclude Include="EDXPrerequisites.h" />
     <ClInclude Include="Graphics\Camera.h" />
     <ClInclude Include="Graphics\Color.h" />
+    <ClInclude Include="Graphics\EDXGui.h" />
     <ClInclude Include="Graphics\ObjMesh.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Math\BoundingBox.h" />
@@ -54,6 +55,7 @@
   <ItemGroup>
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\Color.cpp" />
+    <ClCompile Include="Graphics\EDXGui.cpp" />
     <ClCompile Include="Graphics\ObjMesh.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Math\Matrix.cpp" />

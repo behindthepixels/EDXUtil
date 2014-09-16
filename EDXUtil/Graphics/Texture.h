@@ -12,9 +12,9 @@ namespace EDX
 		Nearest = 0,
 		Linear = 1,
 		TriLinear = 2,
-		Anisotropic4x = 4,
-		Anisotropic8x = 8,
-		Anisotropic16x = 16
+		Anisotropic4x = 3,
+		Anisotropic8x = 4,
+		Anisotropic16x = 5
 	};
 
 	enum class TextureWrapMode

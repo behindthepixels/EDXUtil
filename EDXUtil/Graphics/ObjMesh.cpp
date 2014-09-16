@@ -285,6 +285,8 @@ namespace EDX
 		if (strMaterialFilename[0])
 		{
 			int idx = strrchr(strPath, '/') - strPath + 1;
+			int idx2 = strrchr(strPath, '\\') - strPath + 1;
+			idx = idx > idx2 ? idx : idx2;
 			char strMtlPath[MAX_PATH] = { 0 };
 			strncpy_s(strMtlPath, MAX_PATH, strPath, idx);
 			strcat_s(strMtlPath, MAX_PATH, strMaterialFilename);
@@ -406,6 +408,9 @@ namespace EDX
 						strTexName[strlen(strTexName) - 1] = '\0';
 
 					int idx = strrchr(strPath, '/') - strPath + 1;
+					int idx2 = strrchr(strPath, '\\') - strPath + 1;
+					idx = idx > idx2 ? idx : idx2;
+
 					char strMtlPath[MAX_PATH] = { 0 };
 					strncpy_s(itCurrMaterial->strTexturePath, MAX_PATH, strPath, idx);
 					strcat_s(itCurrMaterial->strTexturePath, MAX_PATH, strTexName + 1);

@@ -126,6 +126,9 @@
     <ClInclude Include="Memory\BlockedArray.h">
       <Filter>Source Files\Memory</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\EDXGui.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="Windows\stb_image.c">
       <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\EDXGui.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
