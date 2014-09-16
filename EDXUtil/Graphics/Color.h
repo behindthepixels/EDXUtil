@@ -127,26 +127,36 @@ namespace EDX
 		}
 
 	public:
-		Color4b operator * (float val) const
+		__forceinline Color4b operator * (float val) const
 		{
 			return Color4b(val * r, val * g, val * b);
 		}
 
-		Color4b operator + (const Color4b& color) const
+		__forceinline Color4b operator + (const Color4b& color) const
 		{
 			return Color4b(r + color.r, g + color.g, b + color.b);
 		}
 
-		Color4b& operator += (const Color4b& color)
+		__forceinline Color4b& operator += (const Color4b& color)
 		{
 			r += color.r; g += color.g; b += color.b; a = 1.0f;
 			return *this;
 		}
 
-		Color4b operator / (float val) const
+		__forceinline void FromFloats(float R, float G, float B, float A = 1.0f)
+		{
+			r = Math::Clamp(Math::RoundToInt(255 * R), 0, 255);
+			g = Math::Clamp(Math::RoundToInt(255 * G), 0, 255);
+			b = Math::Clamp(Math::RoundToInt(255 * B), 0, 255);
+			a = Math::Clamp(Math::RoundToInt(255 * A), 0, 255);
+		}
+
+		__forceinline Color4b operator / (float val) const
 		{
 			float fInv = 1.0f / val;
 			return Color4b(r * fInv, g * fInv, b * fInv);
 		}
+
+		__forceinline Color4b operator >> (const int shift) const { return Color4b(r >> shift, g >> shift, b >> shift, a); }
 	};
 }

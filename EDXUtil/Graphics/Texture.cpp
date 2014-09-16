@@ -49,7 +49,7 @@ namespace EDX
 					for (auto d = 0; d < Dim; d++)
 						sampleIndex[d] = mOffsetTable[s][d] == 0 ? idx0[d] : idx1[d];
 
-					sum += mpLeveledTexels[prevLevel][sampleIndex] / Math::Pow2<Dim>::Value;;
+					sum += mpLeveledTexels[prevLevel][sampleIndex] / Math::Pow2<Dim>::Value;
 				}
 
 				mpLeveledTexels[l][idx] = sum;
