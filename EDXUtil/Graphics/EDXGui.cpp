@@ -2,9 +2,11 @@
 #include "../Math/EDXMath.h"
 #include "../Memory/Memory.h"
 
+#include "../Windows/Application.h"
+#include "../Windows/Window.h"
+
 #include <gl/GL.h>
 #include <gl/GLU.h>
-#include <gl/glut.h>
 
 namespace EDX
 {
@@ -494,14 +496,30 @@ namespace EDX
 
 		GUIPainter::GUIPainter()
 		{
-			miTextListBase = glGenLists(128);
+			HFONT	font;
+			HFONT	oldfont;
 
-			for (int i = 0; i < 128; i++)
-			{
-				glNewList(miTextListBase + i, GL_COMPILE);
-				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, i);
-				glEndList();
-			}
+			miTextListBase = glGenLists(96);
+			font = CreateFont(16,
+				0,
+				0,
+				0,
+				FW_BOLD,
+				FALSE,
+				FALSE,
+				FALSE,
+				DEFAULT_CHARSET,
+				OUT_TT_PRECIS,
+				CLIP_DEFAULT_PRECIS,
+				ANTIALIASED_QUALITY,
+				FF_DONTCARE | DEFAULT_PITCH,
+				L"Helvetica");
+
+			HDC hDC = GetDC(Application::GetMainWindow()->GetHandle());
+			oldfont = (HFONT)SelectObject(hDC, font);
+			wglUseFontBitmaps(hDC, 0, 128, miTextListBase);
+			SelectObject(hDC, oldfont);
+			DeleteObject(font);
 		}
 
 		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize)
