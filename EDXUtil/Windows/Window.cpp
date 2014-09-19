@@ -156,6 +156,29 @@ namespace EDX
 		return false;
 	}
 
+	bool Window::OpenFileDialog(const char* initDir, const char* ext, char outPath[MAX_PATH]) const
+	{
+		OPENFILENAMEA ofn;
+		ZeroMemory(&ofn, sizeof(ofn));
+
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = GetHandle();
+		ofn.lpstrFile = outPath;
+		ofn.lpstrFile[0] = '\0';
+		ofn.nMaxFile = sizeof(outPath);
+		ofn.lpstrFilter = "";
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFileTitle = NULL;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = initDir;
+		ofn.lpstrDefExt = ext;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		if (GetOpenFileNameA(&ofn) == 0)
+			return false;
+
+		return true;
+	}
+
 	bool GLWindow::Create(const wstring& strTitle,
 		const uint iWidth,
 		const uint iHeight)

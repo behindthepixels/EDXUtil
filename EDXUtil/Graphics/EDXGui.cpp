@@ -45,7 +45,7 @@ namespace EDX
 			DeleteObject(font);
 		}
 
-		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize)
+		void GUIPainter::DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize)
 		{
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			DrawRect(iX0, iY0, iX1, iY1);
@@ -58,7 +58,7 @@ namespace EDX
 			if (iX0 > iX1 || iY0 > iY1 || iBorderSize == -1)
 				return;
 
-			glColor4f(0.4f, 0.5f, 1.0f, 1.0f);
+			glColor4f(0.5f, 0.6f, 1.0f, 1.0f);
 			DrawRect(iX0, iY0, iX1, iY1);
 		}
 
@@ -113,7 +113,7 @@ namespace EDX
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
+			glColor4f(0.1f, 0.1f, 0.1f, 0.3f);
 			GUIPainter::Instance()->DrawRect(0, 0, miParentWidth - miPosX, miParentHeight - miPosY);
 
 			for(int i = 0; i < mvControls.size(); i++)
@@ -288,15 +288,15 @@ namespace EDX
 		{
 			if(mbDown)
 			{
-				GUIPainter::Instance()->DrawRect(mrcBBox.left + 1, mrcBBox.top + 1, mrcBBox.right - 1, mrcBBox.bottom - 1, 2);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left + 1, mrcBBox.top + 1, mrcBBox.right - 1, mrcBBox.bottom - 1, 2);
 			}
 			else if(mbHovered)
 			{
-				GUIPainter::Instance()->DrawRect(mrcBBox.left - 1, mrcBBox.top - 1, mrcBBox.right + 1, mrcBBox.bottom + 1, 2);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left - 1, mrcBBox.top - 1, mrcBBox.right + 1, mrcBBox.bottom + 1, 2);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawRect(mrcBBox.left, mrcBBox.top, mrcBBox.right, mrcBBox.bottom, 2);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left, mrcBBox.top, mrcBBox.right, mrcBBox.bottom, 2);
 			}
 
 			int iMidX = miX + miWidth / 2 - strlen(mstrText) * 7 / 2;
@@ -381,8 +381,8 @@ namespace EDX
 			float fLerp = Math::LinStep(mfVal, mfMin, mfMax);
 			int iButPos = (int)Math::Lerp(miX, miX + miWidth, fLerp);
 
-			GUIPainter::Instance()->DrawRect(miX, iY - 1, miX + miWidth, iY + 1, 1);
-			GUIPainter::Instance()->DrawRect(iButPos - miButtonSize, iY - miButtonSize, iButPos + miButtonSize, iY + miButtonSize, 1);
+			GUIPainter::Instance()->DrawBorderedRect(miX, iY - 1, miX + miWidth, iY + 1, 1);
+			GUIPainter::Instance()->DrawBorderedRect(iButPos - miButtonSize, iY - miButtonSize, iButPos + miButtonSize, iY + miButtonSize, 1);
 		}
 
 		void Slider::UpdateRect()
@@ -483,11 +483,11 @@ namespace EDX
 			int iMidY = miY + miHeight / 2;
 			if(mbChecked)
 			{
-				GUIPainter::Instance()->DrawRect(iMidX - miBoxSize, iMidY - miBoxSize, iMidX + miBoxSize, iMidY + miBoxSize, 3);
+				GUIPainter::Instance()->DrawBorderedRect(iMidX - miBoxSize, iMidY - miBoxSize, iMidX + miBoxSize, iMidY + miBoxSize, 3);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawRect(iMidX - miBoxSize, iMidY - miBoxSize, iMidX + miBoxSize, iMidY + miBoxSize, -1);
+				GUIPainter::Instance()->DrawBorderedRect(iMidX - miBoxSize, iMidY - miBoxSize, iMidX + miBoxSize, iMidY + miBoxSize, -1);
 			}
 
 			GUIPainter::Instance()->DrawString(iMidX + miBoxSize + 2, iMidY + 1, mstrText);
