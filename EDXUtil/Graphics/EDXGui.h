@@ -12,7 +12,7 @@ namespace EDX
 		{
 		private:
 			static GUIPainter* mpInstance;
-			int miTextListBase;
+			int mTextListBase;
 
 		private:
 			GUIPainter();
@@ -51,19 +51,30 @@ namespace EDX
 			vector<RefPtr<EDXControl>> mvControls;
 			EDXControl* mpFocusControl;
 
-			int miPosX, miPosY;
-			int miParentWidth, miParentHeight;
+			int mPosX, mPosY;
+			int mParentWidth, mParentHeight;
+
+			int mWidth, mHeight;
+			const int mPaddingX, mPaddingY, mVerticalDistance;
+			const int mControlWidth, mControlHeight;
 
 			NotifyEvent mCallbackEvent;
 
 		public:
-			EDXDialog() {}
+			EDXDialog()
+				: mPaddingX(30)
+				, mPaddingY(30)
+				, mVerticalDistance(25)
+				, mControlWidth(140)
+				, mControlHeight(21)
+			{
+			}
 			~EDXDialog()
 			{
 				Release();
 			}
 
-			void Init(int iX, int iY, int iParentWidth, int iParentHeight);
+			void Init(int iParentWidth, int iParentHeight);
 			void SetCallback(const NotifyEvent& event) { mCallbackEvent = event; }
 			bool MsgProc(const MouseEventArgs& mouseArgs);
 			void SendEvent(EDXControl* pControl);
@@ -77,17 +88,17 @@ namespace EDX
 			EDXControl* GetControlAtPoint(const POINT& pt) const;
 			EDXControl* GetControlWithID(uint ID) const;
 
-			bool AddButton(uint ID, int iX, int iY, int iWidth, int iHeight, char* pStr);
-			bool AddSlider(uint ID, int iX, int iY, int iWidth, int iHeight, float fMin, float fMax, float fVal);
-			bool AddCheckBox(uint ID, int iX, int iY, int iWidth, int iHeight, bool bChecked, char* pStr);
-			bool AddText(uint ID, int iX, int iY, int iWidth, int iHeight, char* pStr);
+			bool AddButton(uint ID, char* pStr);
+			bool AddSlider(uint ID, float min, float max, float val);
+			bool AddCheckBox(uint ID, bool bChecked, char* pStr);
+			bool AddText(uint ID, char* pStr);
 		};
 
 		class EDXControl : public Object
 		{
 		protected:
-			int miX, miY;
-			int miWidth, miHeight;
+			int mX, mY;
+			int mWidth, mHeight;
 			RECT mrcBBox;
 			bool mbHasFocus;
 
@@ -97,10 +108,10 @@ namespace EDX
 		public:
 			EDXControl(uint iID, int iX, int iY, int iW, int iH, EDXDialog* pDiag)
 				: mID(iID)
-				, miX(iX)
-				, miY(iY)
-				, miWidth(iW)
-				, miHeight(iH)
+				, mX(iX)
+				, mY(iY)
+				, mWidth(iW)
+				, mHeight(iH)
 				, mbHasFocus(false)
 				, mpDialog(pDiag)
 			{}
@@ -111,7 +122,7 @@ namespace EDX
 			virtual float GetValue() const { return 0.0f; }
 			void SetFocus() { mbHasFocus = true; mpDialog->SetFocusControl(this); }
 			void ResetFocus() { mbHasFocus = false; mpDialog->ResetFocusControl(); }
-			virtual void UpdateRect() { SetRect(&mrcBBox, miX, miY, miX + miWidth, miY + miHeight); }
+			virtual void UpdateRect() { SetRect(&mrcBBox, mX, mY, mX + mWidth, mY + mHeight); }
 			virtual bool ContainsPoint(const POINT& pt) const { return PtInRect(&mrcBBox, pt); }
 
 			virtual bool HandleMouse(const MouseEventArgs& mouseArgs) { return false; }
@@ -135,25 +146,25 @@ namespace EDX
 		class Slider : public EDXControl
 		{
 		private:
-			float mfMin;
-			float mfMax;
-			float mfVal;
+			float mMin;
+			float mMax;
+			float mVal;
 
 			bool mbPressed;
-			int miDragX;
-			int miDragOffset;
-			int miButtonX;
+			int mDragX;
+			int mDragOffset;
+			int mButtonX;
 
 
-			int miButtonSize;
+			int mButtonSize;
 			RECT mrcButtonBBox;
 
 		public:
-			Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float fMin, float fMax, float fVal, EDXDialog* pDiag);
+			Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, EDXDialog* pDiag);
 			~Slider() {}
 
 			void Render() const;
-			float GetValue() const { return mfVal; }
+			float GetValue() const { return mVal; }
 			void UpdateRect();
 
 			void SetValue(float fValue);
@@ -169,7 +180,7 @@ namespace EDX
 			bool mbChecked;
 			bool mbPressed;
 
-			int miBoxSize;
+			int mBoxSize;
 
 		public:
 			CheckBox(uint iID, int iX, int iY, int iWidth, int iHeight, bool bChecked, char* pStr, EDXDialog* pDiag);

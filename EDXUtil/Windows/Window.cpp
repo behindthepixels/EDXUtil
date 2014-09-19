@@ -161,11 +161,13 @@ namespace EDX
 		OPENFILENAMEA ofn;
 		ZeroMemory(&ofn, sizeof(ofn));
 
+		char filePath[MAX_PATH];
+
 		ofn.lStructSize = sizeof(ofn);
 		ofn.hwndOwner = GetHandle();
-		ofn.lpstrFile = outPath;
+		ofn.lpstrFile = filePath;
 		ofn.lpstrFile[0] = '\0';
-		ofn.nMaxFile = sizeof(outPath);
+		ofn.nMaxFile = sizeof(filePath);
 		ofn.lpstrFilter = "";
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
@@ -176,6 +178,7 @@ namespace EDX
 		if (GetOpenFileNameA(&ofn) == 0)
 			return false;
 
+		strcpy_s(outPath, MAX_PATH, filePath);
 		return true;
 	}
 
