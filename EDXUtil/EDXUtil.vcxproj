@@ -24,6 +24,7 @@
     <ClInclude Include="Graphics\Color.h" />
     <ClInclude Include="Graphics\EDXGui.h" />
     <ClInclude Include="Graphics\ObjMesh.h" />
+    <ClInclude Include="Graphics\OpenGL.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Math\BoundingBox.h" />
     <ClInclude Include="Math\Constants.h" />

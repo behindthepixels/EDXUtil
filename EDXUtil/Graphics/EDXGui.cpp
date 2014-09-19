@@ -5,13 +5,84 @@
 #include "../Windows/Application.h"
 #include "../Windows/Window.h"
 
-#include <gl/GL.h>
-#include <gl/GLU.h>
+#include "OpenGL.h"
 
 namespace EDX
 {
 	namespace GUI
 	{
+		//----------------------------------------------------------------------------------
+		// GUI Painter implementation
+		//----------------------------------------------------------------------------------
+		GUIPainter* GUIPainter::mpInstance = NULL;
+
+		GUIPainter::GUIPainter()
+		{
+			HFONT	font;
+			HFONT	oldfont;
+
+			miTextListBase = glGenLists(96);
+			font = CreateFont(16,
+				0,
+				0,
+				0,
+				FW_BOLD,
+				FALSE,
+				FALSE,
+				FALSE,
+				DEFAULT_CHARSET,
+				OUT_TT_PRECIS,
+				CLIP_DEFAULT_PRECIS,
+				ANTIALIASED_QUALITY,
+				FF_DONTCARE | DEFAULT_PITCH,
+				L"Helvetica");
+
+			HDC hDC = GetDC(Application::GetMainWindow()->GetHandle());
+			oldfont = (HFONT)SelectObject(hDC, font);
+			wglUseFontBitmaps(hDC, 0, 128, miTextListBase);
+
+			SelectObject(hDC, oldfont);
+			DeleteObject(font);
+		}
+
+		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize)
+		{
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			DrawRect(iX0, iY0, iX1, iY1);
+
+			iX0 += iBorderSize;
+			iX1 -= iBorderSize;
+			iY0 += iBorderSize;
+			iY1 -= iBorderSize;
+
+			if (iX0 > iX1 || iY0 > iY1 || iBorderSize == -1)
+				return;
+
+			glColor4f(0.4f, 0.5f, 1.0f, 1.0f);
+			DrawRect(iX0, iY0, iX1, iY1);
+		}
+
+		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1)
+		{
+			glBegin(GL_QUADS);
+
+			glVertex2i(iX0, iY0);
+			glVertex2i(iX1, iY0);
+			glVertex2i(iX1, iY1);
+			glVertex2i(iX0, iY1);
+
+			glEnd();
+		}
+
+		void GUIPainter::DrawString(int x, int y, const char* strText)
+		{
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			glListBase(miTextListBase);
+
+			glRasterPos2i(x + 1, y + 4);
+			glCallLists((GLsizei)strlen(strText), GL_UNSIGNED_BYTE, strText);
+		}
+
 		//----------------------------------------------------------------------------------
 		// Dialog implementation
 		//----------------------------------------------------------------------------------
@@ -41,7 +112,9 @@ namespace EDX
 			glDisable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glColor4f(1.0f, 1.0f, 1.0f, 0.6f);
+
+			glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
+			GUIPainter::Instance()->DrawRect(0, 0, miParentWidth - miPosX, miParentHeight - miPosY);
 
 			for(int i = 0; i < mvControls.size(); i++)
 			{
@@ -65,10 +138,8 @@ namespace EDX
 
 		void EDXDialog::Release()
 		{
-			for(int i = 0; i < mvControls.size(); i++)
-			{
-				SafeDelete(mvControls[i]);
-			}
+			mvControls.clear();
+			GUIPainter::DeleteInstance();
 		}
 
 		bool EDXDialog::AddButton(uint ID, int iX, int iY, int iWidth, int iHeight, char* pStr)
@@ -135,7 +206,7 @@ namespace EDX
 		{
 			for(int i = 0; i < mvControls.size(); i++)
 			{
-				EDXControl* pControl = mvControls[i];
+				EDXControl* pControl = mvControls[i].Ptr();
 
 				if(pControl->ContainsPoint(pt))
 				{
@@ -149,7 +220,7 @@ namespace EDX
 		{
 			for(int i = 0; i < mvControls.size(); i++)
 			{
-				EDXControl* pControl = mvControls[i];
+				EDXControl* pControl = mvControls[i].Ptr();
 
 				if(pControl->GetID() == ID)
 				{
@@ -161,12 +232,10 @@ namespace EDX
 
 		void EDXDialog::SendEvent(EDXControl* pControl)
 		{
-			if(!mpCallbackEvent)
-			{
+			if (!mCallbackEvent.Attached())
 				return;
-			}
 
-			mpCallbackEvent(pControl->GetID(), pControl);
+			mCallbackEvent.Invoke(pControl, EventArgs());
 		}
 
 
@@ -487,79 +556,6 @@ namespace EDX
 			}
 
 			strcpy_s(mstrText, 256, pStr);
-		}
-
-		//----------------------------------------------------------------------------------
-		// GUI Painter implementation
-		//----------------------------------------------------------------------------------
-		GUIPainter* GUIPainter::mpInstance = NULL;
-
-		GUIPainter::GUIPainter()
-		{
-			HFONT	font;
-			HFONT	oldfont;
-
-			miTextListBase = glGenLists(96);
-			font = CreateFont(16,
-				0,
-				0,
-				0,
-				FW_BOLD,
-				FALSE,
-				FALSE,
-				FALSE,
-				DEFAULT_CHARSET,
-				OUT_TT_PRECIS,
-				CLIP_DEFAULT_PRECIS,
-				ANTIALIASED_QUALITY,
-				FF_DONTCARE | DEFAULT_PITCH,
-				L"Helvetica");
-
-			HDC hDC = GetDC(Application::GetMainWindow()->GetHandle());
-			oldfont = (HFONT)SelectObject(hDC, font);
-			wglUseFontBitmaps(hDC, 0, 128, miTextListBase);
-			SelectObject(hDC, oldfont);
-			DeleteObject(font);
-		}
-
-		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize)
-		{
-			glColor3f(1.0f, 1.0f, 1.0f);
-			glBegin(GL_QUADS);
-
-			glVertex2i(iX0, iY0);
-			glVertex2i(iX1, iY0);
-			glVertex2i(iX1, iY1);
-			glVertex2i(iX0, iY1);
-
-			glEnd();
-
-			iX0 += iBorderSize;
-			iX1 -= iBorderSize;
-			iY0 += iBorderSize;
-			iY1 -= iBorderSize;
-
-			if(iX0 > iX1 || iY0 > iY1 || iBorderSize == -1)
-				return;
-
-			glColor4f(0.4f, 0.5f, 1.0f, 0.5f);
-			glBegin(GL_QUADS);
-
-			glVertex2i(iX0, iY0);
-			glVertex2i(iX1, iY0);
-			glVertex2i(iX1, iY1);
-			glVertex2i(iX0, iY1);
-
-			glEnd();
-		}
-
-		void GUIPainter::DrawString(int x, int y, const char* strText)
-		{
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			glListBase(miTextListBase);
-
-			glRasterPos2i(x + 1, y + 4);
-			glCallLists((GLsizei)strlen(strText), GL_UNSIGNED_BYTE, strText);
 		}
 	}
 }

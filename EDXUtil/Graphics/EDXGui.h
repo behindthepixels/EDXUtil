@@ -2,33 +2,69 @@
 
 #include "../EDXPrerequisites.h"
 #include "../Windows/Event.h"
+#include "../Memory/RefPtr.h"
 
 namespace EDX
 {
 	namespace GUI
 	{
-		// Forward declaration
-		class EDXControl;
-
-		typedef void (*PEDXFUNCGUIEVENT)(uint iControlID, EDXControl* pControl);
-
-		class EDXDialog
+		class GUIPainter
 		{
 		private:
-			vector<EDXControl*> mvControls;
+			static GUIPainter* mpInstance;
+			int miTextListBase;
+
+		private:
+			GUIPainter();
+
+		public:
+			static inline GUIPainter* Instance()
+			{
+				if (!mpInstance)
+				{
+					mpInstance = new GUIPainter;
+				}
+
+				return mpInstance;
+			}
+
+			static void DeleteInstance()
+			{
+				if (mpInstance)
+				{
+					delete mpInstance;
+					mpInstance = nullptr;
+				}
+			}
+
+			void DrawRect(int iX0, int iY0, int iX1, int iY1);
+			void DrawRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize);
+			void DrawString(int x, int y, const char* strText);
+		};
+
+		typedef Event<Object*, NotifyEvent> ControlEvent;
+		class EDXControl;
+
+		class EDXDialog : public Object
+		{
+		private:
+			vector<RefPtr<EDXControl>> mvControls;
 			EDXControl* mpFocusControl;
 
 			int miPosX, miPosY;
 			int miParentWidth, miParentHeight;
 
-			PEDXFUNCGUIEVENT mpCallbackEvent;
+			NotifyEvent mCallbackEvent;
 
 		public:
 			EDXDialog() {}
-			~EDXDialog() {}
+			~EDXDialog()
+			{
+				Release();
+			}
 
 			void Init(int iX, int iY, int iParentWidth, int iParentHeight);
-			void SetCallback(PEDXFUNCGUIEVENT pFunc) { mpCallbackEvent = pFunc; }
+			void SetCallback(const NotifyEvent& event) { mCallbackEvent = event; }
 			bool MsgProc(const MouseEventArgs& mouseArgs);
 			void SendEvent(EDXControl* pControl);
 			void Render() const;
@@ -47,7 +83,7 @@ namespace EDX
 			bool AddText(uint ID, int iX, int iY, int iWidth, int iHeight, char* pStr);
 		};
 
-		class EDXControl
+		class EDXControl : public Object
 		{
 		protected:
 			int miX, miY;
@@ -155,30 +191,5 @@ namespace EDX
 
 			void SetText(char* pStr);
 		};
-
-		class GUIPainter
-		{
-		private:
-			static GUIPainter* mpInstance;
-			int miTextListBase;
-
-		private:
-			GUIPainter();
-
-		public:
-			static inline GUIPainter* Instance()
-			{
-				if(!mpInstance)
-				{
-					mpInstance = new GUIPainter;
-				}
-
-				return mpInstance;
-			}
-
-			void DrawRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize);
-			void DrawString(int x, int y, const char* strText);
-		};
-
 	}
 }

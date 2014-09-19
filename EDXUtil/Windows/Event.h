@@ -183,7 +183,7 @@ namespace EDX
 
 		bool Attached() const
 		{
-			return !mListeners.emy();
+			return !mListeners.empty();
 		}
 	};
 
