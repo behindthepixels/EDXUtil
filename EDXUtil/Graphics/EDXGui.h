@@ -55,8 +55,9 @@ namespace EDX
 			int mParentWidth, mParentHeight;
 
 			int mWidth, mHeight;
-			const int mPaddingX, mPaddingY, mVerticalDistance;
+			const int mPaddingX, mVerticalDistance;
 			const int mControlWidth, mControlHeight;
+			int mPaddingY;
 
 			NotifyEvent mCallbackEvent;
 
@@ -137,6 +138,11 @@ namespace EDX
 			bool mbHovered;
 
 		public:
+			static const int Padding = 35;
+			static const int Width = 140;
+			static const int Height = 22;
+
+		public:
 			Button(uint iID, int iX, int iY, int iWidth, int iHeight, char* pStr, EDXDialog* pDiag);
 			void Render() const;
 			void Trigger() { mpDialog->SendEvent(this); }
@@ -158,6 +164,11 @@ namespace EDX
 
 			int mButtonSize;
 			RECT mrcButtonBBox;
+
+		public:
+			static const int Padding = 30;
+			static const int Width = 140;
+			static const int Height = 22;
 
 		public:
 			Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, EDXDialog* pDiag);
@@ -183,6 +194,11 @@ namespace EDX
 			int mBoxSize;
 
 		public:
+			static const int Padding = 22;
+			static const int Width = 140;
+			static const int Height = 21;
+
+		public:
 			CheckBox(uint iID, int iX, int iY, int iWidth, int iHeight, bool bChecked, char* pStr, EDXDialog* pDiag);
 			void Render() const;
 			bool GetChecked() const { return mbChecked; }
@@ -195,6 +211,11 @@ namespace EDX
 		{
 		private:
 			char mstrText[256];
+
+		public:
+			static const int Padding = 22;
+			static const int Width = 140;
+			static const int Height = 21;
 
 		public:
 			Text(uint iID, int iX, int iY, int iWidth, int iHeight, char* pStr, EDXDialog* pDiag);

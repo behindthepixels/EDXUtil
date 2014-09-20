@@ -147,7 +147,8 @@ namespace EDX
 
 		bool EDXDialog::AddButton(uint ID, char* pStr)
 		{
-			EDXControl* pButton = new Button(ID, mPaddingX, mPaddingY + mvControls.size() * mVerticalDistance, mControlWidth, mControlHeight, pStr, this);
+			int posY = mPaddingY + (Button::Padding - Button::Height) / 2;
+			EDXControl* pButton = new Button(ID, mPaddingX, posY, Button::Width, Button::Height, pStr, this);
 			if(!pButton)
 			{
 				return false;
@@ -155,13 +156,15 @@ namespace EDX
 
 			pButton->UpdateRect();
 			mvControls.push_back(pButton);
+			mPaddingY += Button::Padding;
 
 			return true;
 		}
 
 		bool EDXDialog::AddSlider(uint ID, float min, float max, float val)
 		{
-			EDXControl* pSlider = new Slider(ID, mPaddingX, mPaddingY + mvControls.size() * mVerticalDistance, mControlWidth, mControlHeight, min, max, val, this);
+			int posY = mPaddingY + (Slider::Padding - Slider::Height) / 2;
+			EDXControl* pSlider = new Slider(ID, mPaddingX, posY, Slider::Width, Slider::Height, min, max, val, this);
 			if(!pSlider)
 			{
 				return false;
@@ -169,13 +172,15 @@ namespace EDX
 
 			pSlider->UpdateRect();
 			mvControls.push_back(pSlider);
+			mPaddingY += Slider::Padding;
 
 			return true;
 		}
 
 		bool EDXDialog::AddCheckBox(uint ID, bool bChecked, char* pStr)
 		{
-			EDXControl* pCheckedBox = new CheckBox(ID, mPaddingX, mPaddingY + mvControls.size() * mVerticalDistance, mControlWidth, mControlHeight, bChecked, pStr, this);
+			int posY = mPaddingY + (CheckBox::Padding - CheckBox::Height) / 2;
+			EDXControl* pCheckedBox = new CheckBox(ID, mPaddingX, posY, CheckBox::Width, CheckBox::Height, bChecked, pStr, this);
 			if(!pCheckedBox)
 			{
 				return false;
@@ -183,13 +188,15 @@ namespace EDX
 
 			pCheckedBox->UpdateRect();
 			mvControls.push_back(pCheckedBox);
+			mPaddingY += CheckBox::Padding;
 
 			return true;
 		}
 
 		bool EDXDialog::AddText(uint ID, char* pStr)
 		{
-			EDXControl* pText = new Text(ID, mPaddingX, mPaddingY + mvControls.size() * mVerticalDistance, mControlWidth, mControlHeight, pStr, this);
+			int posY = mPaddingY + (Text::Padding - Text::Height) / 2;
+			EDXControl* pText = new Text(ID, mPaddingX, posY, Text::Width, Text::Height, pStr, this);
 			if(!pText)
 			{
 				return false;
@@ -197,6 +204,7 @@ namespace EDX
 
 			pText->UpdateRect();
 			mvControls.push_back(pText);
+			mPaddingY += Text::Padding;
 
 			return true;
 		}
@@ -287,15 +295,15 @@ namespace EDX
 		{
 			if(mbDown)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left + 1, mrcBBox.top + 1, mrcBBox.right - 1, mrcBBox.bottom - 1, 2);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left + 1, mrcBBox.top + 1, mrcBBox.right - 1, mrcBBox.bottom - 1, 1);
 			}
 			else if(mbHovered)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left - 1, mrcBBox.top - 1, mrcBBox.right + 1, mrcBBox.bottom + 1, 2);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left - 1, mrcBBox.top - 1, mrcBBox.right + 1, mrcBBox.bottom + 1, 1);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left, mrcBBox.top, mrcBBox.right, mrcBBox.bottom, 2);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left, mrcBBox.top, mrcBBox.right, mrcBBox.bottom, 1);
 			}
 
 			int midX = mX + mWidth / 2 - strlen(mstrText) * 7 / 2;
