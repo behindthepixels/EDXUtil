@@ -21,7 +21,7 @@ namespace EDX
 			HFONT	font;
 			HFONT	oldfont;
 
-			mTextListBase = glGenLists(96);
+			mTextListBase = glGenLists(128);
 			font = CreateFont(16,
 				0,
 				0,
@@ -45,21 +45,32 @@ namespace EDX
 			DeleteObject(font);
 		}
 
-		void GUIPainter::DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize)
+		void GUIPainter::DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize, const Color& interiorColor, const Color& borderColor)
 		{
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			DrawRect(iX0, iY0, iX1, iY1);
+			if (iBorderSize > 0)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+				glColor4f(borderColor.r, borderColor.g, borderColor.b, 0.5f);
+				DrawRect(iX0, iY0, iX1, iY1);
 
-			iX0 += iBorderSize;
-			iX1 -= iBorderSize;
-			iY0 += iBorderSize;
-			iY1 -= iBorderSize;
+				iX0 += iBorderSize;
+				iX1 -= iBorderSize;
+				iY0 += iBorderSize;
+				iY1 -= iBorderSize;
 
-			if (iX0 > iX1 || iY0 > iY1 || iBorderSize == -1)
-				return;
-
-			glColor4f(0.5f, 0.6f, 1.0f, 1.0f);
-			DrawRect(iX0, iY0, iX1, iY1);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, 0.5f);
+				DrawRect(iX0, iY0, iX1, iY1);
+			}
+			else
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, 0.5f);
+				DrawRect(iX0, iY0, iX1, iY1);
+			}
 		}
 
 		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1)
@@ -74,9 +85,20 @@ namespace EDX
 			glEnd();
 		}
 
+		void GUIPainter::DrawLineStrip(int iX0, int iY0, int iX1, int iY1)
+		{
+			glBegin(GL_LINE_STRIP);
+
+			glVertex2i(iX0, iY0);
+			glVertex2i(iX1, iY0);
+			glVertex2i(iX1, iY1);
+			glVertex2i(iX0, iY1);
+
+			glEnd();
+		}
+
 		void GUIPainter::DrawString(int x, int y, const char* strText)
 		{
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			glListBase(mTextListBase);
 
 			glRasterPos2i(x + 1, y + 4);
@@ -114,9 +136,10 @@ namespace EDX
 			glDisable(GL_LIGHTING);
 			glDisable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
+			GL::glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
 
-			glColor4f(0.0f, 0.0f, 0.0f, 0.3f);
+			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 			GUIPainter::Instance()->DrawRect(0, 0, mWidth, mHeight);
 
 			for(int i = 0; i < mvControls.size(); i++)
@@ -148,7 +171,7 @@ namespace EDX
 		bool EDXDialog::AddButton(uint ID, char* pStr)
 		{
 			int posY = mPaddingY + (Button::Padding - Button::Height) / 2;
-			EDXControl* pButton = new Button(ID, mPaddingX, posY, Button::Width, Button::Height, pStr, this);
+			Button* pButton = new Button(ID, mPaddingX, posY, Button::Width, Button::Height, pStr, this);
 			if(!pButton)
 			{
 				return false;
@@ -161,16 +184,22 @@ namespace EDX
 			return true;
 		}
 
-		bool EDXDialog::AddSlider(uint ID, float min, float max, float val)
+		bool EDXDialog::AddSlider(uint ID, float min, float max, float val, const char* pText)
 		{
+			char str[256];
+			sprintf_s(str, "%s%.2f", pText, val);
+			AddText(999, str);
+
 			int posY = mPaddingY + (Slider::Padding - Slider::Height) / 2;
-			EDXControl* pSlider = new Slider(ID, mPaddingX, posY, Slider::Width, Slider::Height, min, max, val, this);
+			Slider* pSlider = new Slider(ID, mPaddingX, posY, Slider::Width, Slider::Height, min, max, val, pText, this);
 			if(!pSlider)
 			{
 				return false;
 			}
 
 			pSlider->UpdateRect();
+			pSlider->SetTextControl((Text*)mvControls.back().Ptr());
+
 			mvControls.push_back(pSlider);
 			mPaddingY += Slider::Padding;
 
@@ -180,7 +209,7 @@ namespace EDX
 		bool EDXDialog::AddCheckBox(uint ID, bool bChecked, char* pStr)
 		{
 			int posY = mPaddingY + (CheckBox::Padding - CheckBox::Height) / 2;
-			EDXControl* pCheckedBox = new CheckBox(ID, mPaddingX, posY, CheckBox::Width, CheckBox::Height, bChecked, pStr, this);
+			CheckBox* pCheckedBox = new CheckBox(ID, mPaddingX, posY, CheckBox::Width, CheckBox::Height, bChecked, pStr, this);
 			if(!pCheckedBox)
 			{
 				return false;
@@ -193,10 +222,10 @@ namespace EDX
 			return true;
 		}
 
-		bool EDXDialog::AddText(uint ID, char* pStr)
+		bool EDXDialog::AddText(uint ID, const char* pStr)
 		{
 			int posY = mPaddingY + (Text::Padding - Text::Height) / 2;
-			EDXControl* pText = new Text(ID, mPaddingX, posY, Text::Width, Text::Height, pStr, this);
+			Text* pText = new Text(ID, mPaddingX, posY, Text::Width, Text::Height, pStr, this);
 			if(!pText)
 			{
 				return false;
@@ -230,9 +259,7 @@ namespace EDX
 				EDXControl* pControl = mvControls[i].Ptr();
 
 				if(pControl->GetID() == ID)
-				{
 					return pControl;
-				}
 			}
 			return NULL;
 		}
@@ -285,7 +312,7 @@ namespace EDX
 		Button::Button(uint iID, int iX, int iY, int iWidth, int iHeight, char* pStr, EDXDialog* pDiag)
 			: EDXControl(iID, iX, iY, iWidth, iHeight, pDiag)
 			, mbDown(false)
-			, mbPressed(false)
+			, mPressed(false)
 			, mbHovered(false)
 		{
 			strcpy_s(mstrText, 256, pStr);
@@ -295,19 +322,27 @@ namespace EDX
 		{
 			if(mbDown)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left + 1, mrcBBox.top + 1, mrcBBox.right - 1, mrcBBox.bottom - 1, 1);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left + 1, mrcBBox.top + 1, mrcBBox.right - 1, mrcBBox.bottom - 1, 0, Color::WHITE);
 			}
 			else if(mbHovered)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left - 1, mrcBBox.top - 1, mrcBBox.right + 1, mrcBBox.bottom + 1, 1);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left - 1, mrcBBox.top - 1, mrcBBox.right + 1, mrcBBox.bottom + 1, 0, Color::WHITE);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left, mrcBBox.top, mrcBBox.right, mrcBBox.bottom, 1);
+				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left, mrcBBox.top, mrcBBox.right, mrcBBox.bottom, 2);
 			}
 
 			int midX = mX + mWidth / 2 - strlen(mstrText) * 7 / 2;
 			int midY = mY + mHeight / 2;
+
+
+			GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+			if (mbDown || mbHovered)
+				glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
+			else
+				glColor4f(0.85f, 0.85f, 0.85f, 1.0f);
+
 			GUIPainter::Instance()->DrawString(midX, midY + 1, mstrText);
 		}
 
@@ -323,7 +358,7 @@ namespace EDX
 				if (PtInRect(&mrcBBox, mousePt))
 				{
 					mbDown = true;
-					mbPressed = true;
+					mPressed = true;
 					return true;
 				}
 				break;
@@ -334,7 +369,7 @@ namespace EDX
 					mbDown = false;
 					Trigger();
 				}
-				mbPressed = false;
+				mPressed = false;
 
 				return true;
 
@@ -343,7 +378,7 @@ namespace EDX
 			case MouseAction::Move:
 				if (PtInRect(&mrcBBox, mousePt))
 				{
-					if(!mbPressed)
+					if(!mPressed)
 					{
 						mbHovered = true;
 					}
@@ -356,7 +391,7 @@ namespace EDX
 				{
 					mbDown = false;
 					mbHovered = false;
-					if(!mbPressed)
+					if(!mPressed)
 						ResetFocus();
 				}
 				return true;
@@ -370,15 +405,17 @@ namespace EDX
 		//----------------------------------------------------------------------------------
 		// Slider implementation
 		//----------------------------------------------------------------------------------
-		Slider::Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, EDXDialog* pDiag)
+		Slider::Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, const char* pText, EDXDialog* pDiag)
 			: EDXControl(iID, iX, iY, iWidth, iHeight, pDiag)
 			, mMin(min)
 			, mMax(max)
 			, mVal(Math::Clamp(val, min, max))
-			, mbPressed(false)
+			, mPressed(false)
 			, mButtonSize(6)
 		{
-
+			mSlideBase = mX + mButtonSize;
+			mSlideEnd = mX + mWidth - mButtonSize;
+			strcpy_s(mMainText, 256, pText);
 		}
 
 		void Slider::Render() const
@@ -386,10 +423,21 @@ namespace EDX
 			int iY = mY + mHeight / 2;
 
 			float fLerp = Math::LinStep(mVal, mMin, mMax);
-			int iButPos = (int)Math::Lerp(mX, mX + mWidth, fLerp);
+			int iButPos = (int)Math::Lerp(mSlideBase, mSlideEnd, fLerp);
 
-			GUIPainter::Instance()->DrawBorderedRect(mX, iY - 1, mX + mWidth, iY + 1, 1);
-			GUIPainter::Instance()->DrawBorderedRect(iButPos - mButtonSize, iY - mButtonSize, iButPos + mButtonSize, iY + mButtonSize, 1);
+			GUIPainter::Instance()->DrawBorderedRect(mX, iY - 1, iButPos - mButtonSize, iY + 2, 0, Color::WHITE);
+			GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+			glBegin(GL_LINE_STRIP);
+
+			glVertex2i(iButPos + mButtonSize, iY - 1);
+			glVertex2i(mX + mWidth, iY - 1);
+			glVertex2i(mX + mWidth, iY + 1);
+			glVertex2i(iButPos + mButtonSize, iY + 1);
+
+			glEnd();
+
+			GUIPainter::Instance()->DrawBorderedRect(iButPos - mButtonSize, iY - mButtonSize, iButPos + mButtonSize, iY + mButtonSize, 0, Color::WHITE);
 		}
 
 		void Slider::UpdateRect()
@@ -397,7 +445,7 @@ namespace EDX
 			EDXControl::UpdateRect();
 
 			float fLerp = Math::LinStep(mVal, mMin, mMax);
-			mButtonX = (int)Math::Lerp(mX, mX + mWidth, fLerp);
+			mButtonX = (int)Math::Lerp(mSlideBase, mSlideEnd, fLerp);
 
 			int mid = mY + mHeight / 2;
 			SetRect(&mrcButtonBBox, mButtonX - mButtonSize, mid - mButtonSize, mButtonX + mButtonSize, mid + mButtonSize);
@@ -405,14 +453,17 @@ namespace EDX
 
 		void Slider::SetValue(float fValue)
 		{
-			float fClampedVal = Math::Clamp(fValue, mMin, mMax);
+			float clampedVal = Math::Clamp(fValue, mMin, mMax);
 
-			if(fClampedVal == mVal)
+			if (clampedVal == mVal)
 			{
 				return;
 			}
 
-			mVal = fClampedVal;
+			mVal = clampedVal;
+			sprintf_s(mValuedText, 256, "%s%.2f", mMainText, mVal);
+			mpText->SetText(mValuedText);
+
 			UpdateRect();
 
 			mpDialog->SendEvent(this);
@@ -420,7 +471,8 @@ namespace EDX
 
 		void Slider::SetValueFromPos(int iPos)
 		{
-			float fLerp = Math::LinStep(float(iPos), mX, mX + mWidth);
+			float fLerp = Math::LinStep(float(iPos), mSlideBase, mSlideEnd);
+			fLerp = Math::Clamp(fLerp, 0.0f, 1.0f);
 			float fVal = Math::Lerp(mMin, mMax, fLerp);
 
 			SetValue(fVal);
@@ -438,7 +490,7 @@ namespace EDX
 			case MouseAction::LButtonDbClick:
 				if (PtInRect(&mrcButtonBBox, mousePt))
 				{
-					mbPressed = true;
+					mPressed = true;
 					
 					mDragX = mousePt.x;
 					mDragOffset = mButtonX - mDragX;
@@ -450,23 +502,20 @@ namespace EDX
 					SetValueFromPos(mousePt.x);
 					return true;
 				}
-				break;
 
 			case MouseAction::LButtonUp:
-				mbPressed = false;
+				mPressed = false;
 				mDragOffset = 0;
 				mpDialog->SendEvent(this);
 
 				return true;
-				break;
 
 			case MouseAction::Move:
-				if(mbPressed)
+				if(mPressed)
 				{
 					SetValueFromPos(mousePt.x + mDragOffset);
 					return true;
 				}
-				break;	
 			}
 
 			return false;
@@ -478,7 +527,7 @@ namespace EDX
 		CheckBox::CheckBox(uint iID, int iX, int iY, int iWidth, int iHeight, bool bChecked, char* pStr, EDXDialog* pDiag)
 			: EDXControl(iID, iX, iY, iWidth, iHeight, pDiag)
 			, mbChecked(bChecked)
-			, mbPressed(false)
+			, mPressed(false)
 			, mBoxSize(6)
 		{
 			strcpy_s(mstrText, 256, pStr);
@@ -486,18 +535,19 @@ namespace EDX
 
 		void CheckBox::Render() const
 		{
-			int imdX = mX + 6;
-			int imdY = mY + mHeight / 2;
+			int midX = mX + 6;
+			int midY = mY + mHeight / 2;
 			if(mbChecked)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(imdX - mBoxSize, imdY - mBoxSize, imdX + mBoxSize, imdY + mBoxSize, 3);
+				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, 0, Color::WHITE);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawBorderedRect(imdX - mBoxSize, imdY - mBoxSize, imdX + mBoxSize, imdY + mBoxSize, -1);
+				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, 2);
 			}
 
-			GUIPainter::Instance()->DrawString(imdX + mBoxSize + 2, imdY + 1, mstrText);
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			GUIPainter::Instance()->DrawString(midX + mBoxSize + 2, midY + 1, mstrText);
 		}
 
 		void CheckBox::UpdateRect()
@@ -521,16 +571,16 @@ namespace EDX
 			case MouseAction::LButtonDbClick:
 				if (PtInRect(&mrcBoxBBox, mousePt))
 				{
-					mbPressed = true;
+					mPressed = true;
 					return true;
 				}
 				break;
 
 			case MouseAction::LButtonUp:
-				if (PtInRect(&mrcBoxBBox, mousePt) && mbPressed)
+				if (PtInRect(&mrcBoxBBox, mousePt) && mPressed)
 				{
 					Toggle();
-					mbPressed = false;
+					mPressed = false;
 					return true;
 				}
 				break;
@@ -542,7 +592,7 @@ namespace EDX
 		//----------------------------------------------------------------------------------
 		// Text implementation
 		//----------------------------------------------------------------------------------
-		Text::Text(uint iID, int iX, int iY, int iWidth, int iHeight, char* pStr, EDXDialog* pDiag)
+		Text::Text(uint iID, int iX, int iY, int iWidth, int iHeight, const char* pStr, EDXDialog* pDiag)
 			: EDXControl(iID, iX, iY, iWidth, iHeight, pDiag)
 		{
 			strcpy_s(mstrText, 256, pStr);
@@ -551,6 +601,8 @@ namespace EDX
 		void Text::Render() const
 		{
 			int imdY = mY + mHeight / 2;
+
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			GUIPainter::Instance()->DrawString(mX, imdY, mstrText);
 		}
 

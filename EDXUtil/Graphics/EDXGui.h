@@ -2,6 +2,7 @@
 
 #include "../EDXPrerequisites.h"
 #include "../Windows/Event.h"
+#include "Color.h"
 #include "../Memory/RefPtr.h"
 
 namespace EDX
@@ -38,7 +39,9 @@ namespace EDX
 			}
 
 			void DrawRect(int iX0, int iY0, int iX1, int iY1);
-			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize);
+			void DrawLineStrip(int iX0, int iY0, int iX1, int iY1);
+			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize,
+				const Color& interiorColor = Color::BLACK, const Color& borderColor = Color::WHITE);
 			void DrawString(int x, int y, const char* strText);
 		};
 
@@ -55,8 +58,7 @@ namespace EDX
 			int mParentWidth, mParentHeight;
 
 			int mWidth, mHeight;
-			const int mPaddingX, mVerticalDistance;
-			const int mControlWidth, mControlHeight;
+			const int mPaddingX;
 			int mPaddingY;
 
 			NotifyEvent mCallbackEvent;
@@ -65,9 +67,6 @@ namespace EDX
 			EDXDialog()
 				: mPaddingX(30)
 				, mPaddingY(30)
-				, mVerticalDistance(25)
-				, mControlWidth(140)
-				, mControlHeight(21)
 			{
 			}
 			~EDXDialog()
@@ -90,9 +89,13 @@ namespace EDX
 			EDXControl* GetControlWithID(uint ID) const;
 
 			bool AddButton(uint ID, char* pStr);
-			bool AddSlider(uint ID, float min, float max, float val);
+			bool AddSlider(uint ID, float min, float max, float val, const char* pText);
 			bool AddCheckBox(uint ID, bool bChecked, char* pStr);
-			bool AddText(uint ID, char* pStr);
+			bool AddText(uint ID, const char* pStr);
+			void AddPadding(int padding)
+			{
+				mPaddingY += padding;
+			}
 		};
 
 		class EDXControl : public Object
@@ -134,7 +137,7 @@ namespace EDX
 		private:
 			char mstrText[256];
 			bool mbDown;
-			bool mbPressed;
+			bool mPressed;
 			bool mbHovered;
 
 		public:
@@ -156,27 +159,33 @@ namespace EDX
 			float mMax;
 			float mVal;
 
-			bool mbPressed;
+			int mSlideBase, mSlideEnd;
+
+			bool mPressed;
 			int mDragX;
 			int mDragOffset;
 			int mButtonX;
 
-
 			int mButtonSize;
 			RECT mrcButtonBBox;
 
-		public:
-			static const int Padding = 30;
-			static const int Width = 140;
-			static const int Height = 22;
+			class Text* mpText;
+			char mMainText[256];
+			char mValuedText[256];
 
 		public:
-			Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, EDXDialog* pDiag);
+			static const int Padding = 10;
+			static const int Width = 140;
+			static const int Height = 10;
+
+		public:
+			Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, const char* pText, EDXDialog* pDiag);
 			~Slider() {}
 
 			void Render() const;
 			float GetValue() const { return mVal; }
 			void UpdateRect();
+			void SetTextControl(Text* pText) { mpText = pText; }
 
 			void SetValue(float fValue);
 			void SetValueFromPos(int iPos);
@@ -189,7 +198,7 @@ namespace EDX
 			char mstrText[256];
 			RECT mrcBoxBBox;
 			bool mbChecked;
-			bool mbPressed;
+			bool mPressed;
 
 			int mBoxSize;
 
@@ -218,7 +227,7 @@ namespace EDX
 			static const int Height = 21;
 
 		public:
-			Text(uint iID, int iX, int iY, int iWidth, int iHeight, char* pStr, EDXDialog* pDiag);
+			Text(uint iID, int iX, int iY, int iWidth, int iHeight, const char* pStr, EDXDialog* pDiag);
 			void Render() const;
 
 			void SetText(char* pStr);

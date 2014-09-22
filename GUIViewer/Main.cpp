@@ -9,15 +9,153 @@ using namespace EDX::GUI;
 
 EDXDialog		gDialog;
 
+double mAmp;
+double mPhase;
+double mPeriod;
+double mConst;
+double mTotalPeriod;
+double mStraightLength;
+double mHalfRatio;
+bool mMod;
+double PI = 3.141592653f;
+
+double TimeWarp(double time)
+{
+	const double dPhaseShift = mPhase * mTotalPeriod / (2 * PI);
+	time += dPhaseShift;
+
+	double halfSinePeriod = 0.5 * mPeriod;
+	double invHalfPeriod = 1.0 / (0.5 * (mTotalPeriod));
+	time -= halfSinePeriod * 0.5;
+
+	double overPeriod = time * invHalfPeriod;
+	int flr = floor(overPeriod);
+	double frac = overPeriod - flr;
+
+	if (frac < mStraightLength * invHalfPeriod)
+		return flr * halfSinePeriod + halfSinePeriod * 0.5 - dPhaseShift;
+	else
+		return flr * halfSinePeriod + (frac - mStraightLength * invHalfPeriod) / invHalfPeriod + halfSinePeriod * 0.5 - dPhaseShift;
+}
+
+double Lerp(double min, double max, double lin)
+{
+	return min * (1.0 - lin) + max * lin;
+}
+
+double TimeWarp2(double time)
+{
+	int nCycles = static_cast<int>(time / mTotalPeriod);
+	double frac = (time - nCycles * mTotalPeriod) / mTotalPeriod;
+
+	if (frac < mHalfRatio)
+		frac = Lerp(0.0, 0.5, frac / mHalfRatio);
+	else
+		frac = Lerp(0.5, 1.0, (frac - mHalfRatio) / (1.0 - mHalfRatio));
+
+	return (nCycles + frac) * mTotalPeriod;
+}
+
+double TimeWarp3(double time)
+{
+	int nCycles = static_cast<int>(time / (mTotalPeriod * 0.5));
+	double frac = (time - nCycles * mTotalPeriod * 0.5) / (mTotalPeriod * 0.5);
+
+	double ratio = 2.0 * mStraightLength / mTotalPeriod;
+
+
+	if (frac < ratio)
+		frac = 0.0;
+	else
+		frac = Lerp(0.0, 1.0, (frac - ratio) / (1.0 - ratio));
+
+	return (nCycles + frac) * mTotalPeriod * 0.5;
+}
+
+
+double rectifyTimeToFractionOfPeriod(double time)
+{
+	while (time < 0)
+		time += mTotalPeriod;
+	if (time >= mTotalPeriod)
+	{
+		int nCycles = static_cast<int>(time / mTotalPeriod);
+		time -= nCycles * mTotalPeriod;
+	}
+	return time / mTotalPeriod;
+}
+bool SecondHalfCycle(double time)
+{
+	int nCycles = static_cast<int>(time / double(mPeriod));
+
+	return nCycles % 2;
+}
+
+double EvaluateSine(double fractionOfPeriod)
+{
+	double time = mPeriod * fractionOfPeriod;
+	double omega = 2 * 3.141692653f / mPeriod;
+
+	return mAmp * sin(omega * time) + mConst;
+}
+
+double EvaluateSineMod(double fractionOfPeriod)
+{
+	double time = mPeriod * fractionOfPeriod;
+	double omega = 2 * PI / mPeriod;
+
+	return mAmp * 0.5 * sin(omega * time) + mConst;
+}
+
+double evaluateValueEdward(double time)
+{
+	if (mMod)
+	{
+		if (SecondHalfCycle(2.0 * time + 2.0 * (mPhase + 1.5708) * mTotalPeriod / (2 * PI)))
+		{
+			time = TimeWarp(time);
+			time += mPhase * mTotalPeriod / (2 * PI);
+			double t = rectifyTimeToFractionOfPeriod(time);
+			return EvaluateSine(t);
+		}
+
+		time *= 2.0;
+		time += mTotalPeriod * 0.75;
+		time += 2.0 * mPhase * mTotalPeriod / (2 * PI);
+		bool bSec = SecondHalfCycle(time - mTotalPeriod * 0.75);
+		double t = rectifyTimeToFractionOfPeriod(time);
+
+
+		if (bSec)
+			return -EvaluateSineMod(t) - 0.5 * mAmp + 2.0 * mConst;
+		return EvaluateSineMod(t) + 0.5 * mAmp;
+	}
+	else
+	{
+		time += mStraightLength / 2;
+		time += 6.28 * mTotalPeriod / (2 * PI);
+		time += mPhase * mTotalPeriod / (2 * PI);
+		time = TimeWarp3(TimeWarp2(time - 4.71 * mTotalPeriod / (2 * PI)));
+		time += 4.71 * mTotalPeriod / (2 * PI);
+		double t = rectifyTimeToFractionOfPeriod(time);
+
+		return EvaluateSine(t);
+	}
+}
+
 void OnInit(Object* pSender, EventArgs args)
 {
+	GL::LoadGLExtensions();
+
 	glClearColor(0.4f, 0.5f, 0.65f, 1.0f);
 	gDialog.Init(1280, 800);
 
 	gDialog.AddText(0, "GUI Test");
-	gDialog.AddCheckBox(1, true, "Check Box");
+	gDialog.AddCheckBox(1, false, "Check Box");
 	gDialog.AddButton(2, "Button");
-	gDialog.AddSlider(2, 0.0f, 1.0f, 0.5f);
+
+	gDialog.AddPadding(20);
+	gDialog.AddSlider(3, 0.0f, 100.0f, 0.5f, "Values: ");
 }
 
 void OnRender(Object* pSender, EventArgs args)

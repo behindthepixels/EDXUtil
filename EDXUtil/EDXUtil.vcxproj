@@ -58,6 +58,7 @@
     <ClCompile Include="Graphics\Color.cpp" />
     <ClCompile Include="Graphics\EDXGui.cpp" />
     <ClCompile Include="Graphics\ObjMesh.cpp" />
+    <ClCompile Include="Graphics\OpenGL.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Math\Matrix.cpp" />
     <ClCompile Include="Windows\Application.cpp" />
