@@ -143,19 +143,32 @@ double evaluateValueEdward(double time)
 	}
 }
 
+float gSlide;
+bool gChecked;
+int gCombo;
+
 void OnInit(Object* pSender, EventArgs args)
 {
 	GL::LoadGLExtensions();
 
 	glClearColor(0.4f, 0.5f, 0.65f, 1.0f);
+	glClearDepth(1.0f);
 	gDialog.Init(1280, 800);
 
 	gDialog.AddText(0, "GUI Test");
-	gDialog.AddCheckBox(1, false, "Check Box");
+	gDialog.AddCheckBox(1, false, &gChecked, "Check Box");
 	gDialog.AddButton(2, "Button");
 
 	gDialog.AddPadding(20);
-	gDialog.AddSlider(3, 0.0f, 100.0f, 0.5f, "Values: ");
+	gDialog.AddSlider(3, 0.0f, 100.0f, 0.5f, &gSlide, "Values: ");
+
+	ComboBoxItem items[] = {
+			{ 0, "Item 1" },
+			{ 1, "Item 2" }
+	};
+
+	gDialog.AddComboBox(4, 0, &gCombo, items, 2);
+	gDialog.AddComboBox(5, 0, &gCombo, items, 2);
 }
 
 void OnRender(Object* pSender, EventArgs args)

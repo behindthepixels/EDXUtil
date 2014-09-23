@@ -15,6 +15,11 @@ namespace EDX
 			static GUIPainter* mpInstance;
 			int mTextListBase;
 
+		public:
+			static const float DEPTH_FAR;
+			static const float DEPTH_MID;
+			static const float DEPTH_NEAR;
+
 		private:
 			GUIPainter();
 
@@ -38,11 +43,11 @@ namespace EDX
 				}
 			}
 
-			void DrawRect(int iX0, int iY0, int iX1, int iY1);
+			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth);
 			void DrawLineStrip(int iX0, int iY0, int iX1, int iY1);
-			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize,
+			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize,
 				const Color& interiorColor = Color::BLACK, const Color& borderColor = Color::WHITE);
-			void DrawString(int x, int y, const char* strText);
+			void DrawString(int x, int y, float depth, const char* strText);
 		};
 
 		typedef Event<Object*, NotifyEvent> ControlEvent;
@@ -89,9 +94,10 @@ namespace EDX
 			EDXControl* GetControlWithID(uint ID) const;
 
 			bool AddButton(uint ID, char* pStr);
-			bool AddSlider(uint ID, float min, float max, float val, const char* pText);
-			bool AddCheckBox(uint ID, bool bChecked, char* pStr);
+			bool AddSlider(uint ID, float min, float max, float val, float* pRefVal, const char* pText);
+			bool AddCheckBox(uint ID, bool bChecked, bool* pRefVal, char* pStr);
 			bool AddText(uint ID, const char* pStr);
+			bool AddComboBox(uint iID, int initSelectedIdx, int* pRefVal, struct ComboBoxItem* pItems, int numItems);
 			void AddPadding(int padding)
 			{
 				mPaddingY += padding;
@@ -103,8 +109,8 @@ namespace EDX
 		protected:
 			int mX, mY;
 			int mWidth, mHeight;
-			RECT mrcBBox;
-			bool mbHasFocus;
+			RECT mBBox;
+			bool mHasFocus;
 
 			uint mID;
 			EDXDialog* mpDialog;
@@ -116,18 +122,19 @@ namespace EDX
 				, mY(iY)
 				, mWidth(iW)
 				, mHeight(iH)
-				, mbHasFocus(false)
+				, mHasFocus(false)
 				, mpDialog(pDiag)
 			{}
 			virtual ~EDXControl() {}
 
 			uint GetID() const { return mID; }
 			virtual void Render() const = 0;
-			virtual float GetValue() const { return 0.0f; }
-			void SetFocus() { mbHasFocus = true; mpDialog->SetFocusControl(this); }
-			void ResetFocus() { mbHasFocus = false; mpDialog->ResetFocusControl(); }
-			virtual void UpdateRect() { SetRect(&mrcBBox, mX, mY, mX + mWidth, mY + mHeight); }
-			virtual bool ContainsPoint(const POINT& pt) const { return PtInRect(&mrcBBox, pt); }
+			virtual void OnResetFocus() {}
+			void SetFocus() { mHasFocus = true; mpDialog->SetFocusControl(this); }
+			void ResetFocus() { OnResetFocus(); mHasFocus = false; mpDialog->ResetFocusControl(); }
+			bool HasFocus() const { return mHasFocus; }
+			virtual void UpdateRect() { SetRect(&mBBox, mX, mY, mX + mWidth, mY + mHeight); }
+			virtual bool ContainsPoint(const POINT& pt) const { return PtInRect(&mBBox, pt); }
 
 			virtual bool HandleMouse(const MouseEventArgs& mouseArgs) { return false; }
 		};
@@ -141,7 +148,7 @@ namespace EDX
 			bool mbHovered;
 
 		public:
-			static const int Padding = 35;
+			static const int Padding = 40;
 			static const int Width = 140;
 			static const int Height = 22;
 
@@ -173,13 +180,15 @@ namespace EDX
 			char mMainText[256];
 			char mValuedText[256];
 
+			float* mpRefVal;
+
 		public:
-			static const int Padding = 10;
+			static const int Padding = 15;
 			static const int Width = 140;
 			static const int Height = 10;
 
 		public:
-			Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, const char* pText, EDXDialog* pDiag);
+			Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, float* pRefVal, const char* pText, EDXDialog* pDiag);
 			~Slider() {}
 
 			void Render() const;
@@ -202,13 +211,15 @@ namespace EDX
 
 			int mBoxSize;
 
+			bool* mpRefVal;
+
 		public:
-			static const int Padding = 22;
+			static const int Padding = 25;
 			static const int Width = 140;
 			static const int Height = 21;
 
 		public:
-			CheckBox(uint iID, int iX, int iY, int iWidth, int iHeight, bool bChecked, char* pStr, EDXDialog* pDiag);
+			CheckBox(uint iID, int iX, int iY, int iWidth, int iHeight, bool bChecked, bool* pRefVal, char* pStr, EDXDialog* pDiag);
 			void Render() const;
 			bool GetChecked() const { return mbChecked; }
 			void UpdateRect();
@@ -231,6 +242,54 @@ namespace EDX
 			void Render() const;
 
 			void SetText(char* pStr);
+		};
+
+		struct ComboBoxItem
+		{
+			int Value;
+			char* Label;
+		};
+
+		class ComboBox : public EDXControl
+		{
+		public:
+		private:
+			ComboBoxItem* mpItems;
+			int mNumItems;
+			bool mOpened;
+			int mHoveredIdx;
+			int mSelectedIdx;
+
+			int mButtonSize;
+			RECT mBoxMain;
+			RECT mBoxDropdown;
+
+			int* mpRefVal;
+
+		public:
+			static const int Padding = 40;
+			static const int Width = 140;
+			static const int Height = 18;
+			static const int ItemHeight = 20;
+
+		public:
+			ComboBox(uint iID, int iX, int iY, int iWidth, int iHeight, int initSelectedIdx, int* pRefVal, ComboBoxItem* pItems, int numItems, EDXDialog* pDiag);
+			~ComboBox()
+			{
+				if (mpItems)
+					delete[] mpItems;
+			}
+
+			void Render() const;
+			void UpdateRect();
+
+			void OnResetFocus()
+			{
+				mOpened = false;
+				mBBox = mBoxMain;
+			}
+
+			bool HandleMouse(const MouseEventArgs& mouseArgs);
 		};
 	}
 }

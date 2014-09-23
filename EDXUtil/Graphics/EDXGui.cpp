@@ -16,6 +16,10 @@ namespace EDX
 		//----------------------------------------------------------------------------------
 		GUIPainter* GUIPainter::mpInstance = NULL;
 
+		const float GUIPainter::DEPTH_FAR = 0.8f;
+		const float GUIPainter::DEPTH_MID = 0.6f;
+		const float GUIPainter::DEPTH_NEAR = 0.4f;
+
 		GUIPainter::GUIPainter()
 		{
 			HFONT	font;
@@ -45,14 +49,14 @@ namespace EDX
 			DeleteObject(font);
 		}
 
-		void GUIPainter::DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, int iBorderSize, const Color& interiorColor, const Color& borderColor)
+		void GUIPainter::DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize, const Color& interiorColor, const Color& borderColor)
 		{
 			if (iBorderSize > 0)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(borderColor.r, borderColor.g, borderColor.b, 0.5f);
-				DrawRect(iX0, iY0, iX1, iY1);
+				DrawRect(iX0, iY0, iX1, iY1, depth);
 
 				iX0 += iBorderSize;
 				iX1 -= iBorderSize;
@@ -62,25 +66,25 @@ namespace EDX
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, 0.5f);
-				DrawRect(iX0, iY0, iX1, iY1);
+				DrawRect(iX0, iY0, iX1, iY1, depth);
 			}
 			else
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, 0.5f);
-				DrawRect(iX0, iY0, iX1, iY1);
+				DrawRect(iX0, iY0, iX1, iY1, depth);
 			}
 		}
 
-		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1)
+		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, float depth)
 		{
 			glBegin(GL_QUADS);
 
-			glVertex2i(iX0, iY0);
-			glVertex2i(iX1, iY0);
-			glVertex2i(iX1, iY1);
-			glVertex2i(iX0, iY1);
+			glVertex3f(iX0, iY0, depth);
+			glVertex3f(iX1, iY0, depth);
+			glVertex3f(iX1, iY1, depth);
+			glVertex3f(iX0, iY1, depth);
 
 			glEnd();
 		}
@@ -97,11 +101,11 @@ namespace EDX
 			glEnd();
 		}
 
-		void GUIPainter::DrawString(int x, int y, const char* strText)
+		void GUIPainter::DrawString(int x, int y, float depth, const char* strText)
 		{
 			glListBase(mTextListBase);
 
-			glRasterPos2i(x + 1, y + 4);
+			glRasterPos3f(x + 1, y + 4, depth);
 			glCallLists((GLsizei)strlen(strText), GL_UNSIGNED_BYTE, strText);
 		}
 
@@ -121,26 +125,26 @@ namespace EDX
 
 		void EDXDialog::Render() const
 		{
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadIdentity();
+			glOrtho(0, mParentWidth, 0, mParentHeight, 1, -1);
+
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
 			glTranslatef(mPosX, mParentHeight - mPosY, 0.0f);
 			glScalef(1.0f, -1.0f, 1.0f);
 
-			glMatrixMode(GL_PROJECTION);
-			glPushMatrix();
-			glLoadIdentity();
-			glOrtho(0, mParentWidth, 0, mParentHeight, -1, 1);
-
 			glPushAttrib(GL_ENABLE_BIT);
 			glDisable(GL_LIGHTING);
-			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
 			GL::glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
 
 			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-			GUIPainter::Instance()->DrawRect(0, 0, mWidth, mHeight);
+			GUIPainter::Instance()->DrawRect(0, 0, mWidth, mHeight, GUIPainter::DEPTH_FAR);
 
 			for(int i = 0; i < mvControls.size(); i++)
 			{
@@ -149,7 +153,7 @@ namespace EDX
 
 			glPopAttrib();
 			glPopMatrix();
-			glMatrixMode(GL_MODELVIEW);
+			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
 		}
 
@@ -184,14 +188,14 @@ namespace EDX
 			return true;
 		}
 
-		bool EDXDialog::AddSlider(uint ID, float min, float max, float val, const char* pText)
+		bool EDXDialog::AddSlider(uint ID, float min, float max, float val, float* pRefVal, const char* pText)
 		{
 			char str[256];
 			sprintf_s(str, "%s%.2f", pText, val);
 			AddText(999, str);
 
 			int posY = mPaddingY + (Slider::Padding - Slider::Height) / 2;
-			Slider* pSlider = new Slider(ID, mPaddingX, posY, Slider::Width, Slider::Height, min, max, val, pText, this);
+			Slider* pSlider = new Slider(ID, mPaddingX, posY, Slider::Width, Slider::Height, min, max, val, pRefVal, pText, this);
 			if(!pSlider)
 			{
 				return false;
@@ -206,10 +210,10 @@ namespace EDX
 			return true;
 		}
 
-		bool EDXDialog::AddCheckBox(uint ID, bool bChecked, char* pStr)
+		bool EDXDialog::AddCheckBox(uint ID, bool bChecked, bool* pRefVal, char* pStr)
 		{
 			int posY = mPaddingY + (CheckBox::Padding - CheckBox::Height) / 2;
-			CheckBox* pCheckedBox = new CheckBox(ID, mPaddingX, posY, CheckBox::Width, CheckBox::Height, bChecked, pStr, this);
+			CheckBox* pCheckedBox = new CheckBox(ID, mPaddingX, posY, CheckBox::Width, CheckBox::Height, bChecked, pRefVal, pStr, this);
 			if(!pCheckedBox)
 			{
 				return false;
@@ -218,6 +222,18 @@ namespace EDX
 			pCheckedBox->UpdateRect();
 			mvControls.push_back(pCheckedBox);
 			mPaddingY += CheckBox::Padding;
+
+			return true;
+		}
+
+		bool EDXDialog::AddComboBox(uint iID, int initSelectedIdx, int* pRefVal, ComboBoxItem* pItems, int numItems)
+		{
+			int posY = mPaddingY + (ComboBox::Padding - ComboBox::Height) / 2;
+			ComboBox* pComboBox = new ComboBox(iID, mPaddingX, posY, ComboBox::Width, ComboBox::Height, initSelectedIdx, pRefVal, pItems, numItems, this);
+
+			pComboBox->UpdateRect();
+			mvControls.push_back(pComboBox);
+			mPaddingY += ComboBox::Padding;
 
 			return true;
 		}
@@ -291,14 +307,18 @@ namespace EDX
 			EDXControl* pControl = GetControlAtPoint(mousePt);
 			if (pControl)
 			{
-				pControl->SetFocus();
-				mpFocusControl = pControl;
+				if (mpFocusControl && offsettedArgs.Action == MouseAction::LButtonDown)
+					mpFocusControl->ResetFocus();
+
+				if (offsettedArgs.Action == MouseAction::LButtonDown)
+					pControl->SetFocus();
+
 				if (pControl->HandleMouse(offsettedArgs))
 				{
 					return true;
 				}
 			}
-			else if (mpFocusControl && offsettedArgs.lDown)
+			else if (mpFocusControl && offsettedArgs.Action == MouseAction::LButtonDown)
 			{
 				mpFocusControl->ResetFocus();
 			}
@@ -322,15 +342,15 @@ namespace EDX
 		{
 			if(mbDown)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left + 1, mrcBBox.top + 1, mrcBBox.right - 1, mrcBBox.bottom - 1, 0, Color::WHITE);
+				GUIPainter::Instance()->DrawBorderedRect(mBBox.left + 1, mBBox.top + 1, mBBox.right - 1, mBBox.bottom - 1, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 			}
 			else if(mbHovered)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left - 1, mrcBBox.top - 1, mrcBBox.right + 1, mrcBBox.bottom + 1, 0, Color::WHITE);
+				GUIPainter::Instance()->DrawBorderedRect(mBBox.left - 1, mBBox.top - 1, mBBox.right + 1, mBBox.bottom + 1, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawBorderedRect(mrcBBox.left, mrcBBox.top, mrcBBox.right, mrcBBox.bottom, 2);
+				GUIPainter::Instance()->DrawBorderedRect(mBBox.left, mBBox.top, mBBox.right, mBBox.bottom, GUIPainter::DEPTH_MID, 2);
 			}
 
 			int midX = mX + mWidth / 2 - strlen(mstrText) * 7 / 2;
@@ -343,7 +363,7 @@ namespace EDX
 			else
 				glColor4f(0.85f, 0.85f, 0.85f, 1.0f);
 
-			GUIPainter::Instance()->DrawString(midX, midY + 1, mstrText);
+			GUIPainter::Instance()->DrawString(midX, midY + 1, GUIPainter::DEPTH_MID, mstrText);
 		}
 
 		bool Button::HandleMouse(const MouseEventArgs& mouseArgs)
@@ -355,7 +375,7 @@ namespace EDX
 			switch (mouseArgs.Action)
 			{
 			case MouseAction::LButtonDown:
-				if (PtInRect(&mrcBBox, mousePt))
+				if (PtInRect(&mBBox, mousePt))
 				{
 					mbDown = true;
 					mPressed = true;
@@ -364,7 +384,7 @@ namespace EDX
 				break;
 
 			case MouseAction::LButtonUp:
-				if (PtInRect(&mrcBBox, mousePt) && mbDown)
+				if (PtInRect(&mBBox, mousePt) && mbDown)
 				{
 					mbDown = false;
 					Trigger();
@@ -376,23 +396,22 @@ namespace EDX
 				break;
 
 			case MouseAction::Move:
-				if (PtInRect(&mrcBBox, mousePt))
+				if (PtInRect(&mBBox, mousePt))
 				{
+					SetFocus();
+
 					if(!mPressed)
-					{
 						mbHovered = true;
-					}
 					else
-					{
 						mbDown = true;
-					}
 				}
 				else
 				{
-					mbDown = false;
-					mbHovered = false;
 					if(!mPressed)
 						ResetFocus();
+
+					mbDown = false;
+					mbHovered = false;
 				}
 				return true;
 
@@ -405,13 +424,14 @@ namespace EDX
 		//----------------------------------------------------------------------------------
 		// Slider implementation
 		//----------------------------------------------------------------------------------
-		Slider::Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, const char* pText, EDXDialog* pDiag)
+		Slider::Slider(uint iID, int iX, int iY, int iWidth, int iHeight, float min, float max, float val, float* pRefVal, const char* pText, EDXDialog* pDiag)
 			: EDXControl(iID, iX, iY, iWidth, iHeight, pDiag)
 			, mMin(min)
 			, mMax(max)
 			, mVal(Math::Clamp(val, min, max))
 			, mPressed(false)
 			, mButtonSize(6)
+			, mpRefVal(pRefVal)
 		{
 			mSlideBase = mX + mButtonSize;
 			mSlideEnd = mX + mWidth - mButtonSize;
@@ -425,7 +445,7 @@ namespace EDX
 			float fLerp = Math::LinStep(mVal, mMin, mMax);
 			int iButPos = (int)Math::Lerp(mSlideBase, mSlideEnd, fLerp);
 
-			GUIPainter::Instance()->DrawBorderedRect(mX, iY - 1, iButPos - mButtonSize, iY + 2, 0, Color::WHITE);
+			GUIPainter::Instance()->DrawBorderedRect(mX, iY - 1, iButPos - mButtonSize, iY + 2, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 			GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 			glBegin(GL_LINE_STRIP);
@@ -437,7 +457,7 @@ namespace EDX
 
 			glEnd();
 
-			GUIPainter::Instance()->DrawBorderedRect(iButPos - mButtonSize, iY - mButtonSize, iButPos + mButtonSize, iY + mButtonSize, 0, Color::WHITE);
+			GUIPainter::Instance()->DrawBorderedRect(iButPos - mButtonSize, iY - mButtonSize, iButPos + mButtonSize, iY + mButtonSize, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 		}
 
 		void Slider::UpdateRect()
@@ -497,11 +517,13 @@ namespace EDX
 
 					return true;
 				}
-				else if (PtInRect(&mrcBBox, mousePt))
+				else if (PtInRect(&mBBox, mousePt))
 				{
 					SetValueFromPos(mousePt.x);
+					*mpRefVal = GetValue();
 					return true;
 				}
+				break;
 
 			case MouseAction::LButtonUp:
 				mPressed = false;
@@ -514,21 +536,24 @@ namespace EDX
 				if(mPressed)
 				{
 					SetValueFromPos(mousePt.x + mDragOffset);
+					*mpRefVal = GetValue();
 					return true;
 				}
+				break;
 			}
 
 			return false;
 		}
 
 		//----------------------------------------------------------------------------------
-		// CheckedBox implementation
+		// CheckBox implementation
 		//----------------------------------------------------------------------------------
-		CheckBox::CheckBox(uint iID, int iX, int iY, int iWidth, int iHeight, bool bChecked, char* pStr, EDXDialog* pDiag)
+		CheckBox::CheckBox(uint iID, int iX, int iY, int iWidth, int iHeight, bool bChecked, bool* pRefVal, char* pStr, EDXDialog* pDiag)
 			: EDXControl(iID, iX, iY, iWidth, iHeight, pDiag)
 			, mbChecked(bChecked)
 			, mPressed(false)
 			, mBoxSize(6)
+			, mpRefVal(pRefVal)
 		{
 			strcpy_s(mstrText, 256, pStr);
 		}
@@ -539,24 +564,24 @@ namespace EDX
 			int midY = mY + mHeight / 2;
 			if(mbChecked)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, 0, Color::WHITE);
+				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, 2);
+				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, GUIPainter::DEPTH_MID, 2);
 			}
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			GUIPainter::Instance()->DrawString(midX + mBoxSize + 2, midY + 1, mstrText);
+			GUIPainter::Instance()->DrawString(midX + mBoxSize + 2, midY + 1, GUIPainter::DEPTH_MID, mstrText);
 		}
 
 		void CheckBox::UpdateRect()
 		{
 			EDXControl::UpdateRect();
 
-			int imdX = mX + 6;
-			int imdY = mY + mHeight / 2;
-			SetRect(&mrcBoxBBox, imdX - mBoxSize, imdY - mBoxSize, imdX + mBoxSize, imdY + mBoxSize);
+			int midX = mX + 6;
+			int midY = mY + mHeight / 2;
+			SetRect(&mrcBoxBBox, midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize);
 		}
 
 		bool CheckBox::HandleMouse(const MouseEventArgs& mouseArgs)
@@ -581,6 +606,7 @@ namespace EDX
 				{
 					Toggle();
 					mPressed = false;
+					*mpRefVal = GetChecked();
 					return true;
 				}
 				break;
@@ -603,7 +629,7 @@ namespace EDX
 			int imdY = mY + mHeight / 2;
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			GUIPainter::Instance()->DrawString(mX, imdY, mstrText);
+			GUIPainter::Instance()->DrawString(mX, imdY, GUIPainter::DEPTH_MID, mstrText);
 		}
 
 		void Text::SetText(char* pStr)
@@ -615,6 +641,109 @@ namespace EDX
 			}
 
 			strcpy_s(mstrText, 256, pStr);
+		}
+
+		//----------------------------------------------------------------------------------
+		// ComboBox implementation
+		//----------------------------------------------------------------------------------
+		ComboBox::ComboBox(uint iID, int iX, int iY, int iWidth, int iHeight, int initSelectedIdx, int* pRefVal, ComboBoxItem* pItems, int numItems, EDXDialog* pDiag)
+			: EDXControl(iID, iX, iY, iWidth, iHeight, pDiag)
+			, mButtonSize(8)
+			, mpRefVal(pRefVal)
+		{
+			mpItems = new ComboBoxItem[numItems];
+			memcpy(mpItems, pItems, numItems * sizeof(ComboBoxItem));
+
+			mNumItems = numItems;
+			mSelectedIdx = initSelectedIdx;
+		}
+
+		void ComboBox::UpdateRect()
+		{
+			EDXControl::UpdateRect();
+			mBoxMain = mBBox;
+
+			SetRect(&mBoxDropdown, mX, mY + mHeight, mX + mWidth - mHeight, mY + mHeight + 1 + mNumItems * ItemHeight);
+		}
+
+		void ComboBox::Render() const
+		{
+			GUIPainter::Instance()->DrawBorderedRect(mBoxMain.left, mBoxMain.top, mBoxMain.right, mBoxMain.bottom, GUIPainter::DEPTH_MID, 2);
+			GUIPainter::Instance()->DrawBorderedRect(mBoxMain.right - mHeight, mBoxMain.top + 1, mBoxMain.right - 1, mBoxMain.bottom, GUIPainter::DEPTH_MID, 0, Color::WHITE);
+
+			GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glColor4f(0.85f, 0.85f, 0.85f, 1.0f);
+			GUIPainter::Instance()->DrawString(mX + 6, mBoxMain.top + ItemHeight / 2, GUIPainter::DEPTH_MID, mpItems[mSelectedIdx].Label);
+
+			if (mOpened && HasFocus())
+			{
+				GUIPainter::Instance()->DrawBorderedRect(mBoxDropdown.left, mBoxDropdown.top + 1, mBoxDropdown.right, mBoxDropdown.bottom, GUIPainter::DEPTH_NEAR, 0, 0.5f * Color::WHITE);
+
+				int midX = mX + 6;
+				int midY = mBoxDropdown.top + 1 + ItemHeight / 2;
+				for (auto i = 0; i < mNumItems; i++)
+				{
+					if (i == mHoveredIdx)
+					{
+						GUIPainter::Instance()->DrawBorderedRect(mBoxDropdown.left, mBoxDropdown.top + 2 + mHoveredIdx * ItemHeight, mBoxDropdown.right - 1, mBoxDropdown.top + 1 + (mHoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, 0, Color::WHITE);
+
+						GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+						glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
+					}
+					else
+					{
+						GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+						glColor4f(0.85f, 0.85f, 0.85f, 1.0f);
+					}
+
+					GUIPainter::Instance()->DrawString(midX, midY + i * ItemHeight, GUIPainter::DEPTH_NEAR, mpItems[i].Label);
+				}
+			}
+		}
+
+		bool ComboBox::HandleMouse(const MouseEventArgs& mouseArgs)
+		{
+			POINT mousePt;
+			mousePt.x = mouseArgs.x;
+			mousePt.y = mouseArgs.y;
+
+			switch (mouseArgs.Action)
+			{
+			case MouseAction::LButtonDown:
+			case MouseAction::LButtonDbClick:
+				if (PtInRect(&mBBox, mousePt))
+				{
+					if (mOpened)
+					{
+						mSelectedIdx = (mousePt.y - mBBox.top) / ItemHeight;
+						*mpRefVal = mpItems[mSelectedIdx].Value;
+						mpDialog->SendEvent(this);
+					}
+
+					mOpened = !mOpened;
+					if (mOpened)
+					{
+						mBBox = mBoxDropdown;
+						mHoveredIdx = mSelectedIdx;
+					}
+					else
+					{
+						mBBox = mBoxMain;
+					}
+					return true;
+				}
+				break;
+
+			case MouseAction::Move:
+				if (PtInRect(&mBBox, mousePt))
+				{
+					if (mOpened)
+						mHoveredIdx = (mousePt.y - mBBox.top) / ItemHeight;
+				}
+				break;
+			}
+
+			return false;
 		}
 	}
 }
