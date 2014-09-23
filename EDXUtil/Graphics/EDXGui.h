@@ -189,7 +189,7 @@ namespace EDX
 			float* mpRefVal;
 
 		public:
-			static const int Padding = 15;
+			static const int Padding = 20;
 			static const int Width = 140;
 			static const int Height = 10;
 
@@ -273,7 +273,7 @@ namespace EDX
 			int* mpRefVal;
 
 		public:
-			static const int Padding = 25;
+			static const int Padding = 28;
 			static const int Width = 140;
 			static const int Height = 18;
 			static const int ItemHeight = 20;

@@ -136,7 +136,8 @@ namespace EDX
 			glTranslatef(mPosX, mParentHeight - mPosY, 0.0f);
 			glScalef(1.0f, -1.0f, 1.0f);
 
-			glPushAttrib(GL_ENABLE_BIT);
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			glLineWidth(1.0f);
 			glDisable(GL_LIGHTING);
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
@@ -370,7 +371,7 @@ namespace EDX
 			if (mbDown || mHovered)
 				glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
 			else
-				glColor4f(0.85f, 0.85f, 0.85f, 1.0f);
+				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 			GUIPainter::Instance()->DrawString(midX, midY + 1, GUIPainter::DEPTH_MID, mstrText);
 		}
@@ -566,14 +567,9 @@ namespace EDX
 		{
 			int midX = mX + 6;
 			int midY = mY + mHeight / 2;
+			GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, GUIPainter::DEPTH_MID, 2);
 			if(mbChecked)
-			{
-				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, GUIPainter::DEPTH_MID, 0, Color::WHITE);
-			}
-			else
-			{
-				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, GUIPainter::DEPTH_MID, 2);
-			}
+				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize + 1, midY - mBoxSize + 2, midX + mBoxSize - 2, midY + mBoxSize - 1, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			GUIPainter::Instance()->DrawString(midX + mBoxSize + 2, midY + 1, GUIPainter::DEPTH_MID, mstrText);
@@ -676,7 +672,7 @@ namespace EDX
 			GUIPainter::Instance()->DrawBorderedRect(mBoxMain.right - mHeight, mBoxMain.top + 1, mBoxMain.right - 1, mBoxMain.bottom, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 
 			GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
-			glColor4f(0.85f, 0.85f, 0.85f, 1.0f);
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			GUIPainter::Instance()->DrawString(mX + 6, mBoxMain.top + ItemHeight / 2, GUIPainter::DEPTH_MID, mpItems[mSelectedIdx].Label);
 
 			if (mOpened && HasFocus())
@@ -697,7 +693,7 @@ namespace EDX
 					else
 					{
 						GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
-						glColor4f(0.85f, 0.85f, 0.85f, 1.0f);
+						glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 					}
 
 					GUIPainter::Instance()->DrawString(midX, midY + i * ItemHeight, GUIPainter::DEPTH_NEAR, mpItems[i].Label);

@@ -9,15 +9,15 @@ using namespace EDX::GUI;
 
 EDXDialog		gDialog;
 
-double mAmp;
-double mPhase;
-double mPeriod;
-double mConst;
-double mTotalPeriod;
-double mStraightLength;
-double mHalfRatio;
-bool mMod;
 double PI = 3.141592653f;
+double mAmp = 250;
+float mPhase = 0;
+double mPeriod = 500;
+double mConst = 500;
+double mTotalPeriod = 500;
+float mStraightLength = 0;
+float mHalfRatio = 0.5;
+bool mMod;
 
 double TimeWarp(double time)
 {
@@ -151,16 +151,16 @@ void OnInit(Object* pSender, EventArgs args)
 {
 	GL::LoadGLExtensions();
 
-	glClearColor(0.4f, 0.5f, 0.65f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClearDepth(1.0f);
 	gDialog.Init(1280, 800);
 
 	gDialog.AddText(0, "GUI Test");
-	gDialog.AddCheckBox(1, false, &gChecked, "Check Box");
+	gDialog.AddCheckBox(1, mMod, &mMod, "Mod");
 	gDialog.AddButton(2, "Button");
-
-	gDialog.AddPadding(20);
-	gDialog.AddSlider(3, 0.0f, 100.0f, 0.5f, &gSlide, "Values: ");
+	gDialog.AddSlider(3, 0.0f, 6.28f, mPhase, &mPhase, "Phase: ");
+	gDialog.AddSlider(3, 0.0f, 1.0f, mHalfRatio, &mHalfRatio, "Half Ratio: ");
+	gDialog.AddSlider(4, 0.0f, mTotalPeriod, mStraightLength, &mStraightLength, "Motionless: ");
 
 	ComboBoxItem items[] = {
 			{ 0, "Item 1" },
@@ -175,12 +175,33 @@ void OnRender(Object* pSender, EventArgs args)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	int elevation = 500;
+	glLineWidth(3.0f);
+	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+	glBegin(GL_LINE_STRIP);
+
+	for (auto i = 0; i < 1000; i++)
+	{
+		glVertex2f(i, evaluateValueEdward(i));
+	}
+	glEnd();
+
 	gDialog.Render();
 }
 
 void OnResize(Object* pSender, ResizeEventArgs args)
 {
 	glViewport(0, 0, args.Width, args.Height);
+
+	// Set opengl params
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, args.Width, 0, args.Height, -1, 1);
+
+	glMatrixMode(GL_MODELVIEW);
 
 	gDialog.Resize(args.Width, args.Height);
 }
