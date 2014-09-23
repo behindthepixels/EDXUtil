@@ -139,6 +139,7 @@ namespace EDX
 			glPushAttrib(GL_ENABLE_BIT);
 			glDisable(GL_LIGHTING);
 			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
 			GL::glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
@@ -299,6 +300,8 @@ namespace EDX
 			{
 				if (mpFocusControl->HandleMouse(offsettedArgs))
 					return true;
+				else if (offsettedArgs.Action == MouseAction::LButtonDown)
+					mpFocusControl->ResetFocus();
 			}
 
 			POINT mousePt;
@@ -307,20 +310,27 @@ namespace EDX
 			EDXControl* pControl = GetControlAtPoint(mousePt);
 			if (pControl)
 			{
-				if (mpFocusControl && offsettedArgs.Action == MouseAction::LButtonDown)
-					mpFocusControl->ResetFocus();
+				if (mpHoveredControl != pControl)
+				{
+					if (mpHoveredControl)
+						mpHoveredControl->OnMouseOut();
+					mpHoveredControl = pControl;
+					mpHoveredControl->OnMouseIn();
+				}
 
 				if (offsettedArgs.Action == MouseAction::LButtonDown)
 					pControl->SetFocus();
 
 				if (pControl->HandleMouse(offsettedArgs))
-				{
 					return true;
-				}
 			}
-			else if (mpFocusControl && offsettedArgs.Action == MouseAction::LButtonDown)
+			else
 			{
-				mpFocusControl->ResetFocus();
+				if (mpHoveredControl)
+				{
+					mpHoveredControl->OnMouseOut();
+					mpHoveredControl = nullptr;
+				}
 			}
 
 			return false;
@@ -333,7 +343,6 @@ namespace EDX
 			: EDXControl(iID, iX, iY, iWidth, iHeight, pDiag)
 			, mbDown(false)
 			, mPressed(false)
-			, mbHovered(false)
 		{
 			strcpy_s(mstrText, 256, pStr);
 		}
@@ -344,7 +353,7 @@ namespace EDX
 			{
 				GUIPainter::Instance()->DrawBorderedRect(mBBox.left + 1, mBBox.top + 1, mBBox.right - 1, mBBox.bottom - 1, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 			}
-			else if(mbHovered)
+			else if(mHovered)
 			{
 				GUIPainter::Instance()->DrawBorderedRect(mBBox.left - 1, mBBox.top - 1, mBBox.right + 1, mBBox.bottom + 1, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 			}
@@ -358,7 +367,7 @@ namespace EDX
 
 
 			GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
-			if (mbDown || mbHovered)
+			if (mbDown || mHovered)
 				glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
 			else
 				glColor4f(0.85f, 0.85f, 0.85f, 1.0f);
@@ -386,9 +395,9 @@ namespace EDX
 			case MouseAction::LButtonUp:
 				if (PtInRect(&mBBox, mousePt) && mbDown)
 				{
-					mbDown = false;
 					Trigger();
 				}
+				mbDown = false;
 				mPressed = false;
 
 				return true;
@@ -398,22 +407,17 @@ namespace EDX
 			case MouseAction::Move:
 				if (PtInRect(&mBBox, mousePt))
 				{
-					SetFocus();
-
-					if(!mPressed)
-						mbHovered = true;
-					else
+					if (mPressed)
+					{
 						mbDown = true;
+						return true;
+					}
 				}
-				else
+				else if (mPressed)
 				{
-					if(!mPressed)
-						ResetFocus();
-
 					mbDown = false;
-					mbHovered = false;
+					return true;
 				}
-				return true;
 
 				break;	
 			}
@@ -685,7 +689,7 @@ namespace EDX
 				{
 					if (i == mHoveredIdx)
 					{
-						GUIPainter::Instance()->DrawBorderedRect(mBoxDropdown.left, mBoxDropdown.top + 2 + mHoveredIdx * ItemHeight, mBoxDropdown.right - 1, mBoxDropdown.top + 1 + (mHoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, 0, Color::WHITE);
+						GUIPainter::Instance()->DrawBorderedRect(mBoxDropdown.left, mBoxDropdown.top + 2 + mHoveredIdx * ItemHeight, mBoxDropdown.right - 1, mBoxDropdown.top + 1 + (mHoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, 0, 0.85f * Color::WHITE);
 
 						GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 						glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
@@ -730,6 +734,12 @@ namespace EDX
 					{
 						mBBox = mBoxMain;
 					}
+					return true;
+				}
+				if (PtInRect(&mBoxMain, mousePt))
+				{
+					mOpened = !mOpened;
+					mBBox = mBoxMain;
 					return true;
 				}
 				break;

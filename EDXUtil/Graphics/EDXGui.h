@@ -58,6 +58,7 @@ namespace EDX
 		private:
 			vector<RefPtr<EDXControl>> mvControls;
 			EDXControl* mpFocusControl;
+			EDXControl* mpHoveredControl;
 
 			int mPosX, mPosY;
 			int mParentWidth, mParentHeight;
@@ -72,6 +73,8 @@ namespace EDX
 			EDXDialog()
 				: mPaddingX(30)
 				, mPaddingY(30)
+				, mpFocusControl(nullptr)
+				, mpHoveredControl(nullptr)
 			{
 			}
 			~EDXDialog()
@@ -88,7 +91,7 @@ namespace EDX
 			void Release();
 
 			void SetFocusControl(EDXControl* pControl) { mpFocusControl = pControl; }
-			void ResetFocusControl() { mpFocusControl = NULL; }
+			void ResetFocusControl() { mpFocusControl = nullptr; }
 
 			EDXControl* GetControlAtPoint(const POINT& pt) const;
 			EDXControl* GetControlWithID(uint ID) const;
@@ -111,6 +114,7 @@ namespace EDX
 			int mWidth, mHeight;
 			RECT mBBox;
 			bool mHasFocus;
+			bool mHovered;
 
 			uint mID;
 			EDXDialog* mpDialog;
@@ -129,12 +133,15 @@ namespace EDX
 
 			uint GetID() const { return mID; }
 			virtual void Render() const = 0;
-			virtual void OnResetFocus() {}
 			void SetFocus() { mHasFocus = true; mpDialog->SetFocusControl(this); }
 			void ResetFocus() { OnResetFocus(); mHasFocus = false; mpDialog->ResetFocusControl(); }
 			bool HasFocus() const { return mHasFocus; }
 			virtual void UpdateRect() { SetRect(&mBBox, mX, mY, mX + mWidth, mY + mHeight); }
 			virtual bool ContainsPoint(const POINT& pt) const { return PtInRect(&mBBox, pt); }
+
+			virtual void OnResetFocus() {}
+			virtual void OnMouseIn() { mHovered = true; }
+			virtual void OnMouseOut() { mHovered = false; }
 
 			virtual bool HandleMouse(const MouseEventArgs& mouseArgs) { return false; }
 		};
@@ -145,7 +152,6 @@ namespace EDX
 			char mstrText[256];
 			bool mbDown;
 			bool mPressed;
-			bool mbHovered;
 
 		public:
 			static const int Padding = 40;
@@ -267,7 +273,7 @@ namespace EDX
 			int* mpRefVal;
 
 		public:
-			static const int Padding = 40;
+			static const int Padding = 25;
 			static const int Width = 140;
 			static const int Height = 18;
 			static const int ItemHeight = 20;
