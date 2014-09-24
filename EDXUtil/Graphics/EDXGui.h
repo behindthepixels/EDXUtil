@@ -61,18 +61,20 @@ namespace EDX
 			EDXControl* mpHoveredControl;
 
 			int mPosX, mPosY;
+			int mWidth, mHeight;
 			int mParentWidth, mParentHeight;
 
-			int mWidth, mHeight;
 			const int mPaddingX;
 			int mPaddingY;
 
+			bool mVisible;
 			NotifyEvent mCallbackEvent;
 
 		public:
 			EDXDialog()
 				: mPaddingX(30)
 				, mPaddingY(30)
+				, mVisible(true)
 				, mpFocusControl(nullptr)
 				, mpHoveredControl(nullptr)
 			{
@@ -105,6 +107,8 @@ namespace EDX
 			{
 				mPaddingY += padding;
 			}
+
+			void ToggleVisible() { mVisible = !mVisible; }
 		};
 
 		class EDXControl : public Object

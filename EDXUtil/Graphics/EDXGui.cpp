@@ -125,6 +125,9 @@ namespace EDX
 
 		void EDXDialog::Render() const
 		{
+			if (!mVisible)
+				return;
+
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
@@ -293,6 +296,9 @@ namespace EDX
 
 		bool EDXDialog::MsgProc(const MouseEventArgs& mouseArgs)
 		{
+			if (!mVisible)
+				return false;
+
 			MouseEventArgs offsettedArgs = mouseArgs;
 			offsettedArgs.x -= mPosX;
 			offsettedArgs.y -= mPosY;
