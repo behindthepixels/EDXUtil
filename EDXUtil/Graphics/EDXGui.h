@@ -50,7 +50,6 @@ namespace EDX
 			void DrawString(int x, int y, float depth, const char* strText);
 		};
 
-		typedef Event<Object*, NotifyEvent> ControlEvent;
 		class EDXControl;
 
 		class EDXDialog : public Object
@@ -233,7 +232,7 @@ namespace EDX
 			void Render() const;
 			bool GetChecked() const { return mbChecked; }
 			void UpdateRect();
-			void Toggle() { mbChecked = !mbChecked; mpDialog->SendEvent(this); }
+			void Toggle() { mbChecked = !mbChecked; }
 			bool HandleMouse(const MouseEventArgs& mouseArgs);
 		};
 

@@ -6,6 +6,7 @@ namespace EDX
 	HINSTANCE Application::InstHandle = NULL;
 	const wchar_t* Application::WinClassName = L"EDXWinClass";
 	Window* Application::pMainWindow = nullptr;
+	char Application::BaseDirectory[MAX_PATH] = "";
 
 	int Application::Run(Window* pWindow)
 	{

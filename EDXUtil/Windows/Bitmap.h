@@ -14,6 +14,7 @@ namespace EDX
 	{
 	public:
 		static void SaveBitmapFile(const char* strFilename, const float* pData, int iWidth, int iHeight, ImageFormat format = EDX_RGBA_32);
+		static void SaveBitmapFile(const char* strFilename, const _byte* pData, int iWidth, int iHeight);
 		static class Color* ReadFromFileFloat(const char* strFile, int* pWidth, int* pHeight, int* pChannel);
 		static _byte* ReadFromFileByte(const char* strFile, int* pWidth, int* pHeight, int* pChannel);
 	};

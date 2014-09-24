@@ -613,6 +613,7 @@ namespace EDX
 					Toggle();
 					mPressed = false;
 					*mpRefVal = GetChecked();
+					mpDialog->SendEvent(this);
 					return true;
 				}
 				break;

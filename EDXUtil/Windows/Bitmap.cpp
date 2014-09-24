@@ -63,9 +63,66 @@ namespace EDX
 
 		FILE* pFile = NULL;
 		fopen_s(&pFile, strFilename, "wb");
+		assert(pFile);
 
-		if (pFile == NULL)
-			return;
+
+		fwrite(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), pFile);
+		fwrite(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), pFile);
+
+		fwrite(pPixels, 1, iSize, pFile);
+		fclose(pFile);
+
+		SafeDeleteArray(pPixels);
+	}
+
+	void Bitmap::SaveBitmapFile(const char* strFilename, const _byte* pData, int iWidth, int iHeight)
+	{
+		int iPixelBytes = 4;
+		int iSize = iWidth * iHeight * iPixelBytes; // the byte of pixel, data size
+
+		const float fInvGamma = 1.f / 2.2f; // Gamma
+
+		unsigned char* pPixels = new unsigned char[iSize];
+		for (int i = 0; i < iHeight; i++)
+		{
+			for (int j = 0; j < iWidth; j++)
+			{
+				int iIndex = iPixelBytes * (i * iWidth + j);
+				pPixels[iIndex + 0] = pData[iIndex + 2];
+				pPixels[iIndex + 1] = pData[iIndex + 1];
+				pPixels[iIndex + 2] = pData[iIndex + 0];
+				pPixels[iIndex + 3] = pData[iIndex + 3];
+			}
+		}
+
+		// Bmp first part, file information
+		BITMAPFILEHEADER bmpHeader;
+		bmpHeader.bfType = 0x4d42; //Bmp
+		bmpHeader.bfSize = iSize // data size
+			+ sizeof(BITMAPFILEHEADER) // first section size
+			+ sizeof(BITMAPINFOHEADER); // second section size
+
+		bmpHeader.bfReserved1 = 0; // reserved 
+		bmpHeader.bfReserved2 = 0; // reserved
+		bmpHeader.bfOffBits = bmpHeader.bfSize - iSize;
+
+		// Bmp second part, data information
+		BITMAPINFOHEADER bmpInfo;
+		bmpInfo.biSize = sizeof(BITMAPINFOHEADER);
+		bmpInfo.biWidth = iWidth;
+		bmpInfo.biHeight = iHeight;
+		bmpInfo.biPlanes = 1;
+		bmpInfo.biBitCount = 8 * iPixelBytes;
+		bmpInfo.biCompression = 0;
+		bmpInfo.biSizeImage = iSize;
+		bmpInfo.biXPelsPerMeter = 0;
+		bmpInfo.biYPelsPerMeter = 0;
+		bmpInfo.biClrUsed = 0;
+		bmpInfo.biClrImportant = 0;
+
+		FILE* pFile = NULL;
+		fopen_s(&pFile, strFilename, "wb");
+		assert(pFile);
 
 		fwrite(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), pFile);
 		fwrite(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), pFile);
