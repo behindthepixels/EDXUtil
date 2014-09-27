@@ -5,8 +5,6 @@
 #include "../Windows/Application.h"
 #include "../Windows/Window.h"
 
-#include "OpenGL.h"
-
 namespace EDX
 {
 	namespace GUI
@@ -20,8 +18,25 @@ namespace EDX
 		const float GUIPainter::DEPTH_MID = 0.6f;
 		const float GUIPainter::DEPTH_NEAR = 0.4f;
 
+		const char* VertexShaderSource =
+		   "varying vec2 texCoord;\
+			void main()\
+			{\
+				gl_Position = gl_Vertex;\
+				texCoord = gl_MultiTexCoord0.xy;\
+			}";
+		const char* FragmentShaderSource =
+		   "uniform sampler2D texSampler;\
+			varying vec2 texCoord;\
+			void main()\
+			{\
+				vec4 tex = texture2D(texSampler, texCoord);\
+				gl_FragColor = vec4(tex.rgb, 1.0);\
+			}";
+
 		GUIPainter::GUIPainter()
 		{
+			// Initialize font
 			HFONT	font;
 			HFONT	oldfont;
 
@@ -47,6 +62,68 @@ namespace EDX
 
 			SelectObject(hDC, oldfont);
 			DeleteObject(font);
+
+			// Load shaders
+			mVertexShader.Load(ShaderType::VertexShader, VertexShaderSource);
+			mBlurFragmentShader.Load(ShaderType::FragmentShader, FragmentShaderSource);
+			mProgram.AttachShader(&mVertexShader);
+			mProgram.AttachShader(&mBlurFragmentShader);
+			mProgram.Link();
+		}
+
+		void GUIPainter::Resize(int width, int height)
+		{
+			mFBWidth = width;
+			mFBHeight = height;
+			// Init background texture
+			mBackgroundTexStorage.Init(width, height);
+
+			mColorRBO.SetStorage(width, height, ImageFormat::RGBA);
+			mFBO.Attach(FrameBufferAttachment::Color0, &mColorRBO);
+		}
+
+		void GUIPainter::BlurBackgroundTexture()
+		{
+			glReadPixels(0, 0, mFBWidth, mFBHeight, (int)ImageFormat::RGBA, (int)ImageDataType::Byte, (void*)mBackgroundTexStorage.ModifiableData());
+			mBackgroundTex.Load(ImageFormat::RGBA, ImageFormat::RGBA, ImageDataType::Byte, (void*)mBackgroundTexStorage.Data(), mFBWidth, mFBHeight);
+
+			mFBO.SetTarget(FrameBufferTarget::Draw);
+			mFBO.Bind();
+
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			mProgram.Use();
+			mProgram.SetUniform("texSampler", 0);
+
+			mBackgroundTex.Bind();
+			mBackgroundTex.SetFilter(TextureFilter::Nearest);
+			glBegin(GL_QUADS);
+
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex3f(-1.0f, -1.0f, DEPTH_FAR);
+
+			glTexCoord2f(1.0f, 0.0f);
+			glVertex3f(1.0f, -1.0f, DEPTH_FAR);
+
+			glTexCoord2f(1.0f, 1.0f);
+			glVertex3f(1.0f, 1.0f, DEPTH_FAR);
+
+			glTexCoord2f(0.0f, 1.0f);
+			glVertex3f(-1.0f, 1.0f, DEPTH_FAR);
+
+			glEnd();
+
+			mProgram.Unuse();
+			mBackgroundTex.UnBind();
+			mFBO.UnBind();
+		}
+
+		void GUIPainter::DrawBackgroundTexture(int x0, int y0, int x1, int y1)
+		{
+			mFBO.SetTarget(FrameBufferTarget::Read);
+			mFBO.Bind();
+
+			GL::glBlitFramebuffer(x0, y0, x1, y1, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 
 		void GUIPainter::DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize, const Color& interiorColor, const Color& borderColor)
@@ -128,6 +205,8 @@ namespace EDX
 			if (!mVisible)
 				return;
 
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
@@ -136,12 +215,18 @@ namespace EDX
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadIdentity();
+
+			// Render the blurred background texture
+			glEnable(GL_TEXTURE_2D);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_DEPTH_TEST);
+			GUIPainter::Instance()->BlurBackgroundTexture();
+			GUIPainter::Instance()->DrawBackgroundTexture(mPosX, mPosY, mPosX + mWidth, mPosY + mHeight);
+
 			glTranslatef(mPosX, mParentHeight - mPosY, 0.0f);
 			glScalef(1.0f, -1.0f, 1.0f);
 
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
 			glLineWidth(1.0f);
-			glDisable(GL_LIGHTING);
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
 			glEnable(GL_BLEND);
@@ -156,19 +241,22 @@ namespace EDX
 				mvControls[i]->Render();
 			}
 
-			glPopAttrib();
 			glPopMatrix();
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
+
+			glPopAttrib();
 		}
 
-		void EDXDialog::Resize(int iWidth, int iHeight)
+		void EDXDialog::Resize(int width, int height)
 		{
-			mParentWidth = iWidth;
-			mParentHeight = iHeight;
+			mParentWidth = width;
+			mParentHeight = height;
 
 			mPosX = mParentWidth - mWidth;
 			mPosY = 0;
+
+			GUIPainter::Instance()->Resize(width, height);
 		}
 
 		void EDXDialog::Release()

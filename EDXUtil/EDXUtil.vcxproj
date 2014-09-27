@@ -48,6 +48,7 @@
     <ClInclude Include="Windows\Application.h" />
     <ClInclude Include="Windows\Base.h" />
     <ClInclude Include="Windows\Bitmap.h" />
+    <ClInclude Include="Windows\Debug.h" />
     <ClInclude Include="Windows\Event.h" />
     <ClInclude Include="Windows\Thread.h" />
     <ClInclude Include="Windows\Timer.h" />

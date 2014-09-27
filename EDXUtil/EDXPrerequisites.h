@@ -24,6 +24,7 @@ using std::min;
 using std::max;
 using std::swap;
 using std::sort;
+#include <exception>
 
 namespace EDX
 {

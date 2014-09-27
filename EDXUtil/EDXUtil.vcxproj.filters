@@ -132,6 +132,9 @@
     <ClInclude Include="Graphics\OpenGL.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Windows\Debug.h">
+      <Filter>Source Files\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">

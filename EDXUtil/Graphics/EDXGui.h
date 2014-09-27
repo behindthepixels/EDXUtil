@@ -3,17 +3,35 @@
 #include "../EDXPrerequisites.h"
 #include "../Windows/Event.h"
 #include "Color.h"
+#include "../Memory/Array.h"
 #include "../Memory/RefPtr.h"
+
+#include "OpenGL.h"
 
 namespace EDX
 {
+	using namespace OpenGL;
+
 	namespace GUI
 	{
 		class GUIPainter
 		{
 		private:
+			// Singleton handle
 			static GUIPainter* mpInstance;
+
 			int mTextListBase;
+			int mFBWidth, mFBHeight;
+
+			OpenGL::Texture2D mBackgroundTex;
+			Array<2, Color4b> mBackgroundTexStorage;
+
+			FrameBuffer mFBO;
+			RenderBuffer mColorRBO;
+
+			Shader mVertexShader;
+			Shader mBlurFragmentShader;
+			Program mProgram;
 
 		public:
 			static const float DEPTH_FAR;
@@ -42,6 +60,10 @@ namespace EDX
 					mpInstance = nullptr;
 				}
 			}
+
+			void Resize(int width, int height);
+			void BlurBackgroundTexture();
+			void DrawBackgroundTexture(int x0, int y0, int x1, int y1);
 
 			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth);
 			void DrawLineStrip(int iX0, int iY0, int iX1, int iY1);

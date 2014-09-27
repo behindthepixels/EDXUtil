@@ -183,7 +183,7 @@ void OnRender(Object* pSender, EventArgs args)
 	glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
 	glBegin(GL_LINE_STRIP);
 
-	for (auto i = 0; i < 1000; i++)
+	for (auto i = 0; i < 1500; i++)
 	{
 		glVertex2f(i, evaluateValueEdward(i));
 	}
