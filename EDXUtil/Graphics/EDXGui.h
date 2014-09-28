@@ -24,7 +24,6 @@ namespace EDX
 			int mFBWidth, mFBHeight;
 
 			OpenGL::Texture2D mBackgroundTex;
-			Array<2, Color4b> mBackgroundTexStorage;
 
 			FrameBuffer mFBO;
 			RenderBuffer mColorRBO;
@@ -34,7 +33,7 @@ namespace EDX
 			Program mProgram;
 
 			// Gaussian blur weights and offsets
-			static const int BLUR_SAMPLE = 16;
+			static const int BLUR_SAMPLE = 13;
 			float mGaussianWeights[BLUR_SAMPLE];
 			Vector2 mGaussianOffsets[BLUR_SAMPLE];
 

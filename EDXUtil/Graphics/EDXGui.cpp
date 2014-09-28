@@ -18,27 +18,27 @@ namespace EDX
 		const float GUIPainter::DEPTH_MID = 0.6f;
 		const float GUIPainter::DEPTH_NEAR = 0.4f;
 
-		const char* GUIPainter::ScreenQuadVertShaderSource =
-		   "varying vec2 texCoord;\
-			void main()\
-			{\
-				gl_Position = gl_Vertex;\
-				texCoord = gl_MultiTexCoord0.xy;\
-			}";
-		const char* GUIPainter::GaussianBlurFragShaderSource =
-		   "uniform sampler2D texSampler;\
-			uniform float weights[16];\
-			uniform vec2 offsets[16];\
-			varying vec2 texCoord;\
-			void main()\
-			{\
-				vec4 sample = 0.0f;\
-				for(int i = 0; i < 13; i++)\
-				{\
-					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 3);\
-				}\
-				gl_FragColor = vec4(sample.rgb, 1.0);\
-			}";
+		const char* GUIPainter::ScreenQuadVertShaderSource = R"(
+		    varying vec2 texCoord;
+			void main()
+			{
+				gl_Position = gl_Vertex;
+				texCoord = gl_MultiTexCoord0.xy;
+			})";
+		const char* GUIPainter::GaussianBlurFragShaderSource = R"(
+			uniform sampler2D texSampler;
+			uniform float weights[13];
+			uniform vec2 offsets[13];
+			varying vec2 texCoord;
+			void main()
+			{
+				vec4 sample = 0.0f;
+				for(int i = 0; i < 13; i++)
+				{
+					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 3);
+				}
+				gl_FragColor = vec4(sample.rgb, 1.0);
+			})";
 
 		GUIPainter::GUIPainter()
 		{
@@ -81,10 +81,9 @@ namespace EDX
 		{
 			mFBWidth = width;
 			mFBHeight = height;
-			// Init background texture
-			mBackgroundTexStorage.Init(width, height);
 
-			mColorRBO.SetStorage(width, height, ImageFormat::RGBA);
+			// Init background texture
+			mColorRBO.SetStorage(width >> 3, height >> 3, ImageFormat::RGBA);
 			mFBO.Attach(FrameBufferAttachment::Color0, &mColorRBO);
 
 			CalcGaussianBlurWeightsAndOffsets();
@@ -106,6 +105,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Draw);
 			mFBO.Bind();
 
+			glViewport(0, 0, mFBWidth >> 3, mFBHeight >> 3);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			mProgram.Use();
@@ -134,6 +134,8 @@ namespace EDX
 			mProgram.Unuse();
 			mBackgroundTex.UnBind();
 			mFBO.UnBind();
+
+			glViewport(0, 0, mFBWidth, mFBHeight);
 		}
 
 		void GUIPainter::DrawBackgroundTexture(int x0, int y0, int x1, int y1)
@@ -141,7 +143,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Read);
 			mFBO.Bind();
 
-			GL::glBlitFramebuffer(x0, y0, x1, y1, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			GL::glBlitFramebuffer(x0 >> 3, y0 >> 3, x1 >> 3, y1 >> 3, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 			mFBO.UnBind();
 		}

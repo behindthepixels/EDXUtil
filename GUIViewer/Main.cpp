@@ -58,7 +58,7 @@ void OnInit(Object* pSender, EventArgs args)
 
 	int channel;
 	string c = Application::GetBaseDirectory();
-	c += "\\SM.jpg";
+	c += "\\Sponza.jpg";
 	gImage = Bitmap::ReadFromFileByte(c.c_str(), &gWidth, &gHeight, &channel);
 	assert(gImage);
 }
@@ -113,7 +113,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdArgs, int cmdS
 	mainWindow->SetMouseHandler(MouseEvent(OnMouseEvent));
 	mainWindow->SetRelease(NotifyEvent(OnRelease));
 
-	mainWindow->Create(L"EDXGui", 960, 600);
+	mainWindow->Create(L"EDXGui", 1280, 800);
 
 	Application::Run(mainWindow);
 
