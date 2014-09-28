@@ -33,6 +33,14 @@ namespace EDX
 			Shader mBlurFragmentShader;
 			Program mProgram;
 
+			// Gaussian blur weights and offsets
+			static const int BLUR_SAMPLE = 16;
+			float mGaussianWeights[BLUR_SAMPLE];
+			Vector2 mGaussianOffsets[BLUR_SAMPLE];
+
+			static const char* GUIPainter::ScreenQuadVertShaderSource;
+			static const char* GUIPainter::GaussianBlurFragShaderSource;
+
 		public:
 			static const float DEPTH_FAR;
 			static const float DEPTH_MID;
@@ -62,7 +70,7 @@ namespace EDX
 			}
 
 			void Resize(int width, int height);
-			void BlurBackgroundTexture();
+			void BlurBackgroundTexture(int x0, int y0, int x1, int y1);
 			void DrawBackgroundTexture(int x0, int y0, int x1, int y1);
 
 			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth);
@@ -70,6 +78,9 @@ namespace EDX
 			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize,
 				const Color& interiorColor = Color::BLACK, const Color& borderColor = Color::WHITE);
 			void DrawString(int x, int y, float depth, const char* strText);
+
+		private:
+			void CalcGaussianBlurWeightsAndOffsets();
 		};
 
 		class EDXControl;

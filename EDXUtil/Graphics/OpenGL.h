@@ -34,7 +34,9 @@ namespace EDX
 			static PFNGLGETSHADERIVPROC								glGetShaderiv;
 			static PFNGLGETPROGRAMIVPROC							glGetProgramiv;
 			static PFNGLUNIFORM1FPROC								glUniform1f;
+			static PFNGLUNIFORM1FVPROC								glUniform1fv;
 			static PFNGLUNIFORM2FPROC								glUniform2f;
+			static PFNGLUNIFORM2FVPROC								glUniform2fv;
 			static PFNGLUNIFORM3FPROC								glUniform3f;
 			static PFNGLUNIFORM4FPROC								glUniform4f;
 			static PFNGLUNIFORM1IPROC								glUniform1i;
@@ -102,7 +104,9 @@ namespace EDX
 				glGetShaderiv = (PFNGLGETSHADERIVPROC)wglGetProcAddress("glGetShaderiv");
 				glGetProgramiv = (PFNGLGETPROGRAMIVPROC)wglGetProcAddress("glGetProgramiv");
 				glUniform1f = (PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f");
+				glUniform1fv = (PFNGLUNIFORM1FVPROC)wglGetProcAddress("glUniform1fv");
 				glUniform2f = (PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f");
+				glUniform2fv = (PFNGLUNIFORM2FVPROC)wglGetProcAddress("glUniform2fv");
 				glUniform3f = (PFNGLUNIFORM3FPROC)wglGetProcAddress("glUniform3f");
 				glUniform4f = (PFNGLUNIFORM4FPROC)wglGetProcAddress("glUniform4f");
 				glUniform1i = (PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i");
@@ -210,6 +214,9 @@ namespace EDX
 			void SetUniform(const char* name, const Vector3& value);
 			void SetUniform(const char* name, const Vector4& value);
 			void SetUniform(const char* name, const Matrix& value, bool transpose = false);
+			void SetUniform(const char * name, const int* value, int count);
+			void SetUniform(const char * name, const float* value, int count);
+			void SetUniform(const char * name, const Vector2* value, int count);
 			void BindFragDataLocation(const char * name, int loc);
 			void Use();
 			static void Unuse();
@@ -302,6 +309,12 @@ namespace EDX
 			{
 				Bind();
 				glGetTexImage(Target, 0, (int)outputFormat, (int)type, data);
+			}
+			void ReadFromFrameBuffer(ImageFormat internalFormat, int width, int height)
+			{
+				Bind();
+				glCopyTexImage2D(Target, 0, (int)internalFormat, 0, 0, width, height, 0);
+				GL::glGenerateMipmap(Target);
 			}
 			void SetFilter(TextureFilter filter)
 			{
@@ -428,11 +441,13 @@ namespace EDX
 			{
 				Bind();
 				GL::glFramebufferRenderbuffer(mTarget, (int)attachment, GL_RENDERBUFFER, renderBuffer->GetHandle());
+				UnBind();
 			}
 			void Attach(FrameBufferAttachment attachment, Texture2D* texture, int level = 0)
 			{
 				Bind();
 				GL::glFramebufferTexture2D(mTarget, (int)attachment, GL_TEXTURE_2D, texture->GetHandle(), level);
+				UnBind();
 			}
 			void Bind()
 			{

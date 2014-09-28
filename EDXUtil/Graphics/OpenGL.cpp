@@ -21,7 +21,9 @@ namespace EDX
 		PFNGLGETSHADERIVPROC							GL::glGetShaderiv;
 		PFNGLGETPROGRAMIVPROC							GL::glGetProgramiv;
 		PFNGLUNIFORM1FPROC								GL::glUniform1f;
+		PFNGLUNIFORM1FVPROC								GL::glUniform1fv;
 		PFNGLUNIFORM2FPROC								GL::glUniform2f;
+		PFNGLUNIFORM2FVPROC								GL::glUniform2fv;
 		PFNGLUNIFORM3FPROC								GL::glUniform3f;
 		PFNGLUNIFORM4FPROC								GL::glUniform4f;
 		PFNGLUNIFORM1IPROC								GL::glUniform1i;
@@ -175,6 +177,24 @@ namespace EDX
 		{
 			int loc = GL::glGetUniformLocation(mHandle, name);
 			GL::glUniform4f(loc, value.x, value.y, value.z, value.w);
+		}
+
+		void Program::SetUniform(const char * name, const int* value, int count)
+		{
+			int loc = GL::glGetUniformLocation(mHandle, name);
+			GL::glUniform1iv(loc, count, value);
+		}
+
+		void Program::SetUniform(const char * name, const float* value, int count)
+		{
+			int loc = GL::glGetUniformLocation(mHandle, name);
+			GL::glUniform1fv(loc, count, value);
+		}
+
+		void Program::SetUniform(const char * name, const Vector2* value, int count)
+		{
+			int loc = GL::glGetUniformLocation(mHandle, name);
+			GL::glUniform2fv(loc, count, (float*)value);
 		}
 
 		void Program::SetUniform(const char * name, const Matrix& value, bool transpose)

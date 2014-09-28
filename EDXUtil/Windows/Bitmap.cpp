@@ -13,7 +13,7 @@
 namespace EDX
 {
 	// write data to bmp file
-	void Bitmap::SaveBitmapFile(const char* strFilename, const float* pData, int iWidth, int iHeight, ImageFormat format)
+	void Bitmap::SaveBitmapFile(const char* strFilename, const float* pData, int iWidth, int iHeight, EDXImageFormat format)
 	{
 		int iPixelBytes = int(format);
 		int iSize = iWidth * iHeight * iPixelBytes; // the byte of pixel, data size

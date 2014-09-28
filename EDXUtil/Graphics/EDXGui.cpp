@@ -18,20 +18,26 @@ namespace EDX
 		const float GUIPainter::DEPTH_MID = 0.6f;
 		const float GUIPainter::DEPTH_NEAR = 0.4f;
 
-		const char* VertexShaderSource =
+		const char* GUIPainter::ScreenQuadVertShaderSource =
 		   "varying vec2 texCoord;\
 			void main()\
 			{\
 				gl_Position = gl_Vertex;\
 				texCoord = gl_MultiTexCoord0.xy;\
 			}";
-		const char* FragmentShaderSource =
+		const char* GUIPainter::GaussianBlurFragShaderSource =
 		   "uniform sampler2D texSampler;\
+			uniform float weights[16];\
+			uniform vec2 offsets[16];\
 			varying vec2 texCoord;\
 			void main()\
 			{\
-				vec4 tex = texture2D(texSampler, texCoord);\
-				gl_FragColor = vec4(tex.rgb, 1.0);\
+				vec4 sample = 0.0f;\
+				for(int i = 0; i < 13; i++)\
+				{\
+					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 3);\
+				}\
+				gl_FragColor = vec4(sample.rgb, 1.0);\
 			}";
 
 		GUIPainter::GUIPainter()
@@ -64,8 +70,8 @@ namespace EDX
 			DeleteObject(font);
 
 			// Load shaders
-			mVertexShader.Load(ShaderType::VertexShader, VertexShaderSource);
-			mBlurFragmentShader.Load(ShaderType::FragmentShader, FragmentShaderSource);
+			mVertexShader.Load(ShaderType::VertexShader, ScreenQuadVertShaderSource);
+			mBlurFragmentShader.Load(ShaderType::FragmentShader, GaussianBlurFragShaderSource);
 			mProgram.AttachShader(&mVertexShader);
 			mProgram.AttachShader(&mBlurFragmentShader);
 			mProgram.Link();
@@ -80,12 +86,22 @@ namespace EDX
 
 			mColorRBO.SetStorage(width, height, ImageFormat::RGBA);
 			mFBO.Attach(FrameBufferAttachment::Color0, &mColorRBO);
+
+			CalcGaussianBlurWeightsAndOffsets();
 		}
 
-		void GUIPainter::BlurBackgroundTexture()
+		void GUIPainter::BlurBackgroundTexture(int x0, int y0, int x1, int y1)
 		{
-			glReadPixels(0, 0, mFBWidth, mFBHeight, (int)ImageFormat::RGBA, (int)ImageDataType::Byte, (void*)mBackgroundTexStorage.ModifiableData());
-			mBackgroundTex.Load(ImageFormat::RGBA, ImageFormat::RGBA, ImageDataType::Byte, (void*)mBackgroundTexStorage.Data(), mFBWidth, mFBHeight);
+			mBackgroundTex.ReadFromFrameBuffer(ImageFormat::RGBA, mFBWidth, mFBHeight);
+
+			float u0 = (x0 / (float)mFBWidth);
+			float v0 = (y0 / (float)mFBHeight);
+			float u1 = (x1 / (float)mFBWidth);
+			float v1 = (y1 / (float)mFBHeight);
+			float _x0 = u0 * 2.0f - 1.0f;
+			float _y0 = v0 * 2.0f - 1.0f;
+			float _x1 = u1 * 2.0f - 1.0f;
+			float _y1 = v1 * 2.0f - 1.0f;
 
 			mFBO.SetTarget(FrameBufferTarget::Draw);
 			mFBO.Bind();
@@ -94,22 +110,24 @@ namespace EDX
 
 			mProgram.Use();
 			mProgram.SetUniform("texSampler", 0);
+			mProgram.SetUniform("weights", mGaussianWeights, 13);
+			mProgram.SetUniform("offsets", mGaussianOffsets, 13);
 
 			mBackgroundTex.Bind();
-			mBackgroundTex.SetFilter(TextureFilter::Nearest);
+			mBackgroundTex.SetFilter(TextureFilter::TriLinear);
 			glBegin(GL_QUADS);
 
-			glTexCoord2f(0.0f, 0.0f);
-			glVertex3f(-1.0f, -1.0f, DEPTH_FAR);
+			glTexCoord2f(u0, v0);
+			glVertex3f(_x0, _y0, DEPTH_FAR);
 
-			glTexCoord2f(1.0f, 0.0f);
-			glVertex3f(1.0f, -1.0f, DEPTH_FAR);
+			glTexCoord2f(u1, v0);
+			glVertex3f(_x1, _y0, DEPTH_FAR);
 
-			glTexCoord2f(1.0f, 1.0f);
-			glVertex3f(1.0f, 1.0f, DEPTH_FAR);
+			glTexCoord2f(u1, v1);
+			glVertex3f(_x1, _y1, DEPTH_FAR);
 
-			glTexCoord2f(0.0f, 1.0f);
-			glVertex3f(-1.0f, 1.0f, DEPTH_FAR);
+			glTexCoord2f(u0, v1);
+			glVertex3f(_x0, _y1, DEPTH_FAR);
 
 			glEnd();
 
@@ -124,6 +142,8 @@ namespace EDX
 			mFBO.Bind();
 
 			GL::glBlitFramebuffer(x0, y0, x1, y1, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+			mFBO.UnBind();
 		}
 
 		void GUIPainter::DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize, const Color& interiorColor, const Color& borderColor)
@@ -186,6 +206,41 @@ namespace EDX
 			glCallLists((GLsizei)strlen(strText), GL_UNSIGNED_BYTE, strText);
 		}
 
+		void GUIPainter::CalcGaussianBlurWeightsAndOffsets()
+		{
+			auto GaussianDistribution = [](float x, float y, float rho) -> float
+			{
+				float g = 1.0f / Math::Sqrt(2.0f * float(Math::EDX_PI) * rho * rho);
+				g *= Math::Exp(-(x * x + y * y) / (2 * rho * rho));
+
+				return g;
+			};
+
+			float tu = 1.0f / (float)mFBWidth * 8;
+			float tv = 1.0f / (float)mFBHeight * 8;
+
+			float totalWeight = 0.0f;
+			int index = 0;
+			for (int x = -2; x <= 2; x++)
+			{
+				for (int y = -2; y <= 2; y++)
+				{
+					if (abs(x) + abs(y) > 2)
+						continue;
+
+					// Get the unscaled Gaussian intensity for this offset
+					mGaussianOffsets[index] = Vector2(x * tu, y * tv);
+					mGaussianWeights[index] = GaussianDistribution((float)x, (float)y, 1.0f);
+					totalWeight += mGaussianWeights[index];
+
+					index++;
+				}
+			}
+
+			for (int i = 0; i < index; i++)
+				mGaussianWeights[i] /= totalWeight;
+		}
+
 		//----------------------------------------------------------------------------------
 		// Dialog implementation
 		//----------------------------------------------------------------------------------
@@ -205,8 +260,6 @@ namespace EDX
 			if (!mVisible)
 				return;
 
-			glPushAttrib(GL_ALL_ATTRIB_BITS);
-
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
@@ -217,10 +270,11 @@ namespace EDX
 			glLoadIdentity();
 
 			// Render the blurred background texture
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
 			glEnable(GL_TEXTURE_2D);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_DEPTH_TEST);
-			GUIPainter::Instance()->BlurBackgroundTexture();
+			GUIPainter::Instance()->BlurBackgroundTexture(mPosX, mPosY, mPosX + mWidth, mPosY + mHeight);
 			GUIPainter::Instance()->DrawBackgroundTexture(mPosX, mPosY, mPosX + mWidth, mPosY + mHeight);
 
 			glTranslatef(mPosX, mParentHeight - mPosY, 0.0f);
@@ -241,11 +295,10 @@ namespace EDX
 				mvControls[i]->Render();
 			}
 
+			glPopAttrib();
 			glPopMatrix();
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
-
-			glPopAttrib();
 		}
 
 		void EDXDialog::Resize(int width, int height)
@@ -255,6 +308,7 @@ namespace EDX
 
 			mPosX = mParentWidth - mWidth;
 			mPosY = 0;
+			mHeight = height;
 
 			GUIPainter::Instance()->Resize(width, height);
 		}
