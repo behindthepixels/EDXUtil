@@ -29,7 +29,7 @@ int gWidth = 0, gHeight = 0;
 
 void OnInit(Object* pSender, EventArgs args)
 {
-	GL::LoadGLExtensions();
+	OpenGL::InitializeOpenGLExtensions();
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClearDepth(1.0f);

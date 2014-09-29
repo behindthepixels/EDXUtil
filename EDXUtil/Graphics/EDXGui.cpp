@@ -143,7 +143,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Read);
 			mFBO.Bind();
 
-			GL::glBlitFramebuffer(x0 >> 3, y0 >> 3, x1 >> 3, y1 >> 3, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glBlitFramebuffer(x0 >> 3, y0 >> 3, x1 >> 3, y1 >> 3, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 			mFBO.UnBind();
 		}
@@ -153,7 +153,7 @@ namespace EDX
 			if (iBorderSize > 0)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(borderColor.r, borderColor.g, borderColor.b, 0.5f);
 				DrawRect(iX0, iY0, iX1, iY1, depth);
 
@@ -163,14 +163,14 @@ namespace EDX
 				iY1 -= iBorderSize;
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, 0.5f);
 				DrawRect(iX0, iY0, iX1, iY1, depth);
 			}
 			else
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, 0.5f);
 				DrawRect(iX0, iY0, iX1, iY1, depth);
 			}
@@ -287,7 +287,7 @@ namespace EDX
 			glDepthFunc(GL_LEQUAL);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
-			GL::glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
+			glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
 
 			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 			GUIPainter::Instance()->DrawRect(0, 0, mWidth, mHeight, GUIPainter::DEPTH_FAR);
@@ -517,7 +517,7 @@ namespace EDX
 			int midY = mY + mHeight / 2;
 
 
-			GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 			if (mbDown || mHovered)
 				glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
 			else
@@ -601,7 +601,7 @@ namespace EDX
 			int iButPos = (int)Math::Lerp(mSlideBase, mSlideEnd, fLerp);
 
 			GUIPainter::Instance()->DrawBorderedRect(mX, iY - 1, iButPos - mButtonSize, iY + 2, GUIPainter::DEPTH_MID, 0, Color::WHITE);
-			GL::glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 			glBegin(GL_LINE_STRIP);
 
@@ -822,7 +822,7 @@ namespace EDX
 			GUIPainter::Instance()->DrawBorderedRect(mBoxMain.left, mBoxMain.top, mBoxMain.right, mBoxMain.bottom, GUIPainter::DEPTH_MID, 2);
 			GUIPainter::Instance()->DrawBorderedRect(mBoxMain.right - mHeight, mBoxMain.top + 1, mBoxMain.right - 1, mBoxMain.bottom, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 
-			GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			GUIPainter::Instance()->DrawString(mX + 6, mBoxMain.top + ItemHeight / 2, GUIPainter::DEPTH_MID, mpItems[mSelectedIdx].Label);
 
@@ -838,12 +838,12 @@ namespace EDX
 					{
 						GUIPainter::Instance()->DrawBorderedRect(mBoxDropdown.left, mBoxDropdown.top + 2 + mHoveredIdx * ItemHeight, mBoxDropdown.right - 1, mBoxDropdown.top + 1 + (mHoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, 0, 0.85f * Color::WHITE);
 
-						GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+						glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 						glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
 					}
 					else
 					{
-						GL::glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+						glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 						glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 					}
 
