@@ -156,7 +156,7 @@ namespace EDX
 		return false;
 	}
 
-	bool Window::OpenFileDialog(const char* initDir, const char* ext, char outPath[MAX_PATH]) const
+	bool Window::OpenFileDialog(const char* initDir, const char* ext, const char* filter, char outPath[MAX_PATH]) const
 	{
 		OPENFILENAMEA ofn;
 		ZeroMemory(&ofn, sizeof(ofn));
@@ -168,7 +168,7 @@ namespace EDX
 		ofn.lpstrFile = filePath;
 		ofn.lpstrFile[0] = '\0';
 		ofn.nMaxFile = sizeof(filePath);
-		ofn.lpstrFilter = "";
+		ofn.lpstrFilter = filter;
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
 		ofn.nMaxFileTitle = 0;

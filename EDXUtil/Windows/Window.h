@@ -53,7 +53,7 @@ namespace EDX
 		void SetMouseHandler(const MouseEvent& mouseEvent) { mMouseEvent = mouseEvent; }
 		void SetkeyboardHandler(const KeyboardEvent& keyboardEvent) { mKeyboardEvent = keyboardEvent; }
 
-		bool OpenFileDialog(const char* initDir, const char* ext, char outPath[MAX_PATH]) const;
+		bool OpenFileDialog(const char* initDir, const char* ext, const char* filter, char outPath[MAX_PATH]) const;
 
 		virtual bool ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
