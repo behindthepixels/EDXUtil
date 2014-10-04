@@ -42,6 +42,8 @@ namespace EDX
 
 		bool IsActive() const { return mbActive; }
 		void SetActive(const bool active) { mbActive = active; }
+		const uint GetWindowWidth() const { return mWidth; }
+		const uint GetWindowHeight() const { return mHeight; }
 
 		virtual void InvokeMainLoop() { mMainLoopEvent.Invoke(this, EventArgs()); }
 

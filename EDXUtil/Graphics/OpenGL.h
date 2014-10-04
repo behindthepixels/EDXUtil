@@ -65,12 +65,14 @@ namespace EDX
 		extern PFNGLBLITFRAMEBUFFEREXTPROC						glBlitFramebuffer;
 		extern PFNGLGENERATEMIPMAPEXTPROC						glGenerateMipmap;
 		extern PFNGLDRAWBUFFERSPROC								glDrawBuffers;
+		extern PFNGLDRAWRANGEELEMENTSPROC						glDrawRangeElements;
 		extern PFNGLACTIVETEXTUREPROC							glActiveTexture;
 		extern PFNGLCLIENTACTIVETEXTUREPROC						glClientActiveTexture;
 		extern PFNGLMULTITEXCOORD1FPROC							glMultiTexcoord1f;
 		extern PFNGLMULTITEXCOORD2FPROC							glMultiTexcoord2f;
 		extern PFNGLMULTITEXCOORD3FPROC							glMultiTexcoord3f;
 		extern PFNGLMULTITEXCOORD4FPROC							glMultiTexcoord4f;
+		extern PFNGLLOADTRANSPOSEMATRIXFPROC					glLoadTransposeMatrixf;
 		extern PFNGLBINDBUFFERPROC								glBindBuffer;
 		extern PFNGLBUFFERDATAPROC								glBufferData;
 		extern PFNGLBUFFERSUBDATAPROC							glBufferSubData;

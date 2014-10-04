@@ -55,12 +55,14 @@ namespace EDX
 		PFNGLBLITFRAMEBUFFEREXTPROC						glBlitFramebuffer;
 		PFNGLGENERATEMIPMAPEXTPROC						glGenerateMipmap;
 		PFNGLDRAWBUFFERSPROC							glDrawBuffers;
+		PFNGLDRAWRANGEELEMENTSPROC						glDrawRangeElements;
 		PFNGLACTIVETEXTUREPROC							glActiveTexture;
 		PFNGLCLIENTACTIVETEXTUREPROC					glClientActiveTexture;
 		PFNGLMULTITEXCOORD1FPROC						glMultiTexcoord1f;
 		PFNGLMULTITEXCOORD2FPROC						glMultiTexcoord2f;
 		PFNGLMULTITEXCOORD3FPROC						glMultiTexcoord3f;
 		PFNGLMULTITEXCOORD4FPROC						glMultiTexcoord4f;
+		PFNGLLOADTRANSPOSEMATRIXFPROC					glLoadTransposeMatrixf;
 		PFNGLBINDBUFFERPROC								glBindBuffer;
 		PFNGLBUFFERDATAPROC								glBufferData;
 		PFNGLBUFFERSUBDATAPROC							glBufferSubData;
@@ -126,6 +128,7 @@ namespace EDX
 			glRenderbufferStorageMultisample = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC)wglGetProcAddress("glRenderbufferStorageMultisample");
 			glGenerateMipmap = (PFNGLGENERATEMIPMAPEXTPROC)wglGetProcAddress("glGenerateMipmap");
 			glDrawBuffers = (PFNGLDRAWBUFFERSPROC)wglGetProcAddress("glDrawBuffers");
+			glDrawRangeElements = (PFNGLDRAWRANGEELEMENTSPROC)wglGetProcAddress("glDrawRangeElements");
 
 			glActiveTexture = (PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture");
 			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC)wglGetProcAddress("glClientActiveTexture");
@@ -133,6 +136,7 @@ namespace EDX
 			glMultiTexcoord2f = (PFNGLMULTITEXCOORD2FPROC)wglGetProcAddress("glMultiTexCoord2f");
 			glMultiTexcoord3f = (PFNGLMULTITEXCOORD3FPROC)wglGetProcAddress("glMultiTexCoord3f");
 			glMultiTexcoord4f = (PFNGLMULTITEXCOORD4FPROC)wglGetProcAddress("glMultiTexCoord4f");
+			glLoadTransposeMatrixf = (PFNGLLOADTRANSPOSEMATRIXFPROC)wglGetProcAddress("glLoadTransposeMatrixf");
 
 			glBindBuffer = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
 			glBufferData = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");

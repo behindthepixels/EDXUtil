@@ -565,6 +565,12 @@ namespace EDX
 		mMaterialIdx.assign(mTriangleCount, 0);
 		mNormaled = mTextured = true;
 
+		mMaterials.push_back(ObjMaterial());
+
+		mNumSubsets = 1;
+		mSubsetMtlIdx.push_back(0);
+		mSubsetStartIdx.push_back(0);
+		mSubsetStartIdx.push_back(mIndices.size());
 	}
 
 	void ObjMesh::LoadSphere(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float fRadius, const int slices, const int stacks)
@@ -614,6 +620,13 @@ namespace EDX
 		mVertexCount = mVertices.size();
 		mMaterialIdx.assign(mTriangleCount, 0);
 		mNormaled = mTextured = true;
+
+		mMaterials.push_back(ObjMaterial());
+
+		mNumSubsets = 1;
+		mSubsetMtlIdx.push_back(0);
+		mSubsetStartIdx.push_back(0);
+		mSubsetStartIdx.push_back(mIndices.size());
 	}
 
 	void ObjMesh::Release()

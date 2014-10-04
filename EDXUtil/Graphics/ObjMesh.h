@@ -44,8 +44,8 @@ namespace EDX
 		char strTexturePath[MAX_PATH];
 		Color color;
 
-		ObjMaterial(const char* name)
-			: color(0.9f, 0.9f, 0.9f)
+		ObjMaterial(const char* name = "")
+			: color(0.85f, 0.85f, 0.85f)
 			//, strTexturePath("")
 		{
 			strcpy_s(strName, MAX_PATH, name);
@@ -118,6 +118,10 @@ namespace EDX
 		const vector<ObjMaterial>& GetMaterialInfo() const { return mMaterials; }
 		inline const vector<uint>& GetMaterialIdxBuf() const { return mMaterialIdx; }
 		inline uint GetMaterialIdx(int iTri) const { return mMaterialIdx[iTri]; }
+
+		const uint GetSubsetCount() const { return mNumSubsets; }
+		const uint GetSubsetStartIdx(int setIdx) { return mSubsetStartIdx[setIdx]; }
+		const uint GetSubsetMtlIndex(int setIdx) { return mSubsetMtlIdx[setIdx]; }
 
 		inline const BoundingBox GetBounds() const { return mBounds; }
 
