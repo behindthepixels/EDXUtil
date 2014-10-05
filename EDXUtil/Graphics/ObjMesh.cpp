@@ -169,6 +169,10 @@ namespace EDX
 						Vertex.normal = normalBuf[normalIdx - 1];
 					}
 
+
+					if (vertexCount >= 4)
+						break;
+
 					faceIdx[vertexCount] = AddVertex(posIdx - 1, &Vertex);
 					vertexCount++;
 					startIdx = i + 1;

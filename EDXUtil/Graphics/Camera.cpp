@@ -33,7 +33,7 @@ namespace EDX
 		mDir = Math::Normalize(mTarget - mPos);
 
 		mYaw = Math::Atan2(mDir.x, mDir.z);
-		mPitch = Math::Atan2(mDir.y, Math::Sqrt(mDir.x * mDir.x + mDir.z * mDir.z));
+		mPitch = -Math::Atan2(mDir.y, Math::Sqrt(mDir.x * mDir.x + mDir.z * mDir.z));
 
 		mView = Matrix::LookAt(mPos, mTarget, mUp);
 		mViewInv = Matrix::Inverse(mView);
@@ -110,8 +110,8 @@ namespace EDX
 				vMouseDelta.y = float(args.motionY);
 
 				Vector2 vRotateVel = vMouseDelta * mRotateScaler;
-				mYaw -= -vRotateVel.x;
-				mPitch -= -vRotateVel.y;
+				mYaw += vRotateVel.x;
+				mPitch += vRotateVel.y;
 
 				mPitch = Math::Max(mPitch, -float(Math::EDX_PI_2));
 				mPitch = Math::Min(mPitch, float(Math::EDX_PI_2));
