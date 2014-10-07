@@ -302,6 +302,8 @@ namespace EDX
 			auto rs = new Texture2D();
 			rs->Load(ImageFormat::RGBA, ImageFormat::RGBA, ImageDataType::Byte, pRawTex, width, height);
 
+			SafeDeleteArray(pRawTex);
+
 			return rs;
 		}
 	}
