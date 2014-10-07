@@ -248,7 +248,7 @@ namespace EDX
 			}
 		}
 
-		void InitTAndLaunchThreads();
+		void InitAndLaunchThreads();
 		void ReleaseAndStopThreads();
 		int GetThreadCount() const
 		{

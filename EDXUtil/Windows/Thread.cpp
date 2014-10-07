@@ -77,7 +77,7 @@ namespace EDX
 
 	ThreadScheduler* ThreadScheduler::mpInstance = nullptr;
 
-	void ThreadScheduler::InitTAndLaunchThreads()
+	void ThreadScheduler::InitAndLaunchThreads()
 	{
 		mNumThreads = DetectCPUCount();
 		mTerminate = false;
