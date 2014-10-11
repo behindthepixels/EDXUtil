@@ -165,7 +165,7 @@ namespace EDX
 		ray.mDyOrg = TransformPoint(rRay.mDyOrg, mat);
 		ray.mDxDir = TransformVector(rRay.mDxDir, mat);
 		ray.mDyDir = TransformVector(rRay.mDyDir, mat);
-		ray.mbHasDifferential = rRay.mbHasDifferential;
+		ray.mHasDifferential = rRay.mHasDifferential;
 
 		return ray;
 	}

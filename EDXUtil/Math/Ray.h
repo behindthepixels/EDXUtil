@@ -37,19 +37,19 @@ namespace EDX
 		Vector3 mDxOrg, mDyOrg;
 		Vector3 mDxDir, mDyDir;
 
-		bool mbHasDifferential;
+		bool mHasDifferential;
 
 	public:
 		RayDifferential()
-			: Ray(), mbHasDifferential(false)
+			: Ray(), mHasDifferential(false)
 		{
 		}
 		RayDifferential(const Vector3& vOrig, const Vector3& vDir, float max = float(Math::EDX_INFINITY), float min = 0.0f, int depth = 0)
-			: Ray(vOrig, vDir, max, min, depth), mbHasDifferential(false)
+			: Ray(vOrig, vDir, max, min, depth), mHasDifferential(false)
 		{
 		}
 		RayDifferential(const Ray& ray)
-			: Ray(ray), mbHasDifferential(false)
+			: Ray(ray), mHasDifferential(false)
 		{
 		}
 	};
