@@ -114,6 +114,13 @@ namespace EDX
 			static const int Value = 1 << 2 * Dim;
 		};
 
+		inline float Rcp(const float x)
+		{
+			const __m128 vx = _mm_set_ss(x);
+			const __m128 r = _mm_rcp_ps(vx);
+			return _mm_cvtss_f32(_mm_sub_ps(_mm_add_ps(r, r), _mm_mul_ps(_mm_mul_ps(r, r), vx)));
+		}
+
 		inline float Xor(const float f1, const float f2)
 		{
 			return _mm_cvtss_f32(_mm_xor_ps(_mm_set_ss(f1), _mm_set_ss(f2)));

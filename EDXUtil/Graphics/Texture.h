@@ -28,6 +28,8 @@ namespace EDX
 	public:
 		virtual ~Texture() {}
 		virtual T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const = 0;
+		virtual T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim], TextureFilter filter) const = 0;
+		virtual bool HasAlpha() const { return false; }
 		virtual void SetFilter(const TextureFilter filter)
 		{
 		}
@@ -39,7 +41,7 @@ namespace EDX
 	using Texture3D = Texture < 3, T >;
 
 	template<uint Dim, class T>
-	class ConstantTexture : public Texture<Dim, T>
+	class ConstantTexture : public Texture < Dim, T >
 	{
 	private:
 		T mVal;
@@ -49,6 +51,10 @@ namespace EDX
 			: mVal(val) {}
 
 		T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const
+		{
+			return mVal;
+		}
+		T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim], TextureFilter filter) const
 		{
 			return mVal;
 		}
@@ -105,6 +111,7 @@ namespace EDX
 		int mTexWidth;
 		int mTexHeight;
 		float mTexInvWidth, mTexInvHeight;
+		bool mHasAlpha;
 		TextureFilter mTexFilter;
 		Mipmap2D<TMem> mTexels;
 
@@ -115,11 +122,16 @@ namespace EDX
 		}
 
 		TRet Sample(const Vector2& texCoord, const Vector2 differentials[2]) const;
+		TRet Sample(const Vector2& texCoord, const Vector2 differentials[2], TextureFilter filter) const;
 		TRet AnisotropicSample(const Vector2& texCoord, const Vector2 differentials[2], const int maxRate) const;
 
 		void SetFilter(const TextureFilter filter)
 		{
 			mTexFilter = filter;
+		}
+		bool HasAlpha() const
+		{
+			return mHasAlpha;
 		}
 
 		//static T GammaCorrect(T tIn, float fGamma = 2.2f)

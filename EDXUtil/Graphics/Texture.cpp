@@ -149,6 +149,11 @@ namespace EDX
 			throw "Texture file load failed.";
 		}
 
+		if (iChannel == 4)
+			mHasAlpha = true;
+		else
+			mHasAlpha = false;
+
 		mTexels.Generate(Vector2i(mTexWidth, mTexHeight), (TMem*)pRawTex);
 		mTexInvWidth = 1.0f / float(mTexWidth);
 		mTexInvHeight = 1.0f / float(mTexHeight);
@@ -165,6 +170,33 @@ namespace EDX
 		wrappedTexCoord.v = texCoord.v - FastFloor(texCoord.v);
 
 		switch (mTexFilter)
+		{
+		case TextureFilter::Nearest:
+			return mTexels.Sample_Nearest(wrappedTexCoord);
+		case TextureFilter::Linear:
+			return mTexels.SampleLevel_Linear(wrappedTexCoord, 0);
+		case TextureFilter::TriLinear:
+			return mTexels.TrilinearSample(wrappedTexCoord, differentials);
+		case TextureFilter::Anisotropic4x:
+			return AnisotropicSample(wrappedTexCoord, differentials, 4);
+		case TextureFilter::Anisotropic8x:
+			return AnisotropicSample(wrappedTexCoord, differentials, 8);
+		case TextureFilter::Anisotropic16x:
+			return AnisotropicSample(wrappedTexCoord, differentials, 16);
+		}
+
+		return TRet(0);
+	}
+
+	template<typename TRet, typename TMem>
+	TRet ImageTexture<TRet, TMem>::Sample(const Vector2& texCoord, const Vector2 differentials[2], TextureFilter filter) const
+	{
+		// TODO: Add more wrap modes
+		Vector2 wrappedTexCoord;
+		wrappedTexCoord.u = texCoord.u - FastFloor(texCoord.u);
+		wrappedTexCoord.v = texCoord.v - FastFloor(texCoord.v);
+
+		switch (filter)
 		{
 		case TextureFilter::Nearest:
 			return mTexels.Sample_Nearest(wrappedTexCoord);

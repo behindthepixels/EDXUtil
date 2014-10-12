@@ -108,6 +108,39 @@ namespace EDX
 			other.mId = 0;
 		}
 
+		void SetAffinity(size_t affinity)
+		{
+			int groups = GetActiveProcessorGroupCount();
+			int totalProcessors = 0, group = 0, number = 0;
+			for (int i = 0; i < groups; i++)
+			{
+				int processors = GetActiveProcessorCount(i);
+				if (totalProcessors + processors > affinity)
+				{
+					group = i;
+					number = (int)affinity - totalProcessors;
+					break;
+				}
+				totalProcessors += processors;
+			}
+
+			GROUP_AFFINITY groupAffinity;
+			groupAffinity.Group = (WORD)group;
+			groupAffinity.Mask = (KAFFINITY)(uint64(1) << number);
+			groupAffinity.Reserved[0] = 0;
+			groupAffinity.Reserved[1] = 0;
+			groupAffinity.Reserved[2] = 0;
+			if (!SetThreadGroupAffinity(mhThreadHandle, &groupAffinity, NULL))
+				throw std::runtime_error("cannot set thread group affinity");
+
+			PROCESSOR_NUMBER processorNumber;
+			processorNumber.Group = group;
+			processorNumber.Number = number;
+			processorNumber.Reserved = 0;
+			if (!SetThreadIdealProcessorEx(mhThreadHandle, &processorNumber, NULL))
+				throw std::runtime_error("cannot set thread ideal processor");
+		}
+
 		void WorkLoop();
 	};
 
