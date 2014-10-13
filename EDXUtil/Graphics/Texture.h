@@ -50,11 +50,11 @@ namespace EDX
 		ConstantTexture(const T& val)
 			: mVal(val) {}
 
-		T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const
+		__forceinline T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const
 		{
 			return mVal;
 		}
-		T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim], TextureFilter filter) const
+		__forceinline T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim], TextureFilter filter) const
 		{
 			return mVal;
 		}
@@ -89,6 +89,7 @@ namespace EDX
 
 		void Generate(const Vec<Dim, int>& dims, const T* pRawTex);
 
+		T LinearSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const;
 		T TrilinearSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const;
 		T SampleLevel_Linear(const Vec<Dim, float>& texCoord, const int level) const;
 		T Sample_Nearest(const Vec<Dim, float>& texCoord) const;

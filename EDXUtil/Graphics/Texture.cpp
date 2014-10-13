@@ -77,7 +77,7 @@ namespace EDX
 		float filterWidth = Math::EDX_NEG_INFINITY;
 		for (auto d = 0; d < Dim; d++)
 			filterWidth = Math::Max(filterWidth, Math::Length(differentials[d]));
-		
+
 		float lod = mNumLevels - 1 + fast_log2(Math::Max(filterWidth, 1e-8f));
 		if (lod < 0)
 			return SampleLevel_Linear(texCoord, 0);
@@ -92,6 +92,20 @@ namespace EDX
 			return SampleLevel_Linear(texCoord, lodBase + 1);
 
 		return Math::Lerp(SampleLevel_Linear(texCoord, lodBase), SampleLevel_Linear(texCoord, lodBase + 1), lin);
+	}
+
+	template<uint Dim, typename T, typename Container>
+	T Mipmap<Dim, T, Container>::LinearSample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const
+	{
+		float filterWidth = Math::EDX_NEG_INFINITY;
+		for (auto d = 0; d < Dim; d++)
+			filterWidth = Math::Max(filterWidth, Math::Length(differentials[d]));
+
+		float lod = mNumLevels - 1 + fast_log2(Math::Max(filterWidth, 1e-8f));
+		if (lod < 0)
+			return SampleLevel_Linear(texCoord, 0);
+		else
+			return Sample_Nearest(texCoord);
 	}
 
 	inline int FastFloor(float x)
@@ -201,7 +215,7 @@ namespace EDX
 		case TextureFilter::Nearest:
 			return mTexels.Sample_Nearest(wrappedTexCoord);
 		case TextureFilter::Linear:
-			return mTexels.SampleLevel_Linear(wrappedTexCoord, 0);
+			return mTexels.LinearSample(wrappedTexCoord, differentials);
 		case TextureFilter::TriLinear:
 			return mTexels.TrilinearSample(wrappedTexCoord, differentials);
 		case TextureFilter::Anisotropic4x:
