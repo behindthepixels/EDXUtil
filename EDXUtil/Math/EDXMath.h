@@ -120,7 +120,14 @@ namespace EDX
 			const __m128 r = _mm_rcp_ps(vx);
 			return _mm_cvtss_f32(_mm_sub_ps(_mm_add_ps(r, r), _mm_mul_ps(_mm_mul_ps(r, r), vx)));
 		}
-
+		inline float Rsqrt(const float x)
+		{
+			const __m128 a = _mm_set_ss(x);
+			const __m128 r = _mm_rsqrt_ps(a);
+			const __m128 c = _mm_add_ps(_mm_mul_ps(_mm_set_ps(1.5f, 1.5f, 1.5f, 1.5f), r),
+				_mm_mul_ps(_mm_mul_ps(_mm_mul_ps(a, _mm_set_ps(-0.5f, -0.5f, -0.5f, -0.5f)), r), _mm_mul_ps(r, r)));
+			return _mm_cvtss_f32(c);
+		}
 		inline float Xor(const float f1, const float f2)
 		{
 			return _mm_cvtss_f32(_mm_xor_ps(_mm_set_ss(f1), _mm_set_ss(f2)));

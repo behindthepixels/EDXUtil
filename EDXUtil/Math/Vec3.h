@@ -178,7 +178,7 @@ namespace EDX
 		}
 		__forceinline Vector3 Normalize(const Vector3& v)
 		{
-			return v / Length(v);
+			return v * Math::Rsqrt(Math::LengthSquared(v));
 		}
 		__forceinline float Distance(const Vector3& p1, const Vector3& p2)
 		{

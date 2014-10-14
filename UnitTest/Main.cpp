@@ -89,7 +89,46 @@ private:
 	vector<double> v, w;
 };
 
+#include <iostream>
+#include "Math/Vector.h"
+#include "Windows/Timer.h"
+using namespace std;
+
+__forceinline float rsqrt(const float x) {
+	const __m128 a = _mm_set_ss(x);
+	const __m128 r = _mm_rsqrt_ps(a);
+	const __m128 c = _mm_add_ps(_mm_mul_ps(_mm_set_ps(1.5f, 1.5f, 1.5f, 1.5f), r),
+		_mm_mul_ps(_mm_mul_ps(_mm_mul_ps(a, _mm_set_ps(-0.5f, -0.5f, -0.5f, -0.5f)), r), _mm_mul_ps(r, r)));
+	return _mm_cvtss_f32(c);
+}
+
+__forceinline Vector3 FastNormalize(const Vector3& v)
+{
+	return v * rsqrt(Math::LengthSquared(v));
+}
+
+
 void main()
 {
-	Test t;
+	Timer timer;
+	Vector3 v = Vector3::UNIT_SCALE;
+
+	timer.Start();
+	for (auto i = 0; i < 100000; i++)
+	{
+		v = Math::Normalize(v);
+		v *= 2;
+	}
+	timer.Stop();
+	cout << v.x << endl << timer.GetElapsedTime() << endl;
+
+	timer.Reset();
+	timer.Start();
+	for (auto i = 0; i < 100000; i++)
+	{
+		v = FastNormalize(v);
+		v *= 2;
+	}
+	timer.Stop();
+	cout << v.x << endl << timer.GetElapsedTime() << endl;
 }
