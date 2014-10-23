@@ -42,14 +42,21 @@ namespace EDX
 	{
 		char strName[MAX_PATH];
 		char strTexturePath[MAX_PATH];
+		char strBumpPath[MAX_PATH];
 		Color color;
+		Color specColor;
+		Color transColor;
+		float bumpScale;
 
 		ObjMaterial(const char* name = "")
 			: color(0.85f, 0.85f, 0.85f)
-			//, strTexturePath("")
+			, specColor(0.0f, 0.0f, 0.0f)
+			, transColor(0.0f, 0.0f, 0.0f)
+			, bumpScale(1.0f)
 		{
 			strcpy_s(strName, MAX_PATH, name);
 			memset(strTexturePath, 0, MAX_PATH);
+			memset(strBumpPath, 0, MAX_PATH);
 		}
 
 		bool operator == (const ObjMaterial& rhs) const

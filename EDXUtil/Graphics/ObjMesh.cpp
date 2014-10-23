@@ -14,6 +14,7 @@ namespace EDX
 		vector<Vector3> normalBuf;
 		vector<float> texCoordBuf;
 		int iSmoothingGroup = 0;
+		bool hasSmoothGroup = false;
 		int iCurrentMtl = 0;
 		char strMaterialFilename[MAX_PATH] = { 0 };
 
@@ -231,8 +232,11 @@ namespace EDX
 			{
 				fscanf_s(pInFile, "%s", strCommand, MAX_PATH);
 
-				if (strCommand[0] >= '0' && strCommand[0] <= '9')
+				if (strCommand[0] >= '1' && strCommand[0] <= '9')
+				{
+					hasSmoothGroup = true;
 					sscanf_s(strCommand, "%d", &iSmoothingGroup);
+				}
 				else
 					iSmoothingGroup = 0;
 			}
@@ -288,7 +292,7 @@ namespace EDX
 		mBounds = Matrix::TransformBBox(BoundingBox(minPt, maxPt), mWorld);
 
 		// Recompute per-vertex normals
-		if (iSmoothingGroup != 0 || !mNormaled)
+		if (hasSmoothGroup || !mNormaled)
 			ComputeVertexNormals();
 
 		// Delete cache
@@ -413,6 +417,20 @@ namespace EDX
 				fscanf_s(pInFile, "%f %f %f", &r, &g, &b);
 				itCurrMaterial->color = Color(r, g, b);
 			}
+			else if (0 == strcmp(strCommand, "Ks"))
+			{
+				// Diffuse color
+				float r, g, b;
+				fscanf_s(pInFile, "%f %f %f", &r, &g, &b);
+				itCurrMaterial->specColor = Color(r, g, b);
+			}
+			else if (0 == strcmp(strCommand, "Tf"))
+			{
+				// Diffuse color
+				float r, g, b;
+				fscanf_s(pInFile, "%f %f %f", &r, &g, &b);
+				itCurrMaterial->transColor = Color(r, g, b);
+			}
 			else if (0 == strcmp(strCommand, "d") || 0 == strcmp(strCommand, "Tr"))
 			{
 				// Alpha
@@ -436,6 +454,26 @@ namespace EDX
 					char strMtlPath[MAX_PATH] = { 0 };
 					strncpy_s(itCurrMaterial->strTexturePath, MAX_PATH, strPath, idx);
 					strcat_s(itCurrMaterial->strTexturePath, MAX_PATH, strTexName + 1);
+				}
+			}
+			else if (0 == strcmp(strCommand, "bump"))
+			{
+				if (!itCurrMaterial->strBumpPath[0])
+				{
+					// Texture
+					char strTexName[MAX_PATH] = { 0 };
+					fgets(strTexName, MAX_PATH, pInFile);
+
+					if (strTexName[strlen(strTexName) - 1] == '\n')
+						strTexName[strlen(strTexName) - 1] = '\0';
+
+					int idx = strrchr(strPath, '/') - strPath + 1;
+					int idx2 = strrchr(strPath, '\\') - strPath + 1;
+					idx = idx > idx2 ? idx : idx2;
+
+					char strMtlPath[MAX_PATH] = { 0 };
+					strncpy_s(itCurrMaterial->strBumpPath, MAX_PATH, strPath, idx);
+					strcat_s(itCurrMaterial->strBumpPath, MAX_PATH, strTexName + 1);
 				}
 			}
 			else
