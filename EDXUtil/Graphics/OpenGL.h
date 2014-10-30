@@ -8,7 +8,7 @@
 #include "../Windows/Base.h"
 #include <gl/GL.h>
 #include <gl/GLU.h>
-#include <gl/glext.h>
+#include "glext.h"
 
 namespace EDX
 {

@@ -135,6 +135,9 @@
     <ClInclude Include="Windows\Debug.h">
       <Filter>Source Files\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\glext.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">
