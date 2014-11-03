@@ -135,10 +135,10 @@ namespace EDX
 			return mHasAlpha;
 		}
 
-		//static T GammaCorrect(T tIn, float fGamma = 2.2f)
-		//{
-		//	return Math::Pow(tIn, fGamma);
-		//}
+		static TMem GammaCorrect(TMem tIn, float fGamma = 1.0)
+		{
+			return Math::Pow(tIn, fGamma);
+		}
 		//static Color ConvertOut(const Color4b& in)
 		//{
 		//	return in * 0.00390625f;

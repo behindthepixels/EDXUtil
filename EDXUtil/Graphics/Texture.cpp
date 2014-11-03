@@ -157,18 +157,21 @@ namespace EDX
 		, mTexHeight(0)
 	{
 		int iChannel;
-		_byte* pRawTex = Bitmap::ReadFromFileByte(strFile, &mTexWidth, &mTexHeight, &iChannel);
+		TMem* pRawTex = (TMem*)Bitmap::ReadFromFileByte(strFile, &mTexWidth, &mTexHeight, &iChannel);
 		if (!pRawTex)
 		{
-			throw "Texture file load failed.";
+			throw std::exception("Texture file load failed.");
 		}
+
+		for (auto i = 0; i < mTexWidth * mTexHeight; i++)
+			pRawTex[i] = GammaCorrect(pRawTex[i]);
 
 		if (iChannel == 4)
 			mHasAlpha = true;
 		else
 			mHasAlpha = false;
 
-		mTexels.Generate(Vector2i(mTexWidth, mTexHeight), (TMem*)pRawTex);
+		mTexels.Generate(Vector2i(mTexWidth, mTexHeight), pRawTex);
 		mTexInvWidth = 1.0f / float(mTexWidth);
 		mTexInvHeight = 1.0f / float(mTexHeight);
 

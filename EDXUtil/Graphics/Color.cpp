@@ -27,5 +27,10 @@ namespace EDX
 			ret.a = color.a;
 			return ret;
 		}
+
+		Color4b Pow(const Color4b& color, float pow)
+		{
+			return Pow(Color(color), pow);
+		}
 	}
 }

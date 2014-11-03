@@ -289,15 +289,22 @@ namespace EDX
 			glUseProgram(0);
 		}
 
+		Color4b GammaCorrect(Color4b tIn, float fGamma = 2.2f)
+		{
+			return Color4b(Math::Pow(Color(tIn), fGamma));
+		}
+
 		Texture2D * Texture2D::Create(const char* fileName)
 		{
 			int width, height;
 			int channel;
-			_byte* pRawTex = Bitmap::ReadFromFileByte(fileName, &width, &height, &channel);
+			Color4b* pRawTex = (Color4b*)Bitmap::ReadFromFileByte(fileName, &width, &height, &channel);
 			if (!pRawTex)
 			{
 				throw std::exception("Texture file load failed.");
 			}
+			for (auto i = 0; i < width * height; i++)
+				pRawTex[i] = GammaCorrect(pRawTex[i]);
 
 			auto rs = new Texture2D();
 			rs->Load(ImageFormat::RGBA, ImageFormat::RGBA, ImageDataType::Byte, pRawTex, width, height);
