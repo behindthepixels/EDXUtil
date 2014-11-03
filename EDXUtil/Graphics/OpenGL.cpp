@@ -289,7 +289,7 @@ namespace EDX
 			glUseProgram(0);
 		}
 
-		Color4b GammaCorrect(Color4b tIn, float fGamma = 2.2f)
+		Color4b GammaCorrect(Color4b tIn, float fGamma = 1.0f)
 		{
 			return Color4b(Math::Pow(Color(tIn), fGamma));
 		}

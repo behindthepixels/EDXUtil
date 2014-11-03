@@ -135,7 +135,7 @@ namespace EDX
 			return mHasAlpha;
 		}
 
-		static TMem GammaCorrect(TMem tIn, float fGamma = 1.0)
+		static TMem GammaCorrect(TMem tIn, float fGamma = 2.2)
 		{
 			return Math::Pow(tIn, fGamma);
 		}
