@@ -28,6 +28,9 @@ namespace EDX
 		inline bool IsBlack() const { return *this == BLACK; }
 		inline float Luminance() const { return r * 0.212671f + g * 0.715160f + b * 0.072169f; }
 
+		__forceinline const float& operator [] (const size_t idx) const { assert(idx < 4); return (&r)[idx]; }
+		__forceinline		float& operator [] (const size_t idx)		{ assert(idx < 4); return (&r)[idx]; }
+
 		Color operator + (const Color& color) const
 		{
 			return Color(r + color.r, g + color.g, b + color.b);

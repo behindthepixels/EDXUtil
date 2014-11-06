@@ -53,7 +53,7 @@ namespace EDX
 		__forceinline T Product() const { return x * y * z; }
 
 		__forceinline const T& operator [] (const size_t idx) const { assert(idx < 3); return (&x)[idx]; }
-		__forceinline		 T& operator [] (const size_t idx)		 { assert(idx < 3); return (&x)[idx]; }
+		__forceinline		T& operator [] (const size_t idx)		{ assert(idx < 3); return (&x)[idx]; }
 
 		//----------------------------------------------------------------------------------------------
 		// Unary Operators
