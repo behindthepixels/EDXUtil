@@ -117,7 +117,7 @@ namespace EDX
 		Mipmap2D<TMem> mTexels;
 
 	public:
-		ImageTexture(const char* strFile);
+		ImageTexture(const char* strFile, const float gamma = 2.2f);
 		~ImageTexture()
 		{
 		}

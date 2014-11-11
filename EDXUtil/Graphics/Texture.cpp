@@ -152,7 +152,7 @@ namespace EDX
 
 
 	template<typename TRet, typename TMem>
-	ImageTexture<TRet, TMem>::ImageTexture(const char* strFile)
+	ImageTexture<TRet, TMem>::ImageTexture(const char* strFile, const float gamma)
 		: mTexWidth(0)
 		, mTexHeight(0)
 	{
@@ -164,7 +164,7 @@ namespace EDX
 		}
 
 		for (auto i = 0; i < mTexWidth * mTexHeight; i++)
-			pRawTex[i] = GammaCorrect(pRawTex[i]);
+			pRawTex[i] = GammaCorrect(pRawTex[i], gamma);
 
 		if (iChannel == 4)
 			mHasAlpha = true;
