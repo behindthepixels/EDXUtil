@@ -140,6 +140,7 @@ namespace EDX
 			}
 
 			void ToggleVisible() { mVisible = !mVisible; }
+			bool HandleKeyboard(const KeyboardEventArgs& args);
 		};
 
 		class EDXControl : public Object

@@ -292,7 +292,7 @@ namespace EDX
 			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 			GUIPainter::Instance()->DrawRect(0, 0, mWidth, mHeight, GUIPainter::DEPTH_FAR);
 
-			for(int i = 0; i < mvControls.size(); i++)
+			for (int i = 0; i < mvControls.size(); i++)
 			{
 				mvControls[i]->Render();
 			}
@@ -313,6 +313,17 @@ namespace EDX
 			mHeight = height;
 
 			GUIPainter::Instance()->Resize(width, height);
+		}
+
+		bool EDXDialog::HandleKeyboard(const KeyboardEventArgs& args)
+		{
+			if (args.key == 'U')
+			{
+				ToggleVisible();
+				return true;
+			}
+
+			return false;
 		}
 
 		void EDXDialog::Release()
