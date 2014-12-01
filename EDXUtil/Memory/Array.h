@@ -142,7 +142,7 @@ namespace EDX
 				Free();
 				Init(rhs.Size());
 			}
-			memcpy(mpData, rhs.mpData, mArraySize * sizeof(T));
+			memcpy(mpData, rhs.mpData, LinearSize() * sizeof(T));
 			return *this;
 		}
 		Array& operator = (Array&& rhs)

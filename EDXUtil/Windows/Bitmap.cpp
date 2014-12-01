@@ -133,19 +133,16 @@ namespace EDX
 		SafeDeleteArray(pPixels);
 	}
 
-	Color* Bitmap::ReadFromFileFloat(const char* strFile, int* pWidth, int* pHeight, int* pChannel)
+	template<>
+	Color* Bitmap::ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel)
 	{
-		Color* pRet;
-		pRet = (Color*)stbi_loadf(strFile, pWidth, pHeight, pChannel, 4);
-
-		return pRet;
+		return (Color*)stbi_loadf(strFile, pWidth, pHeight, pChannel, 4);
 	}
-	byte* Bitmap::ReadFromFileByte(const char* strFile, int* pWidth, int* pHeight, int* pChannel)
-	{
-		byte* pRet;
-		pRet = (byte*)stbi_load(strFile, pWidth, pHeight, pChannel, 4);
 
-		return pRet;
+	template<>
+	Color4b* Bitmap::ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel)
+	{
+		return (Color4b*)stbi_load(strFile, pWidth, pHeight, pChannel, 4);
 	}
 }
 

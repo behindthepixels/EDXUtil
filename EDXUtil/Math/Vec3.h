@@ -220,12 +220,12 @@ namespace EDX
 		}
 		__forceinline float SphericalTheta(const Vector3& vec)
 		{
-			return Math::Sin(Math::Clamp(vec.y, -1.0f, 1.0f));
+			return acosf(Math::Clamp(vec.y, -1.0f, 1.0f));
 		}
 		__forceinline float SphericalPhi(const Vector3& vec)
 		{
-			float p = Math::Atan2(vec.z, vec.x);
-			return (p < 0.0f) ? p + 2.0f * float(float(Math::EDX_PI)) : p;
+			float p = Math::Atan2(-vec.z, vec.x);
+			return (p < 0.0f) ? p + float(Math::EDX_TWO_PI) : p;
 		}
 
 		template<uint Dimension>

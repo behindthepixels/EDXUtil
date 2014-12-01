@@ -128,7 +128,7 @@ namespace EDX
 		if (coord == coordBase)
 			return sampledLevel[coordBase];
 		
-		Color4b values[Math::Pow2<Dim>::Value];
+		T values[Math::Pow2<Dim>::Value];
 		for (uint i = 0; i < Math::Pow2<Dim>::Value; i++)
 		{
 			Vec<Dim, int> sampledCoord = coordBase + mOffsetTable[i];
@@ -157,7 +157,7 @@ namespace EDX
 		, mTexHeight(0)
 	{
 		int iChannel;
-		TMem* pRawTex = (TMem*)Bitmap::ReadFromFileByte(strFile, &mTexWidth, &mTexHeight, &iChannel);
+		TMem* pRawTex = Bitmap::ReadFromFile<TMem>(strFile, &mTexWidth, &mTexHeight, &iChannel);
 		if (!pRawTex)
 		{
 			throw std::exception("Texture file load failed.");
@@ -175,7 +175,7 @@ namespace EDX
 		mTexInvWidth = 1.0f / float(mTexWidth);
 		mTexInvHeight = 1.0f / float(mTexHeight);
 
-		SafeDeleteArray(pRawTex);
+		SafeDelete(pRawTex);
 	}
 
 	template<typename TRet, typename TMem>
@@ -316,5 +316,7 @@ namespace EDX
 	}
 
 	template class ImageTexture<Color, Color4b>;
+	template class ImageTexture<Color, Color>;
 	template class Mipmap<2, Color4b>;
+	template class Mipmap<2, Color>;
 }

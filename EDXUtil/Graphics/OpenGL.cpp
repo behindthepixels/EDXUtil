@@ -298,7 +298,7 @@ namespace EDX
 		{
 			int width, height;
 			int channel;
-			Color4b* pRawTex = (Color4b*)Bitmap::ReadFromFileByte(fileName, &width, &height, &channel);
+			Color4b* pRawTex = Bitmap::ReadFromFile<Color4b>(fileName, &width, &height, &channel);
 			if (!pRawTex)
 			{
 				throw std::exception("Texture file load failed.");
