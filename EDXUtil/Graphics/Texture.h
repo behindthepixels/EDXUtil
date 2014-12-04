@@ -30,6 +30,8 @@ namespace EDX
 		virtual T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim]) const = 0;
 		virtual T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim], TextureFilter filter) const = 0;
 		virtual bool HasAlpha() const { return false; }
+		virtual int Width() const { return 0; }
+		virtual int Height() const { return 0; }
 		virtual void SetFilter(const TextureFilter filter)
 		{
 		}
@@ -129,6 +131,14 @@ namespace EDX
 		void SetFilter(const TextureFilter filter)
 		{
 			mTexFilter = filter;
+		}
+		int Width() const
+		{
+			return mTexWidth;
+		}
+		int Height() const
+		{
+			return mTexHeight;
 		}
 		bool HasAlpha() const
 		{

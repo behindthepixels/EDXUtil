@@ -33,51 +33,82 @@ namespace EDX
 
 		Color operator + (const Color& color) const
 		{
+			assert(Math::NumericValid(color.r));
+			assert(Math::NumericValid(color.g));
+			assert(Math::NumericValid(color.b));
+			assert(Math::NumericValid(color.a));
 			return Color(r + color.r, g + color.g, b + color.b);
 		}
 
 		Color& operator += (const Color& color)
 		{
+			assert(Math::NumericValid(color.r));
+			assert(Math::NumericValid(color.g));
+			assert(Math::NumericValid(color.b));
+			assert(Math::NumericValid(color.a));
 			r += color.r; g += color.g; b += color.b; a = 1.0f;
 			return *this;
 		}
 		Color operator - (const Color& color) const
 		{
+			assert(Math::NumericValid(color.r));
+			assert(Math::NumericValid(color.g));
+			assert(Math::NumericValid(color.b));
+			assert(Math::NumericValid(color.a));
 			return Color(r - color.r, g - color.g, b - color.b);
 		}
 
 		Color& operator -= (const Color& color)
 		{
+			assert(Math::NumericValid(color.r));
+			assert(Math::NumericValid(color.g));
+			assert(Math::NumericValid(color.b));
+			assert(Math::NumericValid(color.a));
 			r -= color.r; g -= color.g; b -= color.b; a = 1.0f;
 			return *this;
 		}
-		Color operator * (float val) const { return Color(val * r, val * g, val * b); }
+		Color operator * (float val) const
+		{
+			assert(Math::NumericValid(val));
+			return Color(val * r, val * g, val * b);
+		}
 
 		Color operator * (const Color& color) const
 		{
+			assert(Math::NumericValid(color.r));
+			assert(Math::NumericValid(color.g));
+			assert(Math::NumericValid(color.b));
+			assert(Math::NumericValid(color.a));
 			return Color(r * color.r, g * color.g, b * color.b);
 		}
 
 		Color& operator *= (float val)
 		{
+			assert(Math::NumericValid(val));
 			r *= val; g *= val; b *= val; a = 1.0f;
 			return *this;
 		}
 
 		Color& operator *= (const Color& color)
 		{
+			assert(Math::NumericValid(color.r));
+			assert(Math::NumericValid(color.g));
+			assert(Math::NumericValid(color.b));
+			assert(Math::NumericValid(color.a));
 			r *= color.r; g *= color.g; b *= color.b; a = 1.0f;
 			return *this;
 		}
 
 		Color operator / (float val) const
 		{
+			assert(Math::NumericValid(val));
 			float fInv = 1.0f / val;
 			return Color(r * fInv, g * fInv, b * fInv);
 		}
 
 		Color& operator /= (float val)
 		{
+			assert(Math::NumericValid(val));
 			float fInv = 1.0f / val;
 			r *= fInv; g *= fInv; b *= fInv; a = 1.0f;
 			return *this;
