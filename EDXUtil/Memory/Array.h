@@ -108,6 +108,18 @@ namespace EDX
 			Free();
 		}
 
+		Array(const Array& rhs)
+			: mpData(NULL)
+		{
+			this->operator=(rhs);
+		}
+
+		Array(Array&& rhs)
+			: mpData(NULL)
+		{
+			this->operator=(std::move(rhs));
+		}
+
 		void Init(const Vec<Dimension, uint>& size, bool bClear = true)
 		{
 			FreeAligned(mpData);

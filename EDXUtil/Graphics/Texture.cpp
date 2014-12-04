@@ -179,6 +179,20 @@ namespace EDX
 	}
 
 	template<typename TRet, typename TMem>
+	ImageTexture<TRet, TMem>::ImageTexture(const TMem* pTexels, const int width, const int height)
+		: mTexWidth(0)
+		, mTexHeight(0)
+	{
+		mTexWidth = width;
+		mTexHeight = height;
+		mHasAlpha = false;
+		mTexels.Generate(Vector2i(mTexWidth, mTexHeight), pTexels);
+
+		mTexInvWidth = 1.0f / float(mTexWidth);
+		mTexInvHeight = 1.0f / float(mTexHeight);
+	}
+
+	template<typename TRet, typename TMem>
 	TRet ImageTexture<TRet, TMem>::Sample(const Vector2& texCoord, const Vector2 differentials[2]) const
 	{
 		// TODO: Add more wrap modes

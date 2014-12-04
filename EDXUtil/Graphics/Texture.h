@@ -120,6 +120,7 @@ namespace EDX
 
 	public:
 		ImageTexture(const char* strFile, const float gamma = 2.2f);
+		ImageTexture(const TMem* pTexels, const int width, const int height);
 		~ImageTexture()
 		{
 		}
