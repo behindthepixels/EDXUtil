@@ -192,14 +192,19 @@ namespace EDX
 		{
 			return vInci + Vector3(2 * Dot(-vInci, nNorm) * nNorm);
 		}
-		__forceinline Vector3 Refract(const Vector3& vInci, const Vector3& nNorm, float eta)
+		__forceinline Vector3 Refract(const Vector3& wi, const Vector3& n, float eta)
 		{
-			float NDotI = Dot(nNorm, vInci);
-			float k = 1.0f - eta * eta * (1.0f - NDotI * NDotI);
-			if (k < 0.0f)
+			float cosThetaI = Dot(wi, n);
+			if (cosThetaI < 0)
+				eta = 1.0f / eta;
+
+			float cosThetaTSqr = 1 - (1 - cosThetaI*cosThetaI) * (eta*eta);
+
+			if (cosThetaTSqr <= 0.0f)
 				return Vector3::ZERO;
-			else
-				return eta * vInci - (eta * NDotI + Math::Sqrt(k)) * Vector3(nNorm);
+
+			float sign = cosThetaI >= 0.0f ? 1.0f : -1.0f;
+			return n * (-cosThetaI * eta + sign * Sqrt(cosThetaTSqr)) + wi * eta;
 		}
 		__forceinline Vector3 FaceForward(const Vector3& n, const Vector3& v)
 		{
