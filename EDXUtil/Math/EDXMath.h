@@ -10,6 +10,10 @@ namespace EDX
 	namespace Math
 	{
 		template <typename T>
+		inline bool IsNAN(const T& num) { return _isnan(num); }
+		template <typename T>
+		inline bool IsInfinite(const T& num) { return !_finite(num); }
+		template <typename T>
 		inline bool NumericValid(const T& num) { return !_isnan(num) && _finite(num); }
 
 		template <class T1, class T2, class T3>

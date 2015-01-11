@@ -18,23 +18,37 @@ namespace EDX
 		// Constructors, Assignment & Cast Operators
 		//----------------------------------------------------------------------------------------------
 		__forceinline Vec()
-			: x(Math::EDX_ZERO), y(Math::EDX_ZERO), z(Math::EDX_ZERO) {}
+			: x(Math::EDX_ZERO), y(Math::EDX_ZERO), z(Math::EDX_ZERO)
+		{
+		}
 
 		__forceinline Vec(const Vec& vCopyFrom)
-			: x(vCopyFrom.x), y(vCopyFrom.y), z(vCopyFrom.z) {}
+			: x(vCopyFrom.x), y(vCopyFrom.y), z(vCopyFrom.z)
+		{
+			NumericValid();
+		}
 
 		__forceinline Vec(const T& tVal)
-			: x(tVal), y(tVal), z(tVal) {}
+			: x(tVal), y(tVal), z(tVal)
+		{
+			NumericValid();
+		}
 
 		__forceinline Vec(const T& tx, const T& ty, const T& tz)
-			: x(tx), y(ty), z(tz) {}
+			: x(tx), y(ty), z(tz)
+		{
+			NumericValid();
+		}
 
 		//__forceinline Vec(const Vec<2, T>& vCopyFrom, T val = T(Math::EDX_ZERO))
 		//	: x(vCopyFrom.x), y(vCopyFrom.y), z(val) {}
 
 		template<class T1>
 		__forceinline Vec(const Vec<3, T1>& vConvertFrom)
-			: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(vConvertFrom.z)) {}
+			: x(T(vConvertFrom.x)), y(T(vConvertFrom.y)), z(T(vConvertFrom.z))
+		{
+			NumericValid();
+		}
 
 		//template<class T1>
 		//__forceinline Vec(const Vec<2, T1>& vConvertFrom, T1 val)
@@ -44,6 +58,8 @@ namespace EDX
 		__forceinline Vec& operator = (const Vec<3, T1>& vOther)
 		{
 			x = T(vOther.x); y = T(vOther.y); z = T(vOther.z);
+			NumericValid();
+
 			return *this;
 		}
 
@@ -78,22 +94,29 @@ namespace EDX
 		//----------------------------------------------------------------------------------------------
 		// Assignment Operators
 		//----------------------------------------------------------------------------------------------
-		__forceinline const Vec& operator += (const Vec& rhs) { x += rhs.x; y += rhs.y; z += rhs.z; return *this; }
-		__forceinline const Vec& operator -= (const Vec& rhs) { x -= rhs.x; y -= rhs.y; z -= rhs.z; return *this; }
-		__forceinline const Vec& operator *= (const T& rhs) { x *= rhs; y *= rhs; z *= rhs; return *this; }
-		__forceinline const Vec& operator /= (const T& rhs) { x /= rhs; y /= rhs; z /= rhs; return *this; }
-		__forceinline const Vec& operator *= (const Vec& rhs) { x *= rhs.x; y *= rhs.y; z *= rhs.z; return *this; }
-		__forceinline const Vec& operator /= (const Vec& rhs) { x /= rhs.x; y /= rhs.y; z /= rhs.z; return *this; }
-		__forceinline const Vec& operator <<= (const int shift) { x <<= shift; y <<= shift; z <<= shift; return *this; }
-		__forceinline const Vec& operator >>= (const int shift) { x >>= shift; y >>= shift; z >>= shift; return *this; }
-		__forceinline const Vec& operator &= (const int bits) const { x &= bits, y &= bits; z &= bits; return *this; }
-		__forceinline const Vec& operator |= (const int bits) const { x |= bits, y |= bits; z &= bits; return *this; }
+		__forceinline const Vec& operator += (const Vec& rhs) { x += rhs.x; y += rhs.y; z += rhs.z; NumericValid(); return *this; }
+		__forceinline const Vec& operator -= (const Vec& rhs) { x -= rhs.x; y -= rhs.y; z -= rhs.z; NumericValid(); return *this; }
+		__forceinline const Vec& operator *= (const T& rhs) { x *= rhs; y *= rhs; z *= rhs; NumericValid(); return *this; }
+		__forceinline const Vec& operator /= (const T& rhs) { x /= rhs; y /= rhs; z /= rhs; NumericValid(); return *this; }
+		__forceinline const Vec& operator *= (const Vec& rhs) { x *= rhs.x; y *= rhs.y; z *= rhs.z; NumericValid(); return *this; }
+		__forceinline const Vec& operator /= (const Vec& rhs) { x /= rhs.x; y /= rhs.y; z /= rhs.z; NumericValid(); return *this; }
+		__forceinline const Vec& operator <<= (const int shift) { x <<= shift; y <<= shift; z <<= shift; NumericValid(); return *this; }
+		__forceinline const Vec& operator >>= (const int shift) { x >>= shift; y >>= shift; z >>= shift; NumericValid(); return *this; }
+		__forceinline const Vec& operator &= (const int bits) const { x &= bits, y &= bits; z &= bits; NumericValid(); return *this; }
+		__forceinline const Vec& operator |= (const int bits) const { x |= bits, y |= bits; z &= bits; NumericValid(); return *this; }
 
 		//----------------------------------------------------------------------------------------------
 		// Comparison Operators
 		//----------------------------------------------------------------------------------------------
 		__forceinline bool operator == (const Vec& rhs) const { return x == rhs.x && y == rhs.y && z == rhs.z; }
 		__forceinline bool operator != (const Vec& rhs) const { return x != rhs.x || y != rhs.y || z != rhs.z; }
+
+		__forceinline void NumericValid() const
+		{
+			assert(!Math::IsNAN(x));
+			assert(!Math::IsNAN(y));
+			assert(!Math::IsNAN(z));
+		}
 
 		static const Vec ZERO;
 		static const Vec UNIT_SCALE;

@@ -14,6 +14,7 @@ namespace EDX
 		, b(c.b * 0.00390625f)
 		, a(c.a * 0.00390625f)
 	{
+		NumericValid();
 	}
 
 	namespace Math

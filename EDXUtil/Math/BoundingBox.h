@@ -64,9 +64,9 @@ namespace EDX
 
 		inline Vector3 Offset(const Vector3& pt) const
 		{
-			return Vector3((pt.x - mMin.x) / (mMax.x - mMin.x),
-				(pt.y - mMin.y) / (mMax.y - mMin.y),
-				(pt.z - mMin.z) / (mMax.z - mMin.z));
+			return Vector3((pt.x - mMin.x) / (mMax.x - mMin.x + 1e-6f),
+				(pt.y - mMin.y) / (mMax.y - mMin.y + 1e-6f),
+				(pt.z - mMin.z) / (mMax.z - mMin.z + 1e-6f));
 		}
 
 		inline float Area() const

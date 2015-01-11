@@ -119,7 +119,7 @@ namespace EDX
 	{
 		const Container& sampledLevel = mpLeveledTexels[level];
 
-		Vec<Dim, int> coord = texCoord * sampledLevel.Size();
+		Vec<Dim, float> coord = texCoord * sampledLevel.Size();
 
 		coord.u = Math::Min(coord.u, sampledLevel.Size(0) - 1);
 		coord.v = Math::Min(coord.v, sampledLevel.Size(1) - 1);

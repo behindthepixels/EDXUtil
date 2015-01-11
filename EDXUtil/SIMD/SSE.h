@@ -111,4 +111,10 @@ namespace EDX
 	typedef Vec<4, FloatSSE> Vec4f_SSE;
 	typedef Vec<4, IntSSE> Vec4i_SSE;
 	typedef Vec<4, BoolSSE> Vec4b_SSE;
+
+	namespace Math
+	{
+		template <>
+		inline bool IsNAN(const FloatSSE& num) { return false; }
+	}
 }

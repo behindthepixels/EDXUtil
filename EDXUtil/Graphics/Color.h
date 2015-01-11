@@ -13,13 +13,22 @@ namespace EDX
 		Color()
 			: r(0.0f), g(0.0f), b(0.0f), a(1.0f) {}
 		Color(float fR, float fG, float fB, float fA = 1.0f)
-			: r(fR), g(fG), b(fB), a(fA) {}
+			: r(fR), g(fG), b(fB), a(fA)
+		{
+			NumericValid();
+		}
 		Color(float val)
-			: r(val), g(val), b(val), a(1.0f) {}
+			: r(val), g(val), b(val), a(1.0f)
+		{
+			NumericValid();
+		}
 		Color(const class Color4b& c);
 
 		explicit Color(const Vector3& vVec)
-			: r(vVec.x), g(vVec.y), b(vVec.z), a(1.0f) {}
+			: r(vVec.x), g(vVec.y), b(vVec.z), a(1.0f)
+		{
+			NumericValid();
+		}
 
 		~Color()
 		{
@@ -33,84 +42,66 @@ namespace EDX
 
 		Color operator + (const Color& color) const
 		{
-			assert(Math::NumericValid(color.r));
-			assert(Math::NumericValid(color.g));
-			assert(Math::NumericValid(color.b));
-			assert(Math::NumericValid(color.a));
 			return Color(r + color.r, g + color.g, b + color.b);
 		}
 
 		Color& operator += (const Color& color)
 		{
-			assert(Math::NumericValid(color.r));
-			assert(Math::NumericValid(color.g));
-			assert(Math::NumericValid(color.b));
-			assert(Math::NumericValid(color.a));
 			r += color.r; g += color.g; b += color.b; a = 1.0f;
+			NumericValid();
+
 			return *this;
 		}
 		Color operator - (const Color& color) const
 		{
-			assert(Math::NumericValid(color.r));
-			assert(Math::NumericValid(color.g));
-			assert(Math::NumericValid(color.b));
-			assert(Math::NumericValid(color.a));
 			return Color(r - color.r, g - color.g, b - color.b);
 		}
 
 		Color& operator -= (const Color& color)
 		{
-			assert(Math::NumericValid(color.r));
-			assert(Math::NumericValid(color.g));
-			assert(Math::NumericValid(color.b));
-			assert(Math::NumericValid(color.a));
 			r -= color.r; g -= color.g; b -= color.b; a = 1.0f;
+			NumericValid();
+
 			return *this;
 		}
 		Color operator * (float val) const
 		{
-			assert(Math::NumericValid(val));
 			return Color(val * r, val * g, val * b);
 		}
 
 		Color operator * (const Color& color) const
 		{
-			assert(Math::NumericValid(color.r));
-			assert(Math::NumericValid(color.g));
-			assert(Math::NumericValid(color.b));
-			assert(Math::NumericValid(color.a));
 			return Color(r * color.r, g * color.g, b * color.b);
 		}
 
 		Color& operator *= (float val)
 		{
-			assert(Math::NumericValid(val));
 			r *= val; g *= val; b *= val; a = 1.0f;
+			NumericValid();
+
 			return *this;
 		}
 
 		Color& operator *= (const Color& color)
 		{
-			assert(Math::NumericValid(color.r));
-			assert(Math::NumericValid(color.g));
-			assert(Math::NumericValid(color.b));
-			assert(Math::NumericValid(color.a));
 			r *= color.r; g *= color.g; b *= color.b; a = 1.0f;
+			NumericValid();
+
 			return *this;
 		}
 
 		Color operator / (float val) const
 		{
-			assert(Math::NumericValid(val));
 			float fInv = 1.0f / val;
 			return Color(r * fInv, g * fInv, b * fInv);
 		}
 
 		Color& operator /= (float val)
 		{
-			assert(Math::NumericValid(val));
 			float fInv = 1.0f / val;
 			r *= fInv; g *= fInv; b *= fInv; a = 1.0f;
+			NumericValid();
+
 			return *this;
 		}
 
@@ -122,6 +113,13 @@ namespace EDX
 		bool operator != (const Color& color) const
 		{
 			return r != color.r || g != color.g || b != color.b;
+		}
+
+		void NumericValid() const
+		{
+			assert(Math::NumericValid(r));
+			assert(Math::NumericValid(g));
+			assert(Math::NumericValid(b));
 		}
 
 		static const Color BLACK;
