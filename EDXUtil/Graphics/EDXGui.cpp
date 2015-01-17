@@ -1,3 +1,6 @@
+
+#include <stdarg.h>
+
 #include "EDXGui.h"
 #include "../Math/EDXMath.h"
 #include "../Memory/Memory.h"
@@ -912,6 +915,100 @@ namespace EDX
 			}
 
 			return false;
+		}
+
+		//----------------------------------------------------------------------------------
+		// Immediate mode GUI implementation
+		//----------------------------------------------------------------------------------
+		GuiStates EDXGui::States;
+
+		void EDXGui::BeginDialog(int screenWidth, int screenHeight, LayoutStrategy layoutStrategy)
+		{
+			States.ScreenWidth = screenWidth;
+			States.ScreenHeight = screenHeight;
+			States.CurrentLayoutStrategy = layoutStrategy;
+
+			if (States.CurrentLayoutStrategy == LayoutStrategy::DockRight)
+			{
+				States.DialogWidth = 200;
+				States.DialogHeight = States.ScreenHeight;
+				States.DialogPosX = States.ScreenWidth - States.DialogWidth;
+				States.DialogPosY = 0;
+				States.CurrentPosX = 30;
+				States.CurrentPosY = 30;
+			}
+
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadIdentity();
+			glOrtho(0, States.ScreenWidth, 0, States.ScreenHeight, 1, -1);
+
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glLoadIdentity();
+
+			// Render the blurred background texture
+			glPushAttrib(GL_ALL_ATTRIB_BITS);
+			glEnable(GL_TEXTURE_2D);
+			glDisable(GL_LIGHTING);
+			glDisable(GL_DEPTH_TEST);
+			GUIPainter::Instance()->BlurBackgroundTexture(States.DialogPosX, States.DialogPosY, States.DialogPosX + States.DialogWidth, States.DialogPosY + States.DialogHeight);
+			GUIPainter::Instance()->DrawBackgroundTexture(States.DialogPosX, States.DialogPosY, States.DialogPosX + States.DialogWidth, States.DialogPosY + States.DialogHeight);
+
+			glTranslatef(States.DialogPosX, States.ScreenHeight - States.DialogPosY, 0.0f);
+			glScalef(1.0f, -1.0f, 1.0f);
+
+			glLineWidth(1.0f);
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
+			glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
+
+			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+			GUIPainter::Instance()->DrawRect(0, 0, States.ScreenWidth, States.ScreenHeight, GUIPainter::DEPTH_FAR);
+		}
+		void EDXGui::EndDialog()
+		{
+			glPopAttrib();
+			glPopMatrix();
+			glMatrixMode(GL_PROJECTION);
+			glPopMatrix();
+
+			if (States.CurrentLayoutStrategy == LayoutStrategy::DockRight)
+			{
+				States.DialogWidth = 200;
+				States.DialogHeight = States.ScreenHeight;
+				States.DialogPosX = States.ScreenWidth - States.DialogWidth;
+				States.DialogPosY = 0;
+				States.CurrentPosX = 30;
+				States.CurrentPosY = 30;
+			}
+		}
+
+		void EDXGui::Text(const char* str, ...)
+		{
+			const int Padding = 22;
+			const int Width = 140;
+			const int Height = 21;
+
+			int posY = States.CurrentPosY + (Padding - Height) / 2;
+
+			va_list args;
+			va_start(args, str);
+
+			char buff[1024];
+			int size = vsnprintf(buff, sizeof(buff) - 1, str, args);
+
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			GUIPainter::Instance()->DrawString(States.CurrentPosX, posY, 0.5f, buff);
+
+			va_end(args);
+
+			if (States.CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States.CurrentPosY += Padding;
+			else
+				States.CurrentPosX += 5;
 		}
 	}
 }

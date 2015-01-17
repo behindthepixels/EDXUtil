@@ -8,8 +8,6 @@
 using namespace EDX;
 using namespace EDX::GUI;
 
-EDXDialog		gDialog;
-
 double PI = 3.141592653f;
 double mAmp = 250;
 float mPhase = 0;
@@ -33,33 +31,11 @@ void OnInit(Object* pSender, EventArgs args)
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClearDepth(1.0f);
-	gDialog.Init(1280, 800);
-
-	gDialog.AddText(0, "GUI Test");
-	gDialog.AddCheckBox(1, mMod, &mMod, "Check box");
-	gDialog.AddCheckBox(1, mMod, &mMod, "Check box 2");
-	gDialog.AddButton(2, "Button");
-	gDialog.AddSlider(3, 0.0f, 6.28f, mPhase, &mPhase, "Slider 1: ");
-	gDialog.AddSlider(3, 0.0f, 1.0f, mHalfRatio, &mHalfRatio, "Slider 2: ");
-	gDialog.AddSlider(4, 0.0f, mTotalPeriod, mStraightLength, &mStraightLength, "Slider 3: ");
-
-	ComboBoxItem items[] = {
-			{ 0, "Item 1" },
-			{ 1, "Item 2" },
-			{ 2, "Item 3" },
-			{ 3, "Item 4" },
-			{ 4, "Item 5" },
-	};
-
-	gDialog.AddComboBox(4, 0, &gCombo, items, 5);
-	gDialog.AddComboBox(5, 0, &gCombo, items, 5);
-
-	gDialog.AddButton(2, "Button 2");
 
 	int channel;
 	string c = Application::GetBaseDirectory();
 	c += "\\Sponza.jpg";
-	gImage = Bitmap::ReadFromFileByte(c.c_str(), &gWidth, &gHeight, &channel);
+	gImage = (_byte*)Bitmap::ReadFromFile<Color4b>(c.c_str(), &gWidth, &gHeight, &channel);
 	assert(gImage);
 }
 
@@ -73,7 +49,14 @@ void OnRender(Object* pSender, EventArgs args)
 	glRasterPos3f(0.0f, 0.0f, 1.0f);
 	glDrawPixels(gWidth, gHeight, GL_RGBA, GL_UNSIGNED_BYTE, gImage);
 
-	gDialog.Render();
+	EDXGui::BeginDialog(1280, 800);
+	EDXGui::Text("Fuck you! %f", 1.0f);
+	EDXGui::Text("Fuck you! %f", 2.0f);
+	EDXGui::Text("Fuck you! %f", 2.0f);
+	EDXGui::Text("Fuck you! %f", 4.0f);
+	EDXGui::Text("Fuck you! %f", 236.0f);
+	EDXGui::Text("Fuck you! %f", 2345.0f);
+	EDXGui::EndDialog();
 }
 
 void OnResize(Object* pSender, ResizeEventArgs args)
@@ -87,18 +70,15 @@ void OnResize(Object* pSender, ResizeEventArgs args)
 
 	glMatrixMode(GL_MODELVIEW);
 
-	gDialog.Resize(args.Width, args.Height);
 }
 
 void OnMouseEvent(Object* pSender, MouseEventArgs args)
 {
-	if (gDialog.MsgProc(args))
-		return;
 }
 
 void OnRelease(Object* pSender, EventArgs args)
 {
-	gDialog.Release();
+	GUIPainter::DeleteInstance();
 }
 
 

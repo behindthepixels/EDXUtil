@@ -333,5 +333,47 @@ namespace EDX
 
 			bool HandleMouse(const MouseEventArgs& mouseArgs);
 		};
+
+		//----------------------------------------------------------------------------------
+		// Immediate mode GUI
+		//----------------------------------------------------------------------------------
+		enum class LayoutStrategy
+		{
+			DockLeft,
+			DockRight,
+			Floating
+		};
+
+		enum class GrowthStrategy
+		{
+			Vertical,
+			Horizontal
+		};
+
+		struct GuiStates
+		{
+			int CurrentPosX;
+			int CurrentPosY;
+			int ScreenWidth;
+			int ScreenHeight;
+			int DialogPosX;
+			int DialogPosY;
+			int DialogWidth;
+			int DialogHeight;
+			LayoutStrategy CurrentLayoutStrategy;
+			GrowthStrategy CurrentGrowthStrategy;
+		};
+
+		class EDXGui
+		{
+		private:
+			static GuiStates States;
+
+		public:
+			static void BeginDialog(int screenWidth, int screenHeight, LayoutStrategy layoutStrategy = LayoutStrategy::DockRight);
+			static void EndDialog();
+
+			static void Text(const char* str, ...);
+		};
 	}
 }
