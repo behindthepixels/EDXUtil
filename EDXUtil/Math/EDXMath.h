@@ -58,7 +58,7 @@ namespace EDX
 			{
 				return 0.0f;
 			}
-			return Saturate((tVal - min) / (max - min));
+			return Saturate((tVal - min) / float(max - min));
 		}
 		template<class T1, class T2> inline auto Lerp(const T1& min, const T2& max, const float val) -> decltype(min + max) { return min * (1 - val) + max * val; }
 		template<class T1, class T2> inline auto Max(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 > e2 ? e1 : e2; }

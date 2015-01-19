@@ -32,6 +32,8 @@ void OnInit(Object* pSender, EventArgs args)
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClearDepth(1.0f);
 
+	EDXGui::Init();
+
 	int channel;
 	string c = Application::GetBaseDirectory();
 	c += "\\Sponza.jpg";
@@ -49,13 +51,16 @@ void OnRender(Object* pSender, EventArgs args)
 	glRasterPos3f(0.0f, 0.0f, 1.0f);
 	glDrawPixels(gWidth, gHeight, GL_RGBA, GL_UNSIGNED_BYTE, gImage);
 
-	EDXGui::BeginDialog(1280, 800);
-	EDXGui::Text("Fuck you! %f", 1.0f);
-	EDXGui::Text("Fuck you! %f", 2.0f);
-	EDXGui::Text("Fuck you! %f", 2.0f);
-	EDXGui::Text("Fuck you! %f", 4.0f);
-	EDXGui::Text("Fuck you! %f", 236.0f);
-	EDXGui::Text("Fuck you! %f", 2345.0f);
+	static float counter = 0;
+	EDXGui::BeginDialog();
+	EDXGui::Text("Fuck you! %f", counter);
+	if (EDXGui::Bottun("Fuck you again!"))
+		counter += 1;
+	EDXGui::Slider<float>("Damn!", &counter, 0.0f, 20.0f);
+	static bool checked = false;
+	EDXGui::CheckBox("Bitch!", checked);
+	if (EDXGui::Bottun("And again!"))
+		counter += 10;
 	EDXGui::EndDialog();
 }
 
@@ -70,15 +75,18 @@ void OnResize(Object* pSender, ResizeEventArgs args)
 
 	glMatrixMode(GL_MODELVIEW);
 
+	EDXGui::Resize(args.Width, args.Height);
 }
 
 void OnMouseEvent(Object* pSender, MouseEventArgs args)
 {
+	EDXGui::HandleMouseEvent(args);
 }
 
 void OnRelease(Object* pSender, EventArgs args)
 {
-	GUIPainter::DeleteInstance();
+	EDXGui::Release();
+	SafeDeleteArray(gImage);
 }
 
 

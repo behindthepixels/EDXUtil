@@ -207,7 +207,7 @@ namespace EDX
 		{
 			glListBase(mTextListBase);
 
-			glRasterPos3f(x + 1, y + 4, depth);
+			glRasterPos3f(x, y + 10, depth);
 			glCallLists((GLsizei)strlen(strText), GL_UNSIGNED_BYTE, strText);
 		}
 
@@ -339,7 +339,7 @@ namespace EDX
 		{
 			int posY = mPaddingY + (Button::Padding - Button::Height) / 2;
 			Button* pButton = new Button(ID, mPaddingX, posY, Button::Width, Button::Height, pStr, this);
-			if(!pButton)
+			if (!pButton)
 			{
 				return false;
 			}
@@ -359,7 +359,7 @@ namespace EDX
 
 			int posY = mPaddingY + (Slider::Padding - Slider::Height) / 2;
 			Slider* pSlider = new Slider(ID, mPaddingX, posY, Slider::Width, Slider::Height, min, max, val, pRefVal, pText, this);
-			if(!pSlider)
+			if (!pSlider)
 			{
 				return false;
 			}
@@ -377,7 +377,7 @@ namespace EDX
 		{
 			int posY = mPaddingY + (CheckBox::Padding - CheckBox::Height) / 2;
 			CheckBox* pCheckedBox = new CheckBox(ID, mPaddingX, posY, CheckBox::Width, CheckBox::Height, bChecked, pRefVal, pStr, this);
-			if(!pCheckedBox)
+			if (!pCheckedBox)
 			{
 				return false;
 			}
@@ -405,7 +405,7 @@ namespace EDX
 		{
 			int posY = mPaddingY + (Text::Padding - Text::Height) / 2;
 			Text* pText = new Text(ID, mPaddingX, posY, Text::Width, Text::Height, pStr, this);
-			if(!pText)
+			if (!pText)
 			{
 				return false;
 			}
@@ -419,11 +419,11 @@ namespace EDX
 
 		EDXControl* EDXDialog::GetControlAtPoint(const POINT& pt) const
 		{
-			for(int i = 0; i < mvControls.size(); i++)
+			for (int i = 0; i < mvControls.size(); i++)
 			{
 				EDXControl* pControl = mvControls[i].Ptr();
 
-				if(pControl->ContainsPoint(pt))
+				if (pControl->ContainsPoint(pt))
 				{
 					return pControl;
 				}
@@ -433,11 +433,11 @@ namespace EDX
 
 		EDXControl* EDXDialog::GetControlWithID(uint ID) const
 		{
-			for(int i = 0; i < mvControls.size(); i++)
+			for (int i = 0; i < mvControls.size(); i++)
 			{
 				EDXControl* pControl = mvControls[i].Ptr();
 
-				if(pControl->GetID() == ID)
+				if (pControl->GetID() == ID)
 					return pControl;
 			}
 			return NULL;
@@ -514,11 +514,11 @@ namespace EDX
 
 		void Button::Render() const
 		{
-			if(mbDown)
+			if (mbDown)
 			{
 				GUIPainter::Instance()->DrawBorderedRect(mBBox.left + 1, mBBox.top + 1, mBBox.right - 1, mBBox.bottom - 1, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 			}
-			else if(mHovered)
+			else if (mHovered)
 			{
 				GUIPainter::Instance()->DrawBorderedRect(mBBox.left - 1, mBBox.top - 1, mBBox.right + 1, mBBox.bottom + 1, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 			}
@@ -584,7 +584,7 @@ namespace EDX
 					return true;
 				}
 
-				break;	
+				break;
 			}
 
 			return false;
@@ -680,7 +680,7 @@ namespace EDX
 				if (PtInRect(&mrcButtonBBox, mousePt))
 				{
 					mPressed = true;
-					
+
 					mDragX = mousePt.x;
 					mDragOffset = mButtonX - mDragX;
 
@@ -702,7 +702,7 @@ namespace EDX
 				return true;
 
 			case MouseAction::Move:
-				if(mPressed)
+				if (mPressed)
 				{
 					SetValueFromPos(mousePt.x + mDragOffset);
 					*mpRefVal = GetValue();
@@ -732,7 +732,7 @@ namespace EDX
 			int midX = mX + 6;
 			int midY = mY + mHeight / 2;
 			GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize, midY - mBoxSize, midX + mBoxSize, midY + mBoxSize, GUIPainter::DEPTH_MID, 2);
-			if(mbChecked)
+			if (mbChecked)
 				GUIPainter::Instance()->DrawBorderedRect(midX - mBoxSize + 1, midY - mBoxSize + 2, midX + mBoxSize - 2, midY + mBoxSize - 1, GUIPainter::DEPTH_MID, 0, Color::WHITE);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -799,7 +799,7 @@ namespace EDX
 
 		void Text::SetText(char* pStr)
 		{
-			if(pStr == NULL)
+			if (pStr == NULL)
 			{
 				mstrText[0] = 0;
 				return;
@@ -922,11 +922,22 @@ namespace EDX
 		//----------------------------------------------------------------------------------
 		GuiStates EDXGui::States;
 
-		void EDXGui::BeginDialog(int screenWidth, int screenHeight, LayoutStrategy layoutStrategy)
+		void EDXGui::Init()
 		{
-			States.ScreenWidth = screenWidth;
-			States.ScreenHeight = screenHeight;
+			States.ActiveId = -1;
+		}
+
+		void EDXGui::Release()
+		{
+			GUIPainter::DeleteInstance();
+		}
+
+		void EDXGui::BeginDialog(LayoutStrategy layoutStrategy)
+		{
 			States.CurrentLayoutStrategy = layoutStrategy;
+			States.CurrentGrowthStrategy = GrowthStrategy::Vertical;
+			States.CurrentId = -1;
+			States.HoveredId = -1;
 
 			if (States.CurrentLayoutStrategy == LayoutStrategy::DockRight)
 			{
@@ -965,6 +976,7 @@ namespace EDX
 			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
 			glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
 
+			// Draw blurred background
 			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 			GUIPainter::Instance()->DrawRect(0, 0, States.ScreenWidth, States.ScreenHeight, GUIPainter::DEPTH_FAR);
 		}
@@ -986,13 +998,27 @@ namespace EDX
 			}
 		}
 
+		void EDXGui::Resize(int screenWidth, int screenHeight)
+		{
+			States.ScreenWidth = screenWidth;
+			States.ScreenHeight = screenHeight;
+
+			GUIPainter::Instance()->Resize(screenWidth, screenHeight);
+		}
+
+		void EDXGui::HandleMouseEvent(const MouseEventArgs& mouseArgs)
+		{
+			States.MouseState = mouseArgs;
+			States.MouseState.x = mouseArgs.x - States.DialogPosX;
+			States.MouseState.y = mouseArgs.y - States.DialogPosY;
+		}
+
 		void EDXGui::Text(const char* str, ...)
 		{
-			const int Padding = 22;
+			const int Height = 10;
 			const int Width = 140;
-			const int Height = 21;
 
-			int posY = States.CurrentPosY + (Padding - Height) / 2;
+			States.CurrentId++;
 
 			va_list args;
 			va_start(args, str);
@@ -1001,12 +1027,161 @@ namespace EDX
 			int size = vsnprintf(buff, sizeof(buff) - 1, str, args);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			GUIPainter::Instance()->DrawString(States.CurrentPosX, posY, 0.5f, buff);
+			GUIPainter::Instance()->DrawString(States.CurrentPosX, States.CurrentPosY, 0.5f, buff);
 
 			va_end(args);
 
 			if (States.CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States.CurrentPosY += Padding;
+				States.CurrentPosY += Height + 10;
+			else
+				States.CurrentPosX += 5;
+		}
+
+		bool EDXGui::Bottun(const char* str)
+		{
+			const int Padding = 30;
+			const int Width = 140;
+			const int Height = 22;
+
+			bool trigger = false;
+			int Id = States.CurrentId++;
+
+			RECT btnRect;
+			SetRect(&btnRect, States.CurrentPosX, States.CurrentPosY, States.CurrentPosX + Width, States.CurrentPosY + Height);
+
+			POINT mousePt;
+			mousePt.x = States.MouseState.x;
+			mousePt.y = States.MouseState.y;
+
+			bool inRect = PtInRect(&btnRect, mousePt);
+
+			if (inRect)
+			{
+				switch (States.MouseState.Action)
+				{
+				case MouseAction::LButtonDown:
+					States.ActiveId = Id;
+					break;
+				case MouseAction::LButtonUp:
+					if (States.ActiveId == Id)
+					{
+						States.ActiveId = -1;
+						trigger = true;
+					}
+					break;
+				case MouseAction::Move:
+					States.HoveredId = Id;
+					break;
+				default:
+					break;
+				}
+
+				if (States.ActiveId == Id)
+				{
+					GUIPainter::Instance()->DrawBorderedRect(btnRect.left + 1,
+						btnRect.top + 1,
+						btnRect.right - 1,
+						btnRect.bottom - 1,
+						GUIPainter::DEPTH_MID,
+						0,
+						Color::WHITE);
+				}
+				else
+				{
+					GUIPainter::Instance()->DrawBorderedRect(btnRect.left - 1,
+						btnRect.top - 1,
+						btnRect.right + 1,
+						btnRect.bottom + 1,
+						GUIPainter::DEPTH_MID,
+						0,
+						Color::WHITE);
+				}
+			}
+			else
+			{
+				GUIPainter::Instance()->DrawBorderedRect(btnRect.left,
+					btnRect.top,
+					btnRect.right,
+					btnRect.bottom,
+					GUIPainter::DEPTH_MID,
+					2);
+			}
+
+			int midX = States.CurrentPosX + Width / 2 - strlen(str) * 7 / 2;
+
+			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+			if (inRect)
+				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
+			else
+				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			GUIPainter::Instance()->DrawString(midX, States.CurrentPosY + 6, GUIPainter::DEPTH_MID, str);
+
+			if (States.CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States.CurrentPosY += Height + 10;
+			else
+				States.CurrentPosX += 5;
+
+			return trigger;
+		}
+
+		void EDXGui::CheckBox(const char* str, bool& checked)
+		{
+			const int Width = 140;
+			const int BoxSize = 12;
+
+			int Id = States.CurrentId++;
+
+			RECT boxRect;
+			SetRect(&boxRect, States.CurrentPosX, States.CurrentPosY, States.CurrentPosX + BoxSize, States.CurrentPosY + BoxSize);
+
+			POINT mousePt;
+			mousePt.x = States.MouseState.x;
+			mousePt.y = States.MouseState.y;
+			bool inRect = PtInRect(&boxRect, mousePt);
+
+			if (inRect)
+			{
+				switch (States.MouseState.Action)
+				{
+				case MouseAction::LButtonDown:
+					States.ActiveId = Id;
+					break;
+				case MouseAction::LButtonUp:
+					if (States.ActiveId == Id)
+					{
+						States.ActiveId = -1;
+						checked = !checked;
+					}
+					break;
+				}
+			}
+			else
+			{
+				if (States.MouseState.Action == MouseAction::Move)
+					if (States.ActiveId == Id)
+						States.ActiveId = -1;
+			}
+
+			GUIPainter::Instance()->DrawBorderedRect(boxRect.left,
+				boxRect.top,
+				boxRect.right,
+				boxRect.bottom,
+				GUIPainter::DEPTH_MID,
+				2);
+			if (checked)
+				GUIPainter::Instance()->DrawBorderedRect(boxRect.left + 1,
+				boxRect.top + 2,
+				boxRect.right - 2,
+				boxRect.bottom - 1,
+				GUIPainter::DEPTH_MID,
+				0,
+				Color::WHITE);
+
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			GUIPainter::Instance()->DrawString(States.CurrentPosX + BoxSize + 7, States.CurrentPosY + 2, GUIPainter::DEPTH_MID, str);
+
+			if (States.CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States.CurrentPosY += BoxSize + 10;
 			else
 				States.CurrentPosX += 5;
 		}
