@@ -53,13 +53,15 @@ void OnRender(Object* pSender, EventArgs args)
 
 	static float counter = 0;
 	EDXGui::BeginDialog();
-	EDXGui::Text("Fuck you! %f", counter);
-	if (EDXGui::Bottun("Fuck you again!"))
+	EDXGui::Text("Active Id: %i", EDXGui::States->ActiveId);
+	EDXGui::Text("L Down: %i", EDXGui::States->MouseState.lDown ? 1 : 0);
+	EDXGui::Text("Value: %f", counter);
+	if (EDXGui::Bottun("Button 1"))
 		counter += 1;
-	EDXGui::Slider<float>("Damn!", &counter, 0.0f, 20.0f);
+	EDXGui::Slider<float>("Slider 1", &counter, 0.0f, 20.0f);
 	static bool checked = false;
-	EDXGui::CheckBox("Bitch!", checked);
-	if (EDXGui::Bottun("And again!"))
+	EDXGui::CheckBox("Check Box", checked);
+	if (EDXGui::Bottun("Button 2"))
 		counter += 10;
 	EDXGui::EndDialog();
 }

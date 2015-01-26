@@ -920,39 +920,41 @@ namespace EDX
 		//----------------------------------------------------------------------------------
 		// Immediate mode GUI implementation
 		//----------------------------------------------------------------------------------
-		GuiStates EDXGui::States;
+		GuiStates* EDXGui::States;
 
 		void EDXGui::Init()
 		{
-			States.ActiveId = -1;
+			States = new GuiStates;
+			States->ActiveId = -1;
 		}
 
 		void EDXGui::Release()
 		{
+			SafeDelete(States);
 			GUIPainter::DeleteInstance();
 		}
 
 		void EDXGui::BeginDialog(LayoutStrategy layoutStrategy)
 		{
-			States.CurrentLayoutStrategy = layoutStrategy;
-			States.CurrentGrowthStrategy = GrowthStrategy::Vertical;
-			States.CurrentId = -1;
-			States.HoveredId = -1;
+			States->CurrentLayoutStrategy = layoutStrategy;
+			States->CurrentGrowthStrategy = GrowthStrategy::Vertical;
+			States->CurrentId = -1;
+			States->HoveredId = -1;
 
-			if (States.CurrentLayoutStrategy == LayoutStrategy::DockRight)
+			if (States->CurrentLayoutStrategy == LayoutStrategy::DockRight)
 			{
-				States.DialogWidth = 200;
-				States.DialogHeight = States.ScreenHeight;
-				States.DialogPosX = States.ScreenWidth - States.DialogWidth;
-				States.DialogPosY = 0;
-				States.CurrentPosX = 30;
-				States.CurrentPosY = 30;
+				States->DialogWidth = 200;
+				States->DialogHeight = States->ScreenHeight;
+				States->DialogPosX = States->ScreenWidth - States->DialogWidth;
+				States->DialogPosY = 0;
+				States->CurrentPosX = 30;
+				States->CurrentPosY = 30;
 			}
 
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
-			glOrtho(0, States.ScreenWidth, 0, States.ScreenHeight, 1, -1);
+			glOrtho(0, States->ScreenWidth, 0, States->ScreenHeight, 1, -1);
 
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
@@ -963,10 +965,10 @@ namespace EDX
 			glEnable(GL_TEXTURE_2D);
 			glDisable(GL_LIGHTING);
 			glDisable(GL_DEPTH_TEST);
-			GUIPainter::Instance()->BlurBackgroundTexture(States.DialogPosX, States.DialogPosY, States.DialogPosX + States.DialogWidth, States.DialogPosY + States.DialogHeight);
-			GUIPainter::Instance()->DrawBackgroundTexture(States.DialogPosX, States.DialogPosY, States.DialogPosX + States.DialogWidth, States.DialogPosY + States.DialogHeight);
+			GUIPainter::Instance()->BlurBackgroundTexture(States->DialogPosX, States->DialogPosY, States->DialogPosX + States->DialogWidth, States->DialogPosY + States->DialogHeight);
+			GUIPainter::Instance()->DrawBackgroundTexture(States->DialogPosX, States->DialogPosY, States->DialogPosX + States->DialogWidth, States->DialogPosY + States->DialogHeight);
 
-			glTranslatef(States.DialogPosX, States.ScreenHeight - States.DialogPosY, 0.0f);
+			glTranslatef(States->DialogPosX, States->ScreenHeight - States->DialogPosY, 0.0f);
 			glScalef(1.0f, -1.0f, 1.0f);
 
 			glLineWidth(1.0f);
@@ -978,7 +980,7 @@ namespace EDX
 
 			// Draw blurred background
 			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-			GUIPainter::Instance()->DrawRect(0, 0, States.ScreenWidth, States.ScreenHeight, GUIPainter::DEPTH_FAR);
+			GUIPainter::Instance()->DrawRect(0, 0, States->ScreenWidth, States->ScreenHeight, GUIPainter::DEPTH_FAR);
 		}
 		void EDXGui::EndDialog()
 		{
@@ -987,30 +989,33 @@ namespace EDX
 			glMatrixMode(GL_PROJECTION);
 			glPopMatrix();
 
-			if (States.CurrentLayoutStrategy == LayoutStrategy::DockRight)
+			if (States->CurrentLayoutStrategy == LayoutStrategy::DockRight)
 			{
-				States.DialogWidth = 200;
-				States.DialogHeight = States.ScreenHeight;
-				States.DialogPosX = States.ScreenWidth - States.DialogWidth;
-				States.DialogPosY = 0;
-				States.CurrentPosX = 30;
-				States.CurrentPosY = 30;
+				States->DialogWidth = 200;
+				States->DialogHeight = States->ScreenHeight;
+				States->DialogPosX = States->ScreenWidth - States->DialogWidth;
+				States->DialogPosY = 0;
+				States->CurrentPosX = 30;
+				States->CurrentPosY = 30;
 			}
 		}
 
 		void EDXGui::Resize(int screenWidth, int screenHeight)
 		{
-			States.ScreenWidth = screenWidth;
-			States.ScreenHeight = screenHeight;
+			States->ScreenWidth = screenWidth;
+			States->ScreenHeight = screenHeight;
 
 			GUIPainter::Instance()->Resize(screenWidth, screenHeight);
 		}
 
 		void EDXGui::HandleMouseEvent(const MouseEventArgs& mouseArgs)
 		{
-			States.MouseState = mouseArgs;
-			States.MouseState.x = mouseArgs.x - States.DialogPosX;
-			States.MouseState.y = mouseArgs.y - States.DialogPosY;
+			States->MouseState = mouseArgs;
+			States->MouseState.x = mouseArgs.x - States->DialogPosX;
+			States->MouseState.y = mouseArgs.y - States->DialogPosY;
+
+			if (States->MouseState.Action == MouseAction::LButtonUp)
+				States->ActiveId = -1;
 		}
 
 		void EDXGui::Text(const char* str, ...)
@@ -1018,7 +1023,7 @@ namespace EDX
 			const int Height = 10;
 			const int Width = 140;
 
-			States.CurrentId++;
+			++States->CurrentId;
 
 			va_list args;
 			va_start(args, str);
@@ -1027,75 +1032,70 @@ namespace EDX
 			int size = vsnprintf(buff, sizeof(buff) - 1, str, args);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			GUIPainter::Instance()->DrawString(States.CurrentPosX, States.CurrentPosY, 0.5f, buff);
+			GUIPainter::Instance()->DrawString(States->CurrentPosX, States->CurrentPosY, 0.5f, buff);
 
 			va_end(args);
 
-			if (States.CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States.CurrentPosY += Height + 10;
+			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States->CurrentPosY += Height + 10;
 			else
-				States.CurrentPosX += 5;
+				States->CurrentPosX += 5;
 		}
 
 		bool EDXGui::Bottun(const char* str)
 		{
-			const int Padding = 30;
 			const int Width = 140;
 			const int Height = 22;
 
 			bool trigger = false;
-			int Id = States.CurrentId++;
+			int Id = ++States->CurrentId;
 
 			RECT btnRect;
-			SetRect(&btnRect, States.CurrentPosX, States.CurrentPosY, States.CurrentPosX + Width, States.CurrentPosY + Height);
+			SetRect(&btnRect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + Width, States->CurrentPosY + Height);
 
 			POINT mousePt;
-			mousePt.x = States.MouseState.x;
-			mousePt.y = States.MouseState.y;
+			mousePt.x = States->MouseState.x;
+			mousePt.y = States->MouseState.y;
 
 			bool inRect = PtInRect(&btnRect, mousePt);
 
 			if (inRect)
 			{
-				switch (States.MouseState.Action)
+				if (States->MouseState.Action == MouseAction::LButtonDown)
+					States->ActiveId = Id;
+				if (States->MouseState.Action == MouseAction::LButtonUp)
 				{
-				case MouseAction::LButtonDown:
-					States.ActiveId = Id;
-					break;
-				case MouseAction::LButtonUp:
-					if (States.ActiveId == Id)
+					if (States->ActiveId == Id)
 					{
-						States.ActiveId = -1;
+						States->ActiveId = -1;
 						trigger = true;
 					}
-					break;
-				case MouseAction::Move:
-					States.HoveredId = Id;
-					break;
-				default:
-					break;
 				}
+			}
 
-				if (States.ActiveId == Id)
-				{
-					GUIPainter::Instance()->DrawBorderedRect(btnRect.left + 1,
-						btnRect.top + 1,
-						btnRect.right - 1,
-						btnRect.bottom - 1,
-						GUIPainter::DEPTH_MID,
-						0,
-						Color::WHITE);
-				}
-				else
-				{
-					GUIPainter::Instance()->DrawBorderedRect(btnRect.left - 1,
-						btnRect.top - 1,
-						btnRect.right + 1,
-						btnRect.bottom + 1,
-						GUIPainter::DEPTH_MID,
-						0,
-						Color::WHITE);
-				}
+			if (inRect && States->ActiveId == Id)
+			{
+				GUIPainter::Instance()->DrawBorderedRect(btnRect.left + 1,
+					btnRect.top + 1,
+					btnRect.right - 1,
+					btnRect.bottom - 1,
+					GUIPainter::DEPTH_MID,
+					0,
+					Color::WHITE);
+
+				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
+			}
+			else if (inRect && States->ActiveId == -1)
+			{
+				GUIPainter::Instance()->DrawBorderedRect(btnRect.left - 1,
+					btnRect.top - 1,
+					btnRect.right + 1,
+					btnRect.bottom + 1,
+					GUIPainter::DEPTH_MID,
+					0,
+					Color::WHITE);
+
+				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
 			else
 			{
@@ -1105,21 +1105,19 @@ namespace EDX
 					btnRect.bottom,
 					GUIPainter::DEPTH_MID,
 					2);
+
+				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 
-			int midX = States.CurrentPosX + Width / 2 - strlen(str) * 7 / 2;
 
 			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
-			if (inRect)
-				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
-			else
-				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			GUIPainter::Instance()->DrawString(midX, States.CurrentPosY + 6, GUIPainter::DEPTH_MID, str);
+			int midX = States->CurrentPosX + Width / 2 - strlen(str) * 7 / 2;
+			GUIPainter::Instance()->DrawString(midX, States->CurrentPosY + 6, GUIPainter::DEPTH_MID, str);
 
-			if (States.CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States.CurrentPosY += Height + 10;
+			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States->CurrentPosY += Height + 10;
 			else
-				States.CurrentPosX += 5;
+				States->CurrentPosX += 5;
 
 			return trigger;
 		}
@@ -1129,37 +1127,34 @@ namespace EDX
 			const int Width = 140;
 			const int BoxSize = 12;
 
-			int Id = States.CurrentId++;
+			int Id = ++States->CurrentId;
 
 			RECT boxRect;
-			SetRect(&boxRect, States.CurrentPosX, States.CurrentPosY, States.CurrentPosX + BoxSize, States.CurrentPosY + BoxSize);
+			SetRect(&boxRect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + BoxSize, States->CurrentPosY + BoxSize);
 
 			POINT mousePt;
-			mousePt.x = States.MouseState.x;
-			mousePt.y = States.MouseState.y;
+			mousePt.x = States->MouseState.x;
+			mousePt.y = States->MouseState.y;
 			bool inRect = PtInRect(&boxRect, mousePt);
 
 			if (inRect)
 			{
-				switch (States.MouseState.Action)
+				if (States->MouseState.Action == MouseAction::LButtonDown)
+					States->ActiveId = Id;
+				if (States->MouseState.Action == MouseAction::LButtonUp)
 				{
-				case MouseAction::LButtonDown:
-					States.ActiveId = Id;
-					break;
-				case MouseAction::LButtonUp:
-					if (States.ActiveId == Id)
+					if (States->ActiveId == Id)
 					{
-						States.ActiveId = -1;
+						States->ActiveId = -1;
 						checked = !checked;
 					}
-					break;
 				}
 			}
 			else
 			{
-				if (States.MouseState.Action == MouseAction::Move)
-					if (States.ActiveId == Id)
-						States.ActiveId = -1;
+				if (States->MouseState.Action == MouseAction::Move)
+					if (States->ActiveId == Id)
+						States->ActiveId = -1;
 			}
 
 			GUIPainter::Instance()->DrawBorderedRect(boxRect.left,
@@ -1178,12 +1173,22 @@ namespace EDX
 				Color::WHITE);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			GUIPainter::Instance()->DrawString(States.CurrentPosX + BoxSize + 7, States.CurrentPosY + 2, GUIPainter::DEPTH_MID, str);
+			GUIPainter::Instance()->DrawString(States->CurrentPosX + BoxSize + 7, States->CurrentPosY + 2, GUIPainter::DEPTH_MID, str);
 
-			if (States.CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States.CurrentPosY += BoxSize + 10;
+			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States->CurrentPosY += BoxSize + 10;
 			else
-				States.CurrentPosX += 5;
+				States->CurrentPosX += 5;
+		}
+
+		void EDXGui::ComboBox(const ComboBoxItem* pItems, int& selected)
+		{
+			static const int Padding = 28;
+			static const int Width = 140;
+			static const int Height = 18;
+			static const int ItemHeight = 20;
+
+			int Id = ++States->CurrentId;
 		}
 	}
 }

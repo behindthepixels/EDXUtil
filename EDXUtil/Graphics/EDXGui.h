@@ -8,6 +8,9 @@
 
 #include "OpenGL.h"
 
+#include <map>
+using std::map;
+
 namespace EDX
 {
 	using namespace OpenGL;
@@ -367,12 +370,14 @@ namespace EDX
 			int HoveredId;
 			int ActiveId;
 			MouseEventArgs MouseState;
+
+			map<int, bool> ControlOpened;
 		};
 
 		class EDXGui
 		{
-		private:
-			static GuiStates States;
+		public:
+			static GuiStates* States;
 
 		public:
 			static void Init();
@@ -385,88 +390,93 @@ namespace EDX
 			static void Text(const char* str, ...);
 			static bool Bottun(const char* str);
 			static void CheckBox(const char* str, bool& checked);
+			static void ComboBox(const ComboBoxItem* pItems, int& selected);
 
 			template<typename T>
 			static void Slider(const char* str, T* pVal, T min, T max)
 			{
 				// Print slider text
 				Text(str, "%s: %.2f", str, pVal);
-				States.CurrentPosY -= 5;
+				States->CurrentPosY -= 5;
 
 				const int Width = 140;
 				const int ButtonSize = 12;
 				const int ButtonSize_2 = 6;
-				const int SlideBase = States.CurrentPosX + ButtonSize_2;
-				const int SlideEnd = States.CurrentPosX + Width - ButtonSize_2;
+				const int SlideBase = States->CurrentPosX + ButtonSize_2;
+				const int SlideEnd = States->CurrentPosX + Width - ButtonSize_2;
 
-				int Id = States.CurrentId++;
+				int Id = ++States->CurrentId;
 
 				float lin = Math::LinStep(*pVal, min, max);
 				int buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
 
 				RECT btnRect;
-				SetRect(&btnRect, buttonX - ButtonSize_2, States.CurrentPosY, buttonX + ButtonSize_2, States.CurrentPosY + ButtonSize);
+				SetRect(&btnRect, buttonX - ButtonSize_2, States->CurrentPosY, buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize);
+				RECT barRect;
+				SetRect(&barRect, States->CurrentPosX, States->CurrentPosY, SlideEnd, States->CurrentPosY + ButtonSize);
 
 				POINT mousePt;
-				mousePt.x = States.MouseState.x;
-				mousePt.y = States.MouseState.y;
+				mousePt.x = States->MouseState.x;
+				mousePt.y = States->MouseState.y;
 				if (PtInRect(&btnRect, mousePt))
 				{
-					if (States.MouseState.Action == MouseAction::LButtonDown)
-						States.ActiveId = Id;
-
-
-					if (States.MouseState.Action == MouseAction::Move)
-						States.HoveredId = Id;
+					if (States->MouseState.Action == MouseAction::LButtonDown)
+						States->ActiveId = Id;
 				}
-				else
+				else if (PtInRect(&barRect, mousePt))
 				{
-					if (States.MouseState.Action == MouseAction::Move)
-						States.HoveredId = -1;
-				}
-
-				if (States.MouseState.Action == MouseAction::Move)
-				{
-					if (States.ActiveId == Id)
+					if (States->MouseState.Action == MouseAction::LButtonDown)
 					{
-						buttonX = Math::Clamp(States.MouseState.x, SlideBase, SlideEnd);
+						buttonX = Math::Clamp(States->MouseState.x, SlideBase, SlideEnd);
 						float btnLin = Math::LinStep(buttonX, SlideBase, SlideEnd);
 						*pVal = (T)Math::Lerp(min, max, btnLin);
 					}
 				}
-				else if (States.MouseState.Action == MouseAction::LButtonUp)
-					if (States.ActiveId == Id)
-						States.ActiveId = -1;
+
+				if (States->MouseState.Action == MouseAction::Move)
+				{
+					if (States->ActiveId == Id)
+					{
+						buttonX = Math::Clamp(States->MouseState.x, SlideBase, SlideEnd);
+						float btnLin = Math::LinStep(buttonX, SlideBase, SlideEnd);
+						*pVal = (T)Math::Lerp(min, max, btnLin);
+					}
+				}
+
+				
+				if (States->MouseState.Action == MouseAction::LButtonUp)
+					if (States->ActiveId == Id)
+						States->ActiveId = -1;
 
 				// Rendering
-				GUIPainter::Instance()->DrawBorderedRect(States.CurrentPosX,
-					States.CurrentPosY + ButtonSize_2 - 1,
+				GUIPainter::Instance()->DrawBorderedRect(States->CurrentPosX,
+					States->CurrentPosY + ButtonSize_2 - 1,
 					buttonX - ButtonSize_2,
-					States.CurrentPosY + ButtonSize_2 + 2,
+					States->CurrentPosY + ButtonSize_2 + 2,
 					GUIPainter::DEPTH_MID,
 					0, Color::WHITE);
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 				glBegin(GL_LINE_STRIP);
 
-				glVertex2i(buttonX + ButtonSize_2, States.CurrentPosY + ButtonSize_2 - 1);
-				glVertex2i(States.CurrentPosX + Width, States.CurrentPosY + ButtonSize_2 - 1);
-				glVertex2i(States.CurrentPosX + Width, States.CurrentPosY + ButtonSize_2 + 1);
-				glVertex2i(buttonX + ButtonSize_2, States.CurrentPosY + ButtonSize_2 + 1);
+				glVertex2i(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 - 1);
+				glVertex2i(States->CurrentPosX + Width, States->CurrentPosY + ButtonSize_2 - 1);
+				glVertex2i(States->CurrentPosX + Width, States->CurrentPosY + ButtonSize_2 + 1);
+				glVertex2i(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 + 1);
 
 				glEnd();
 
 				GUIPainter::Instance()->DrawBorderedRect(buttonX - ButtonSize_2,
-					States.CurrentPosY,
+					States->CurrentPosY,
 					buttonX + ButtonSize_2,
-					States.CurrentPosY + ButtonSize,
+					States->CurrentPosY + ButtonSize,
 					GUIPainter::DEPTH_MID,
 					0, Color::WHITE);
 
-				if (States.CurrentGrowthStrategy == GrowthStrategy::Vertical)
-					States.CurrentPosY += ButtonSize + 10;
+				if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+					States->CurrentPosY += ButtonSize + 10;
 				else
-					States.CurrentPosX += 5;
+					States->CurrentPosX += 5;
 			}
 		};
 	}
