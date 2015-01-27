@@ -78,7 +78,7 @@ namespace EDX
 			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth);
 			void DrawLineStrip(int iX0, int iY0, int iX1, int iY1);
 			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize,
-				const Color& interiorColor = Color::BLACK, const Color& borderColor = Color::WHITE);
+				const Color& interiorColor = Color(0.0f, 0.0f, 0.0f, 0.5f), const Color& borderColor = Color(1.0f, 1.0f, 1.0f, 0.5f));
 			void DrawString(int x, int y, float depth, const char* strText);
 
 		private:
@@ -480,7 +480,7 @@ namespace EDX
 					buttonX - ButtonSize_2,
 					States->CurrentPosY + ButtonSize_2 + 2,
 					GUIPainter::DEPTH_MID,
-					0, Color::WHITE);
+					0, Color(1.0f, 1.0f, 1.0f, 0.5f));
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 				glBegin(GL_LINE_STRIP);
@@ -492,12 +492,13 @@ namespace EDX
 
 				glEnd();
 
+				Color btnColor = States->HoveredId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 				GUIPainter::Instance()->DrawBorderedRect(buttonX - ButtonSize_2,
 					States->CurrentPosY,
 					buttonX + ButtonSize_2,
 					States->CurrentPosY + ButtonSize,
 					GUIPainter::DEPTH_MID,
-					0, Color::WHITE);
+					0, btnColor);
 
 				if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
 					States->CurrentPosY += ButtonSize + 10;

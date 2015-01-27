@@ -157,7 +157,7 @@ namespace EDX
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
-				glColor4f(borderColor.r, borderColor.g, borderColor.b, 0.5f);
+				glColor4f(borderColor.r, borderColor.g, borderColor.b, borderColor.a);
 				DrawRect(iX0, iY0, iX1, iY1, depth);
 
 				iX0 += iBorderSize;
@@ -167,14 +167,14 @@ namespace EDX
 
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
-				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, 0.5f);
+				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, interiorColor.a);
 				DrawRect(iX0, iY0, iX1, iY1, depth);
 			}
 			else
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
-				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, 0.5f);
+				glColor4f(interiorColor.r, interiorColor.g, interiorColor.b, interiorColor.a);
 				DrawRect(iX0, iY0, iX1, iY1, depth);
 			}
 		}
@@ -1087,7 +1087,7 @@ namespace EDX
 					btnRect.bottom - 1,
 					GUIPainter::DEPTH_MID,
 					0,
-					Color::WHITE);
+					Color(1.0f, 1.0f, 1.0f, 0.5f));
 
 				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
@@ -1099,7 +1099,7 @@ namespace EDX
 					btnRect.bottom + 1,
 					GUIPainter::DEPTH_MID,
 					0,
-					Color::WHITE);
+					Color(1.0f, 1.0f, 1.0f, 0.5f));
 
 				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
@@ -1141,9 +1141,8 @@ namespace EDX
 			POINT mousePt;
 			mousePt.x = States->MouseState.x;
 			mousePt.y = States->MouseState.y;
-			bool inRect = PtInRect(&boxRect, mousePt);
 
-			if (inRect)
+			if (PtInRect(&boxRect, mousePt))
 			{
 				if (States->MouseState.Action == MouseAction::LButtonDown)
 					States->ActiveId = Id;
@@ -1171,14 +1170,15 @@ namespace EDX
 				boxRect.bottom,
 				GUIPainter::DEPTH_MID,
 				2);
-			if (checked)
-				GUIPainter::Instance()->DrawBorderedRect(boxRect.left + 1,
+
+			Color color = checked ? Color(1.0f, 1.0f, 1.0f, 0.5f) : States->HoveredId == Id ? Color(1.0f, 1.0f, 1.0f, 0.15f) : Color::BLACK;
+			GUIPainter::Instance()->DrawBorderedRect(boxRect.left + 1,
 				boxRect.top + 2,
 				boxRect.right - 2,
 				boxRect.bottom - 1,
 				GUIPainter::DEPTH_MID,
 				0,
-				Color::WHITE);
+				color);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			GUIPainter::Instance()->DrawString(States->CurrentPosX + BoxSize + 7, States->CurrentPosY + 2, GUIPainter::DEPTH_MID, str);
@@ -1217,7 +1217,9 @@ namespace EDX
 			}
 
 			GUIPainter::Instance()->DrawBorderedRect(mainRect.left, mainRect.top, mainRect.right, mainRect.bottom, GUIPainter::DEPTH_MID, 2);
-			GUIPainter::Instance()->DrawBorderedRect(mainRect.right - Height, mainRect.top + 1, mainRect.right - 1, mainRect.bottom, GUIPainter::DEPTH_MID, 0, Color::WHITE);
+
+			Color btnColor = States->ActiveId == Id || States->HoveredId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+			GUIPainter::Instance()->DrawBorderedRect(mainRect.right - Height, mainRect.top + 1, mainRect.right - 1, mainRect.bottom, GUIPainter::DEPTH_MID, 0, btnColor);
 
 			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1243,7 +1245,7 @@ namespace EDX
 				{
 					if (i == hoveredIdx)
 					{
-						GUIPainter::Instance()->DrawBorderedRect(dropDownRect.left, dropDownRect.top + 2 + hoveredIdx * ItemHeight, dropDownRect.right - 1, dropDownRect.top + 1 + (hoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, 0, 0.85f * Color::WHITE);
+						GUIPainter::Instance()->DrawBorderedRect(dropDownRect.left, dropDownRect.top + 2 + hoveredIdx * ItemHeight, dropDownRect.right - 1, dropDownRect.top + 1 + (hoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, 0, Color(0.85f, 0.85f, 0.85f, 0.5f));
 
 						glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 						glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
