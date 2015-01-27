@@ -212,7 +212,8 @@ namespace EDX
 		RButtonUp = WM_RBUTTONUP,
 		RButtonDbClick = WM_RBUTTONDBLCLK,
 		Move = WM_MOUSEMOVE,
-		Wheel = WM_MOUSEHWHEEL
+		Wheel = WM_MOUSEHWHEEL,
+		None = 0
 	};
 
 	class MouseEventArgs : public EventArgs

@@ -371,7 +371,25 @@ namespace EDX
 			int ActiveId;
 			MouseEventArgs MouseState;
 
-			map<int, bool> ControlOpened;
+			vector<bool> ControlOpenedRecord;
+			int OpenedIdx;
+
+			int IncreId()
+			{
+				return ++CurrentId;
+			}
+			bool ControlOpened()
+			{
+				OpenedIdx++;
+				while (OpenedIdx >= ControlOpenedRecord.size())
+					ControlOpenedRecord.push_back(false);
+
+				return ControlOpenedRecord[OpenedIdx];
+			}
+			void SetOpened(bool opened)
+			{
+				ControlOpenedRecord[OpenedIdx] = opened;
+			}
 		};
 
 		class EDXGui
@@ -390,7 +408,7 @@ namespace EDX
 			static void Text(const char* str, ...);
 			static bool Bottun(const char* str);
 			static void CheckBox(const char* str, bool& checked);
-			static void ComboBox(const ComboBoxItem* pItems, int& selected);
+			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
 
 			template<typename T>
 			static void Slider(const char* str, T* pVal, T min, T max)
@@ -422,6 +440,8 @@ namespace EDX
 				{
 					if (States->MouseState.Action == MouseAction::LButtonDown)
 						States->ActiveId = Id;
+
+					States->HoveredId = Id;
 				}
 				else if (PtInRect(&barRect, mousePt))
 				{
@@ -430,7 +450,11 @@ namespace EDX
 						buttonX = Math::Clamp(States->MouseState.x, SlideBase, SlideEnd);
 						float btnLin = Math::LinStep(buttonX, SlideBase, SlideEnd);
 						*pVal = (T)Math::Lerp(min, max, btnLin);
+						float lin = Math::LinStep(*pVal, min, max);
+						buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
 					}
+
+					States->HoveredId = Id;
 				}
 
 				if (States->MouseState.Action == MouseAction::Move)
@@ -440,6 +464,8 @@ namespace EDX
 						buttonX = Math::Clamp(States->MouseState.x, SlideBase, SlideEnd);
 						float btnLin = Math::LinStep(buttonX, SlideBase, SlideEnd);
 						*pVal = (T)Math::Lerp(min, max, btnLin);
+						float lin = Math::LinStep(*pVal, min, max);
+						buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
 					}
 				}
 

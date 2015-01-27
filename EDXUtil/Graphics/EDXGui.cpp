@@ -940,6 +940,7 @@ namespace EDX
 			States->CurrentGrowthStrategy = GrowthStrategy::Vertical;
 			States->CurrentId = -1;
 			States->HoveredId = -1;
+			States->OpenedIdx = -1;
 
 			if (States->CurrentLayoutStrategy == LayoutStrategy::DockRight)
 			{
@@ -998,6 +999,9 @@ namespace EDX
 				States->CurrentPosX = 30;
 				States->CurrentPosY = 30;
 			}
+
+			if (States->MouseState.Action == MouseAction::LButtonDown)
+				States->MouseState.Action = MouseAction::None;
 		}
 
 		void EDXGui::Resize(int screenWidth, int screenHeight)
@@ -1014,7 +1018,7 @@ namespace EDX
 			States->MouseState.x = mouseArgs.x - States->DialogPosX;
 			States->MouseState.y = mouseArgs.y - States->DialogPosY;
 
-			if (States->MouseState.Action == MouseAction::LButtonUp)
+			if (States->MouseState.Action == MouseAction::LButtonUp && States->HoveredId == -1)
 				States->ActiveId = -1;
 		}
 
@@ -1071,9 +1075,11 @@ namespace EDX
 						trigger = true;
 					}
 				}
+
+				States->HoveredId = Id;
 			}
 
-			if (inRect && States->ActiveId == Id)
+			if (States->HoveredId == Id && States->ActiveId == Id)
 			{
 				GUIPainter::Instance()->DrawBorderedRect(btnRect.left + 1,
 					btnRect.top + 1,
@@ -1085,7 +1091,7 @@ namespace EDX
 
 				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
-			else if (inRect && States->ActiveId == -1)
+			else if (States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id)
 			{
 				GUIPainter::Instance()->DrawBorderedRect(btnRect.left - 1,
 					btnRect.top - 1,
@@ -1149,6 +1155,8 @@ namespace EDX
 						checked = !checked;
 					}
 				}
+
+				States->HoveredId = Id;
 			}
 			else
 			{
@@ -1181,14 +1189,79 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
-		void EDXGui::ComboBox(const ComboBoxItem* pItems, int& selected)
+		void EDXGui::ComboBox(const ComboBoxItem* pItems, int numItems, int& selected)
 		{
-			static const int Padding = 28;
-			static const int Width = 140;
-			static const int Height = 18;
-			static const int ItemHeight = 20;
+			const int Width = 140;
+			const int Height = 18;
+			const int ItemHeight = 20;
 
 			int Id = ++States->CurrentId;
+
+			POINT mousePt;
+			mousePt.x = States->MouseState.x;
+			mousePt.y = States->MouseState.y;
+
+			RECT mainRect;
+			SetRect(&mainRect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + Width, States->CurrentPosY + Height);
+			if (PtInRect(&mainRect, mousePt))
+			{
+				if (States->MouseState.Action == MouseAction::LButtonDown)
+				{
+					if (States->ActiveId == -1)
+						States->ActiveId = Id;
+					else if (States->ActiveId == Id)
+						States->ActiveId = -1;
+				}
+
+				States->HoveredId = Id;
+			}
+
+			GUIPainter::Instance()->DrawBorderedRect(mainRect.left, mainRect.top, mainRect.right, mainRect.bottom, GUIPainter::DEPTH_MID, 2);
+			GUIPainter::Instance()->DrawBorderedRect(mainRect.right - Height, mainRect.top + 1, mainRect.right - 1, mainRect.bottom, GUIPainter::DEPTH_MID, 0, Color::WHITE);
+
+			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			GUIPainter::Instance()->DrawString(mainRect.left + 3, mainRect.top + 5, GUIPainter::DEPTH_MID, pItems[selected].Label);
+
+			if (States->ActiveId == Id)
+			{
+				RECT dropDownRect;
+				SetRect(&dropDownRect, States->CurrentPosX, States->CurrentPosY + Height, States->CurrentPosX + Width - Height, States->CurrentPosY + Height + 1 + numItems * ItemHeight);
+
+				if (PtInRect(&dropDownRect, mousePt) && States->MouseState.Action == MouseAction::LButtonDown)
+				{
+					selected = (mousePt.y - dropDownRect.top) / ItemHeight;
+					States->ActiveId = -1;
+					States->HoveredId = Id;
+					States->MouseState.Action = MouseAction::None;
+				}
+
+				GUIPainter::Instance()->DrawBorderedRect(dropDownRect.left, dropDownRect.top + 1, dropDownRect.right, dropDownRect.bottom, GUIPainter::DEPTH_NEAR, 0, 0.5f * Color::WHITE);
+
+				int hoveredIdx = Math::Clamp((mousePt.y - dropDownRect.top) / ItemHeight, 0, numItems - 1);
+				for (auto i = 0; i < numItems; i++)
+				{
+					if (i == hoveredIdx)
+					{
+						GUIPainter::Instance()->DrawBorderedRect(dropDownRect.left, dropDownRect.top + 2 + hoveredIdx * ItemHeight, dropDownRect.right - 1, dropDownRect.top + 1 + (hoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, 0, 0.85f * Color::WHITE);
+
+						glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+						glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
+					}
+					else
+					{
+						glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
+						glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+					}
+
+					GUIPainter::Instance()->DrawString(dropDownRect.left + 3, dropDownRect.top + 6 + i * ItemHeight, GUIPainter::DEPTH_NEAR, pItems[i].Label);
+				}
+			}
+
+			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States->CurrentPosY += Height + 10;
+			else
+				States->CurrentPosX += 5;
 		}
 	}
 }

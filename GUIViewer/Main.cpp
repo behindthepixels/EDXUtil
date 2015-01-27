@@ -51,18 +51,33 @@ void OnRender(Object* pSender, EventArgs args)
 	glRasterPos3f(0.0f, 0.0f, 1.0f);
 	glDrawPixels(gWidth, gHeight, GL_RGBA, GL_UNSIGNED_BYTE, gImage);
 
-	static float counter = 0;
+	static int counter = 0;
+	static int hoveredId = 0;
 	EDXGui::BeginDialog();
+
 	EDXGui::Text("Active Id: %i", EDXGui::States->ActiveId);
+	EDXGui::Text("Hovered Id: %i", hoveredId);
 	EDXGui::Text("L Down: %i", EDXGui::States->MouseState.lDown ? 1 : 0);
-	EDXGui::Text("Value: %f", counter);
+	EDXGui::Text("Value: %i", counter);
 	if (EDXGui::Bottun("Button 1"))
 		counter += 1;
-	EDXGui::Slider<float>("Slider 1", &counter, 0.0f, 20.0f);
+	EDXGui::Slider<int>("Slider 1", &counter, 0.0f, 20.0f);
 	static bool checked = false;
 	EDXGui::CheckBox("Check Box", checked);
 	if (EDXGui::Bottun("Button 2"))
 		counter += 10;
+	static int selected = 0;
+	ComboBoxItem items[] = {
+		{ 1, "Item 1" },
+		{ 2, "Item 2" },
+		{ 3, "Item 3" },
+	};
+	EDXGui::ComboBox(items, 3, selected);
+	if (EDXGui::Bottun("Button 3"))
+		counter -= 3;
+	hoveredId = EDXGui::States->HoveredId;
+
+
 	EDXGui::EndDialog();
 }
 
