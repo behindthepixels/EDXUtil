@@ -6,9 +6,10 @@
 #include "Bitmap.h"
 #include "../Memory/Memory.h"
 
-#define STBI_HEADER_FILE_ONLY
+//#define STBI_HEADER_FILE_ONLY
+#define STB_IMAGE_IMPLEMENTATION
 #define _CRT_SECURE_NO_WARNINGS 1
-#include "stb_image.c"
+#include "stb_image.h"
 
 namespace EDX
 {

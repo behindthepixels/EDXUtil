@@ -51,6 +51,8 @@
     <ClInclude Include="Windows\Bitmap.h" />
     <ClInclude Include="Windows\Debug.h" />
     <ClInclude Include="Windows\Event.h" />
+    <ClInclude Include="Windows\stb_image.h" />
+    <ClInclude Include="Windows\stb_textedit.h" />
     <ClInclude Include="Windows\Thread.h" />
     <ClInclude Include="Windows\Timer.h" />
     <ClInclude Include="Windows\Window.h" />
@@ -65,7 +67,6 @@
     <ClCompile Include="Math\Matrix.cpp" />
     <ClCompile Include="Windows\Application.cpp" />
     <ClCompile Include="Windows\Bitmap.cpp" />
-    <ClCompile Include="Windows\stb_image.c" />
     <ClCompile Include="Windows\Thread.cpp" />
     <ClCompile Include="Windows\Window.cpp" />
   </ItemGroup>

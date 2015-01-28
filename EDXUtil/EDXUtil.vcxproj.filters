@@ -138,6 +138,12 @@
     <ClInclude Include="Graphics\glext.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Windows\stb_image.h">
+      <Filter>Source Files\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\stb_textedit.h">
+      <Filter>Source Files\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">
@@ -165,9 +171,6 @@
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Windows\Bitmap.cpp">
-      <Filter>Source Files\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\stb_image.c">
       <Filter>Source Files\Windows</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\EDXGui.cpp">
