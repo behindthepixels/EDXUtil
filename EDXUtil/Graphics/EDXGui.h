@@ -370,26 +370,6 @@ namespace EDX
 			int HoveredId;
 			int ActiveId;
 			MouseEventArgs MouseState;
-
-			vector<bool> ControlOpenedRecord;
-			int OpenedIdx;
-
-			int IncreId()
-			{
-				return ++CurrentId;
-			}
-			bool ControlOpened()
-			{
-				OpenedIdx++;
-				while (OpenedIdx >= ControlOpenedRecord.size())
-					ControlOpenedRecord.push_back(false);
-
-				return ControlOpenedRecord[OpenedIdx];
-			}
-			void SetOpened(bool opened)
-			{
-				ControlOpenedRecord[OpenedIdx] = opened;
-			}
 		};
 
 		class EDXGui
@@ -428,30 +408,27 @@ namespace EDX
 				float lin = Math::LinStep(*pVal, min, max);
 				int buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
 
-				RECT btnRect;
-				SetRect(&btnRect, buttonX - ButtonSize_2, States->CurrentPosY, buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize);
 				RECT barRect;
 				SetRect(&barRect, States->CurrentPosX, States->CurrentPosY, SlideEnd, States->CurrentPosY + ButtonSize);
 
 				POINT mousePt;
 				mousePt.x = States->MouseState.x;
 				mousePt.y = States->MouseState.y;
-				if (PtInRect(&btnRect, mousePt))
+				if (PtInRect(&barRect, mousePt))
 				{
 					if (States->MouseState.Action == MouseAction::LButtonDown)
 						States->ActiveId = Id;
-
-					States->HoveredId = Id;
-				}
-				else if (PtInRect(&barRect, mousePt))
-				{
-					if (States->MouseState.Action == MouseAction::LButtonDown)
+					
+					if (States->MouseState.Action == MouseAction::LButtonUp)
 					{
 						buttonX = Math::Clamp(States->MouseState.x, SlideBase, SlideEnd);
 						float btnLin = Math::LinStep(buttonX, SlideBase, SlideEnd);
 						*pVal = (T)Math::Lerp(min, max, btnLin);
 						float lin = Math::LinStep(*pVal, min, max);
 						buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
+
+						if (States->ActiveId == Id)
+							States->ActiveId = -1;
 					}
 
 					States->HoveredId = Id;
@@ -474,13 +451,15 @@ namespace EDX
 					if (States->ActiveId == Id)
 						States->ActiveId = -1;
 
+				Color color = States->HoveredId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+
 				// Rendering
 				GUIPainter::Instance()->DrawBorderedRect(States->CurrentPosX,
 					States->CurrentPosY + ButtonSize_2 - 1,
 					buttonX - ButtonSize_2,
 					States->CurrentPosY + ButtonSize_2 + 2,
 					GUIPainter::DEPTH_MID,
-					0, Color(1.0f, 1.0f, 1.0f, 0.5f));
+					0, color);
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 				glBegin(GL_LINE_STRIP);
@@ -492,13 +471,12 @@ namespace EDX
 
 				glEnd();
 
-				Color btnColor = States->HoveredId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 				GUIPainter::Instance()->DrawBorderedRect(buttonX - ButtonSize_2,
 					States->CurrentPosY,
 					buttonX + ButtonSize_2,
 					States->CurrentPosY + ButtonSize,
 					GUIPainter::DEPTH_MID,
-					0, btnColor);
+					0, color);
 
 				if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
 					States->CurrentPosY += ButtonSize + 10;

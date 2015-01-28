@@ -940,7 +940,6 @@ namespace EDX
 			States->CurrentGrowthStrategy = GrowthStrategy::Vertical;
 			States->CurrentId = -1;
 			States->HoveredId = -1;
-			States->OpenedIdx = -1;
 
 			if (States->CurrentLayoutStrategy == LayoutStrategy::DockRight)
 			{
@@ -1087,7 +1086,7 @@ namespace EDX
 					btnRect.bottom - 1,
 					GUIPainter::DEPTH_MID,
 					0,
-					Color(1.0f, 1.0f, 1.0f, 0.5f));
+					Color(1.0f, 1.0f, 1.0f, 0.65f));
 
 				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
