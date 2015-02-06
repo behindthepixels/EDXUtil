@@ -1017,7 +1017,7 @@ namespace EDX
 			States->MouseState.x = mouseArgs.x - States->DialogPosX;
 			States->MouseState.y = mouseArgs.y - States->DialogPosY;
 
-			if (States->MouseState.Action == MouseAction::LButtonUp && States->HoveredId == -1)
+			if (States->MouseState.Action == MouseAction::LButtonUp && States->HoveredId != States->ActiveId)
 				States->ActiveId = -1;
 		}
 
@@ -1170,7 +1170,7 @@ namespace EDX
 				GUIPainter::DEPTH_MID,
 				2);
 
-			Color color = checked ? Color(1.0f, 1.0f, 1.0f, 0.5f) : States->HoveredId == Id ? Color(1.0f, 1.0f, 1.0f, 0.15f) : Color::BLACK;
+			Color color = checked ? Color(1.0f, 1.0f, 1.0f, 0.5f) : States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.15f) : Color::BLACK;
 			GUIPainter::Instance()->DrawBorderedRect(boxRect.left + 1,
 				boxRect.top + 2,
 				boxRect.right - 2,
@@ -1217,7 +1217,7 @@ namespace EDX
 
 			GUIPainter::Instance()->DrawBorderedRect(mainRect.left, mainRect.top, mainRect.right, mainRect.bottom, GUIPainter::DEPTH_MID, 2);
 
-			Color btnColor = States->ActiveId == Id || States->HoveredId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+			Color btnColor = States->ActiveId == Id || States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 			GUIPainter::Instance()->DrawBorderedRect(mainRect.right - Height, mainRect.top + 1, mainRect.right - 1, mainRect.bottom, GUIPainter::DEPTH_MID, 0, btnColor);
 
 			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);

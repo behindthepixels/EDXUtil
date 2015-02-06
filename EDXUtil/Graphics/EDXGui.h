@@ -8,9 +8,6 @@
 
 #include "OpenGL.h"
 
-#include <map>
-using std::map;
-
 namespace EDX
 {
 	using namespace OpenGL;
@@ -451,7 +448,7 @@ namespace EDX
 					if (States->ActiveId == Id)
 						States->ActiveId = -1;
 
-				Color color = States->HoveredId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+				Color color = States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 
 				// Rendering
 				GUIPainter::Instance()->DrawBorderedRect(States->CurrentPosX,
