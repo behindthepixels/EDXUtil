@@ -138,7 +138,7 @@ namespace EDX
 		case WM_MOUSEWHEEL:
 			InvokeMouseEvent();
 			return true;
-		case WM_KEYDOWN:
+		case WM_CHAR:
 		{
 			KeyboardEventArgs kbArgs;
 			kbArgs.ctrlDown = GetKeyState(VK_CONTROL) & 0x80;

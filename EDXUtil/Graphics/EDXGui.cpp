@@ -46,11 +46,8 @@ namespace EDX
 		GUIPainter::GUIPainter()
 		{
 			// Initialize font
-			HFONT	font;
-			HFONT	oldfont;
-
 			mTextListBase = glGenLists(128);
-			font = CreateFont(16,
+			mFont = CreateFont(16,
 				0,
 				0,
 				0,
@@ -65,12 +62,9 @@ namespace EDX
 				FF_DONTCARE | DEFAULT_PITCH,
 				L"Helvetica");
 
-			HDC hDC = GetDC(Application::GetMainWindow()->GetHandle());
-			oldfont = (HFONT)SelectObject(hDC, font);
-			wglUseFontBitmaps(hDC, 0, 128, mTextListBase);
-
-			SelectObject(hDC, oldfont);
-			DeleteObject(font);
+			mHDC = ::GetDC(Application::GetMainWindow()->GetHandle());
+			mOldfont = (HFONT)SelectObject(mHDC, mFont);
+			wglUseFontBitmaps(mHDC, 0, 128, mTextListBase);
 
 			// Load shaders
 			mVertexShader.Load(ShaderType::VertexShader, ScreenQuadVertShaderSource);
@@ -78,6 +72,12 @@ namespace EDX
 			mProgram.AttachShader(&mVertexShader);
 			mProgram.AttachShader(&mBlurFragmentShader);
 			mProgram.Link();
+		}
+
+		GUIPainter::~GUIPainter()
+		{
+			SelectObject(mHDC, mOldfont);
+			DeleteObject(mFont);
 		}
 
 		void GUIPainter::Resize(int width, int height)
@@ -201,6 +201,14 @@ namespace EDX
 			glVertex2i(iX0, iY1);
 
 			glEnd();
+		}
+
+		void GUIPainter::DrawChar(int x, int y, float depth, const char ch)
+		{
+			glListBase(mTextListBase);
+
+			glRasterPos3f(x, y + 10, depth);
+			glCallLists(1, GL_UNSIGNED_BYTE, &ch);
 		}
 
 		void GUIPainter::DrawString(int x, int y, float depth, const char* strText)
@@ -926,6 +934,7 @@ namespace EDX
 		{
 			States = new GuiStates;
 			States->ActiveId = -1;
+			States->KeyState.key = '\0';
 		}
 
 		void EDXGui::Release()
@@ -938,7 +947,7 @@ namespace EDX
 		{
 			States->CurrentLayoutStrategy = layoutStrategy;
 			States->CurrentGrowthStrategy = GrowthStrategy::Vertical;
-			States->CurrentId = -1;
+			States->CurrentId = 0;
 			States->HoveredId = -1;
 
 			if (States->CurrentLayoutStrategy == LayoutStrategy::DockRight)
@@ -999,8 +1008,8 @@ namespace EDX
 				States->CurrentPosY = 30;
 			}
 
-			if (States->MouseState.Action == MouseAction::LButtonDown)
-				States->MouseState.Action = MouseAction::None;
+			States->MouseState.Action = MouseAction::None;
+			States->KeyState.key = '\0';
 		}
 
 		void EDXGui::Resize(int screenWidth, int screenHeight)
@@ -1019,6 +1028,11 @@ namespace EDX
 
 			if (States->MouseState.Action == MouseAction::LButtonUp && States->HoveredId != States->ActiveId)
 				States->ActiveId = -1;
+		}
+
+		void EDXGui::HandleKeyboardEvent(const KeyboardEventArgs& keyArgs)
+		{
+			States->KeyState = keyArgs;
 		}
 
 		void EDXGui::Text(const char* str, ...)
@@ -1051,7 +1065,7 @@ namespace EDX
 			const int Height = 22;
 
 			bool trigger = false;
-			int Id = ++States->CurrentId;
+			int Id = States->CurrentId++;
 
 			RECT btnRect;
 			SetRect(&btnRect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + Width, States->CurrentPosY + Height);
@@ -1132,7 +1146,7 @@ namespace EDX
 			const int Width = 140;
 			const int BoxSize = 12;
 
-			int Id = ++States->CurrentId;
+			int Id = States->CurrentId++;
 
 			RECT boxRect;
 			SetRect(&boxRect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + BoxSize, States->CurrentPosY + BoxSize);
@@ -1194,7 +1208,7 @@ namespace EDX
 			const int Height = 18;
 			const int ItemHeight = 20;
 
-			int Id = ++States->CurrentId;
+			int Id = States->CurrentId++;
 
 			POINT mousePt;
 			mousePt.x = States->MouseState.x;
@@ -1263,6 +1277,97 @@ namespace EDX
 				States->CurrentPosY += Height + 10;
 			else
 				States->CurrentPosX += 5;
+		}
+
+		bool EDXGui::InputText(string& buf)
+		{
+			const int Width = 100;
+			const int Height = 18;
+
+			bool trigger = false;
+			int Id = States->CurrentId++;
+
+			RECT rect;
+			SetRect(&rect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + Width, States->CurrentPosY + Height);
+
+			POINT mousePt;
+			mousePt.x = States->MouseState.x;
+			mousePt.y = States->MouseState.y;
+
+			if (PtInRect(&rect, mousePt))
+			{
+				if (States->MouseState.Action == MouseAction::LButtonDown)
+				{
+					if (States->ActiveId == Id) // Activated
+					{
+						// Place cursor
+						auto distX = mousePt.x - (States->CurrentPosX + 3);
+						auto charIdx = std::lower_bound(States->StrWidthPrefixSum.begin(), States->StrWidthPrefixSum.end(), distX);
+						
+						States->CursorIdx = ((charIdx == States->StrWidthPrefixSum.begin()) ? -1 : charIdx - 1 - States->StrWidthPrefixSum.begin());
+						States->CursorPos = States->CurrentPosX + 4 + ((charIdx == States->StrWidthPrefixSum.begin()) ? 0 : *(charIdx - 1));
+					}
+					else
+					{
+						// Set activated
+						States->ActiveId = Id;
+
+						// Calculate string length prefix sum
+						States->StrWidthPrefixSum.clear();
+						for (auto i = 0; i < buf.length(); i++)
+						{
+							SIZE textExtent;
+							GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &buf[i], 1, &textExtent);
+							States->StrWidthPrefixSum.push_back(i == 0 ? textExtent.cx : textExtent.cx + States->StrWidthPrefixSum[i - 1]);
+						}
+
+						States->CursorPos = States->CurrentPosX + 4 + (buf.length() > 0 ? *(States->StrWidthPrefixSum.end() - 1) : 0);
+						States->CursorIdx = buf.length() - 1;
+					}
+				}
+
+				States->HoveredId = Id;
+			}
+
+			if (States->KeyState.key != '\0')
+			{
+				buf.insert(States->CursorIdx + 1, 1, States->KeyState.key);
+
+				// Calculate string length prefix sum
+				States->StrWidthPrefixSum.clear();
+				for (auto i = 0; i < buf.length(); i++)
+				{
+					SIZE textExtent;
+					GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &buf[i], 1, &textExtent);
+					States->StrWidthPrefixSum.push_back(i == 0 ? textExtent.cx : textExtent.cx + States->StrWidthPrefixSum[i - 1]);
+				}
+
+				SIZE textExtent;
+				GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &States->KeyState.key, 1, &textExtent);
+				States->CursorPos += textExtent.cx;
+				States->CursorIdx++;
+			}
+
+			GUIPainter::Instance()->DrawBorderedRect(rect.left,
+				rect.top,
+				rect.right,
+				rect.bottom,
+				GUIPainter::DEPTH_MID,
+				2);
+
+			// Draw string
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			GUIPainter::Instance()->DrawString(States->CurrentPosX + 3, States->CurrentPosY + 5, GUIPainter::DEPTH_MID, buf.c_str());
+
+			if (States->ActiveId == Id) // Draw cursor
+				GUIPainter::Instance()->DrawLineStrip(States->CursorPos, States->CurrentPosY + 3, States->CursorPos, States->CurrentPosY + 16);
+
+			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States->CurrentPosY += Height + 10;
+			else
+				States->CurrentPosX += 5;
+
+			return false;
 		}
 	}
 }

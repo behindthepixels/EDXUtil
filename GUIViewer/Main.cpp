@@ -51,6 +51,7 @@ void OnRender(Object* pSender, EventArgs args)
 	glRasterPos3f(0.0f, 0.0f, 1.0f);
 	glDrawPixels(gWidth, gHeight, GL_RGBA, GL_UNSIGNED_BYTE, gImage);
 
+	static string buf("fuck");
 	static int counter = 0;
 	static int hoveredId = 0;
 	EDXGui::BeginDialog();
@@ -65,7 +66,7 @@ void OnRender(Object* pSender, EventArgs args)
 	static bool checked = false;
 	EDXGui::CheckBox("Check Box", checked);
 	if (EDXGui::Bottun("Button 2"))
-		counter += 10;
+		buf = "";
 	static int selected = 0;
 	ComboBoxItem items[] = {
 		{ 1, "Item 1" },
@@ -77,6 +78,8 @@ void OnRender(Object* pSender, EventArgs args)
 		counter -= 3;
 	hoveredId = EDXGui::States->HoveredId;
 
+	EDXGui::Text("Cursor Idx: %i", EDXGui::States->CursorIdx);
+	EDXGui::InputText(buf);
 
 	EDXGui::EndDialog();
 }
@@ -100,6 +103,11 @@ void OnMouseEvent(Object* pSender, MouseEventArgs args)
 	EDXGui::HandleMouseEvent(args);
 }
 
+void OnKeyboardEvent(Object* pSender, KeyboardEventArgs args)
+{
+	EDXGui::HandleKeyboardEvent(args);
+}
+
 void OnRelease(Object* pSender, EventArgs args)
 {
 	EDXGui::Release();
@@ -116,6 +124,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdArgs, int cmdS
 	mainWindow->SetInit(NotifyEvent(OnInit));
 	mainWindow->SetResize(ResizeEvent(OnResize));
 	mainWindow->SetMouseHandler(MouseEvent(OnMouseEvent));
+	mainWindow->SetkeyboardHandler(KeyboardEvent(OnKeyboardEvent));
 	mainWindow->SetRelease(NotifyEvent(OnRelease));
 
 	mainWindow->Create(L"EDXGui", 1280, 800);

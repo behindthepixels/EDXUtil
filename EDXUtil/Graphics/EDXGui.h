@@ -22,9 +22,12 @@ namespace EDX
 
 			int mTextListBase;
 			int mFBWidth, mFBHeight;
+			HFONT mFont;
+			HFONT mOldfont;
 
 			OpenGL::Texture2D mBackgroundTex;
 
+			HDC mHDC;
 			FrameBuffer mFBO;
 			RenderBuffer mColorRBO;
 
@@ -47,6 +50,7 @@ namespace EDX
 
 		private:
 			GUIPainter();
+			~GUIPainter();
 
 		public:
 			static inline GUIPainter* Instance()
@@ -68,6 +72,8 @@ namespace EDX
 				}
 			}
 
+			HDC GetDC() { return mHDC; }
+
 			void Resize(int width, int height);
 			void BlurBackgroundTexture(int x0, int y0, int x1, int y1);
 			void DrawBackgroundTexture(int x0, int y0, int x1, int y1);
@@ -76,6 +82,8 @@ namespace EDX
 			void DrawLineStrip(int iX0, int iY0, int iX1, int iY1);
 			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize,
 				const Color& interiorColor = Color(0.0f, 0.0f, 0.0f, 0.5f), const Color& borderColor = Color(1.0f, 1.0f, 1.0f, 0.5f));
+
+			void DrawChar(int x, int y, float depth, const char ch);
 			void DrawString(int x, int y, float depth, const char* strText);
 
 		private:
@@ -367,6 +375,13 @@ namespace EDX
 			int HoveredId;
 			int ActiveId;
 			MouseEventArgs MouseState;
+			KeyboardEventArgs KeyState;
+
+			// Text edit states
+			int CursorPos;
+			int CursorIdx;
+			bool Selecting;
+			vector<int> StrWidthPrefixSum;
 		};
 
 		class EDXGui
@@ -381,11 +396,13 @@ namespace EDX
 			static void EndDialog();
 			static void Resize(int screenWidth, int screenHeight);
 			static void HandleMouseEvent(const MouseEventArgs& mouseArgs);
+			static void HandleKeyboardEvent(const KeyboardEventArgs& keyArgs);
 
 			static void Text(const char* str, ...);
 			static bool Bottun(const char* str);
 			static void CheckBox(const char* str, bool& checked);
 			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
+			static bool InputText(string& str);
 
 			template<typename T>
 			static void Slider(const char* str, T* pVal, T min, T max)
@@ -400,7 +417,7 @@ namespace EDX
 				const int SlideBase = States->CurrentPosX + ButtonSize_2;
 				const int SlideEnd = States->CurrentPosX + Width - ButtonSize_2;
 
-				int Id = ++States->CurrentId;
+				int Id = States->CurrentId++;
 
 				float lin = Math::LinStep(*pVal, min, max);
 				int buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
