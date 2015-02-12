@@ -934,7 +934,7 @@ namespace EDX
 		{
 			States = new GuiStates;
 			States->ActiveId = -1;
-			States->KeyState.key = '\0';
+			States->KeyState.key = char(Key::None);
 		}
 
 		void EDXGui::Release()
@@ -1009,7 +1009,7 @@ namespace EDX
 			}
 
 			States->MouseState.Action = MouseAction::None;
-			States->KeyState.key = '\0';
+			States->KeyState.key = char(Key::None);
 		}
 
 		void EDXGui::Resize(int screenWidth, int screenHeight)
@@ -1054,7 +1054,7 @@ namespace EDX
 			va_end(args);
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States->CurrentPosY += Height + 10;
+				States->CurrentPosY += Height + Padding;
 			else
 				States->CurrentPosX += 5;
 		}
@@ -1134,7 +1134,7 @@ namespace EDX
 			GUIPainter::Instance()->DrawString(midX, States->CurrentPosY + 6, GUIPainter::DEPTH_MID, str);
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States->CurrentPosY += Height + 10;
+				States->CurrentPosY += Height + Padding;
 			else
 				States->CurrentPosX += 5;
 
@@ -1274,7 +1274,7 @@ namespace EDX
 			}
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States->CurrentPosY += Height + 10;
+				States->CurrentPosY += Height + Padding;
 			else
 				States->CurrentPosX += 5;
 		}
@@ -1282,7 +1282,21 @@ namespace EDX
 		bool EDXGui::InputText(string& buf)
 		{
 			const int Width = 100;
-			const int Height = 18;
+			const int Height = 19;
+			const int Indent = 4;
+
+			auto CalcCharWidthPrefixSum = [&]()
+			{
+				// Calculate string length prefix sum
+				States->StrWidthPrefixSum.clear();
+				States->StrWidthPrefixSum.push_back(0);
+				for (auto i = 0; i < buf.length(); i++)
+				{
+					SIZE textExtent;
+					GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &buf[i], 1, &textExtent);
+					States->StrWidthPrefixSum.push_back(i == 0 ? textExtent.cx : textExtent.cx + States->StrWidthPrefixSum[i]);
+				}
+			};
 
 			bool trigger = false;
 			int Id = States->CurrentId++;
@@ -1304,48 +1318,89 @@ namespace EDX
 						auto distX = mousePt.x - (States->CurrentPosX + 3);
 						auto charIdx = std::lower_bound(States->StrWidthPrefixSum.begin(), States->StrWidthPrefixSum.end(), distX);
 						
-						States->CursorIdx = ((charIdx == States->StrWidthPrefixSum.begin()) ? -1 : charIdx - 1 - States->StrWidthPrefixSum.begin());
-						States->CursorPos = States->CurrentPosX + 4 + ((charIdx == States->StrWidthPrefixSum.begin()) ? 0 : *(charIdx - 1));
+						States->CursorIdx = ((charIdx == States->StrWidthPrefixSum.begin()) ? 0 : charIdx - States->StrWidthPrefixSum.begin() - 1);
+						States->CursorPos = Indent + ((charIdx == States->StrWidthPrefixSum.begin()) ? 0 : *(charIdx - 1));
 					}
 					else
 					{
 						// Set activated
 						States->ActiveId = Id;
 
-						// Calculate string length prefix sum
-						States->StrWidthPrefixSum.clear();
-						for (auto i = 0; i < buf.length(); i++)
-						{
-							SIZE textExtent;
-							GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &buf[i], 1, &textExtent);
-							States->StrWidthPrefixSum.push_back(i == 0 ? textExtent.cx : textExtent.cx + States->StrWidthPrefixSum[i - 1]);
-						}
+						CalcCharWidthPrefixSum();
 
-						States->CursorPos = States->CurrentPosX + 4 + (buf.length() > 0 ? *(States->StrWidthPrefixSum.end() - 1) : 0);
-						States->CursorIdx = buf.length() - 1;
+						States->CursorPos = Indent + (buf.length() > 0 ? *States->StrWidthPrefixSum.rbegin() : 0);
+						States->CursorIdx = buf.length();
 					}
 				}
 
 				States->HoveredId = Id;
 			}
 
-			if (States->KeyState.key != '\0')
+			if (States->ActiveId == Id && States->KeyState.key != char(Key::None))
 			{
-				buf.insert(States->CursorIdx + 1, 1, States->KeyState.key);
-
-				// Calculate string length prefix sum
-				States->StrWidthPrefixSum.clear();
-				for (auto i = 0; i < buf.length(); i++)
+				switch (States->KeyState.key)
 				{
-					SIZE textExtent;
-					GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &buf[i], 1, &textExtent);
-					States->StrWidthPrefixSum.push_back(i == 0 ? textExtent.cx : textExtent.cx + States->StrWidthPrefixSum[i - 1]);
+				case char(Key::LeftArrow):
+				{
+					auto orgIdx = States->CursorIdx--;
+					States->CursorIdx = Math::Max(States->CursorIdx, 0);
+					States->CursorPos -= States->StrWidthPrefixSum[orgIdx] - States->StrWidthPrefixSum[States->CursorIdx];
+					break;
 				}
+				case char(Key::RightArrow) :
+				{
+					auto orgIdx = States->CursorIdx++;
+					States->CursorIdx = Math::Min(States->CursorIdx, buf.length());
+					States->CursorPos += States->StrWidthPrefixSum[States->CursorIdx] - States->StrWidthPrefixSum[orgIdx];
+					break;
+				}
+				case char(Key::BackSpace) :
+					if (States->CursorIdx > 0)
+					{
+						int shift = States->StrWidthPrefixSum[States->CursorIdx] - States->StrWidthPrefixSum[States->CursorIdx - 1];
+						buf.erase(States->CursorIdx - 1, 1);
 
-				SIZE textExtent;
-				GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &States->KeyState.key, 1, &textExtent);
-				States->CursorPos += textExtent.cx;
-				States->CursorIdx++;
+						CalcCharWidthPrefixSum();
+
+						States->CursorPos -= shift;
+						States->CursorIdx--;
+					}
+					break;
+				case char(Key::Delete) :
+					if (States->CursorIdx < buf.length())
+					{
+						int indent = States->StrWidthPrefixSum[States->CursorIdx + 1] - States->StrWidthPrefixSum[States->CursorIdx];
+						buf.erase(States->CursorIdx, 1);
+
+						CalcCharWidthPrefixSum();
+					}
+					break;
+				case char(Key::Home):
+					States->CursorPos = Indent;
+					States->CursorIdx = 0;
+					break;
+				case char(Key::End) :
+					States->CursorPos = *States->StrWidthPrefixSum.rbegin() + Indent;
+					States->CursorIdx = States->StrWidthPrefixSum.size() - 1;
+					break;
+
+				default:
+					if (States->KeyState.key < ' ' || States->KeyState.key > '~' || States->KeyState.ctrlDown)
+						break; // Displayable charactors only
+
+					SIZE textExtent;
+					GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &States->KeyState.key, 1, &textExtent);
+
+					if (*States->StrWidthPrefixSum.rbegin() + textExtent.cx >= Width - Indent)
+						break; // Limit string length to input frame width
+
+					buf.insert(States->CursorIdx, 1, States->KeyState.key);
+
+					CalcCharWidthPrefixSum();
+
+					States->CursorPos += textExtent.cx;
+					States->CursorIdx++;
+				}
 			}
 
 			GUIPainter::Instance()->DrawBorderedRect(rect.left,
@@ -1360,10 +1415,10 @@ namespace EDX
 			GUIPainter::Instance()->DrawString(States->CurrentPosX + 3, States->CurrentPosY + 5, GUIPainter::DEPTH_MID, buf.c_str());
 
 			if (States->ActiveId == Id) // Draw cursor
-				GUIPainter::Instance()->DrawLineStrip(States->CursorPos, States->CurrentPosY + 3, States->CursorPos, States->CurrentPosY + 16);
+				GUIPainter::Instance()->DrawLineStrip(States->CurrentPosX + States->CursorPos, States->CurrentPosY + 3, States->CurrentPosX + States->CursorPos, States->CurrentPosY + 16);
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States->CurrentPosY += Height + 10;
+				States->CurrentPosY += Height + Padding;
 			else
 				States->CurrentPosX += 5;
 

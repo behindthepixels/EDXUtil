@@ -138,6 +138,7 @@ namespace EDX
 		case WM_MOUSEWHEEL:
 			InvokeMouseEvent();
 			return true;
+		case WM_KEYDOWN:
 		case WM_CHAR:
 		{
 			KeyboardEventArgs kbArgs;

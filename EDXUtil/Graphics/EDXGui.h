@@ -388,6 +388,7 @@ namespace EDX
 		{
 		public:
 			static GuiStates* States;
+			static const int Padding = 10;
 
 		public:
 			static void Init();
@@ -493,7 +494,7 @@ namespace EDX
 					0, color);
 
 				if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
-					States->CurrentPosY += ButtonSize + 10;
+					States->CurrentPosY += ButtonSize + Padding;
 				else
 					States->CurrentPosX += 5;
 			}

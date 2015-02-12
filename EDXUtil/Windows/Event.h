@@ -225,6 +225,22 @@ namespace EDX
 		MouseAction Action;
 	};
 
+	enum class Key
+	{
+		Enter = VK_RETURN,
+		LeftArrow = VK_LEFT,
+		UpArrow = VK_UP,
+		RightArrow = VK_RIGHT,
+		DownArrow = VK_DOWN,
+		Insert = VK_INSERT,
+		BackSpace = VK_BACK,
+		Delete = VK_DELETE,
+		Tab = VK_TAB,
+		Home = VK_HOME,
+		End = VK_END,
+		None = '\0'
+	};
+
 	class KeyboardEventArgs : public EventArgs
 	{
 	public:

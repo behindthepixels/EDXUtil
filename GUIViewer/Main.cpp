@@ -52,6 +52,7 @@ void OnRender(Object* pSender, EventArgs args)
 	glDrawPixels(gWidth, gHeight, GL_RGBA, GL_UNSIGNED_BYTE, gImage);
 
 	static string buf("fuck");
+	static string buf2("you");
 	static int counter = 0;
 	static int hoveredId = 0;
 	EDXGui::BeginDialog();
@@ -80,6 +81,7 @@ void OnRender(Object* pSender, EventArgs args)
 
 	EDXGui::Text("Cursor Idx: %i", EDXGui::States->CursorIdx);
 	EDXGui::InputText(buf);
+	EDXGui::InputText(buf2);
 
 	EDXGui::EndDialog();
 }
