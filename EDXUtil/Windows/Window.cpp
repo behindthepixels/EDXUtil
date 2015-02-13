@@ -52,7 +52,7 @@ namespace EDX
 	{
 		WNDCLASSEX winClass;
 		winClass.cbSize = sizeof(WNDCLASSEX);
-		winClass.style = CS_OWNDC;
+		winClass.style = CS_OWNDC | CS_DBLCLKS;
 		winClass.lpfnWndProc = WndProc;
 		winClass.cbClsExtra = 0;
 		winClass.cbWndExtra = 0;
@@ -99,8 +99,6 @@ namespace EDX
 		case WM_SIZE:
 			mResizeEvent.Invoke(Application::GetMainWindow(), ResizeEventArgs(LOWORD(lParam), HIWORD(lParam)));
 			return true;
-
-
 		case WM_MOUSEMOVE:
 			InvokeMouseEvent();
 			return true;

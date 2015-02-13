@@ -84,7 +84,7 @@ namespace EDX
 				const Color& interiorColor = Color(0.0f, 0.0f, 0.0f, 0.5f), const Color& borderColor = Color(1.0f, 1.0f, 1.0f, 0.5f));
 
 			void DrawChar(int x, int y, float depth, const char ch);
-			void DrawString(int x, int y, float depth, const char* strText);
+			void DrawString(int x, int y, float depth, const char* strText, int length = -1);
 
 		private:
 			void CalcGaussianBlurWeightsAndOffsets();
@@ -380,6 +380,7 @@ namespace EDX
 			// Text edit states
 			int CursorPos;
 			int CursorIdx;
+			int SelectIdx;
 			bool Selecting;
 			vector<int> StrWidthPrefixSum;
 		};
