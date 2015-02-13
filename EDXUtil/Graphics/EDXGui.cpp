@@ -1092,16 +1092,18 @@ namespace EDX
 			{
 				if (States->MouseState.Action == MouseAction::LButtonDown)
 					States->ActiveId = Id;
-				if (States->MouseState.Action == MouseAction::LButtonUp)
-				{
-					if (States->ActiveId == Id)
-					{
-						States->ActiveId = -1;
-						trigger = true;
-					}
-				}
 
 				States->HoveredId = Id;
+			}
+
+			if (States->MouseState.Action == MouseAction::LButtonUp)
+			{
+				if (States->ActiveId == Id)
+				{
+					States->ActiveId = -1;
+					if (inRect)
+						trigger = true;
+				}
 			}
 
 			if (States->HoveredId == Id && States->ActiveId == Id)
@@ -1381,7 +1383,16 @@ namespace EDX
 					break;
 				}
 				case char(Key::BackSpace) :
-					if (States->CursorIdx > 0)
+					if (States->Selecting) // When in selection mode, erase all charactors selected
+					{
+						auto minIdx = Math::Min(States->CursorIdx, States->SelectIdx);
+						auto maxIdx = Math::Max(States->CursorIdx, States->SelectIdx);
+						buf.erase(minIdx, maxIdx - minIdx);
+						States->CursorIdx = minIdx;
+						States->CursorPos = Indent + States->StrWidthPrefixSum[minIdx];
+						CalcCharWidthPrefixSum();
+					}
+					else if (States->CursorIdx > 0)
 					{
 						int shift = States->StrWidthPrefixSum[States->CursorIdx] - States->StrWidthPrefixSum[States->CursorIdx - 1];
 						buf.erase(States->CursorIdx - 1, 1);
