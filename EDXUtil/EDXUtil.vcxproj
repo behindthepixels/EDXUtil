@@ -52,7 +52,6 @@
     <ClInclude Include="Windows\Debug.h" />
     <ClInclude Include="Windows\Event.h" />
     <ClInclude Include="Windows\stb_image.h" />
-    <ClInclude Include="Windows\stb_textedit.h" />
     <ClInclude Include="Windows\Thread.h" />
     <ClInclude Include="Windows\Timer.h" />
     <ClInclude Include="Windows\Window.h" />

@@ -378,10 +378,11 @@ namespace EDX
 			KeyboardEventArgs KeyState;
 
 			// Text edit states
+			int EditingId;
 			int CursorPos;
 			int CursorIdx;
 			int SelectIdx;
-			bool Selecting;
+			string BufferedString;
 			vector<int> StrWidthPrefixSum;
 		};
 
@@ -401,10 +402,11 @@ namespace EDX
 			static void HandleKeyboardEvent(const KeyboardEventArgs& keyArgs);
 
 			static void Text(const char* str, ...);
-			static bool Bottun(const char* str);
+			static bool Bottun(const char* str, const int width = 140, const int height = 22);
 			static void CheckBox(const char* str, bool& checked);
 			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
-			static bool InputText(string& str);
+			static bool InputText(string& str, const int width = 100);
+			static bool InputDigit(int& digit, const char* notation);
 
 			template<typename T>
 			static void Slider(const char* str, T* pVal, T min, T max)
@@ -477,7 +479,7 @@ namespace EDX
 					GUIPainter::DEPTH_MID,
 					0, color);
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
-				glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+				glColor4fv((float*)&color);
 				glBegin(GL_LINE_STRIP);
 
 				glVertex2i(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 - 1);

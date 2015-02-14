@@ -141,9 +141,6 @@
     <ClInclude Include="Windows\stb_image.h">
       <Filter>Source Files\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="Windows\stb_textedit.h">
-      <Filter>Source Files\Windows</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">

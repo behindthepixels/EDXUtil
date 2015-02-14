@@ -54,11 +54,11 @@ void OnRender(Object* pSender, EventArgs args)
 	static string buf("fuck");
 	static string buf2("you");
 	static int counter = 0;
-	static int hoveredId = 0;
 	EDXGui::BeginDialog();
 
 	EDXGui::Text("Active Id: %i", EDXGui::States->ActiveId);
-	EDXGui::Text("Hovered Id: %i", hoveredId);
+	EDXGui::Text("Hovered Id: %i", EDXGui::States->HoveredId);
+	EDXGui::Text("Editing Id: %i", EDXGui::States->EditingId);
 	EDXGui::Text("L Down: %i", EDXGui::States->MouseState.lDown ? 1 : 0);
 	EDXGui::Text("Value: %i", counter);
 	if (EDXGui::Bottun("Button 1"))
@@ -77,11 +77,11 @@ void OnRender(Object* pSender, EventArgs args)
 	EDXGui::ComboBox(items, 3, selected);
 	if (EDXGui::Bottun("Button 3"))
 		counter -= 3;
-	hoveredId = EDXGui::States->HoveredId;
 
 	EDXGui::Text("Cursor Idx: %i", EDXGui::States->CursorIdx);
 	EDXGui::InputText(buf);
 	EDXGui::InputText(buf2);
+	EDXGui::InputDigit(counter, "Number:");
 
 	EDXGui::EndDialog();
 }
