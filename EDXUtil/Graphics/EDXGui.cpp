@@ -72,6 +72,18 @@ namespace EDX
 			mProgram.AttachShader(&mVertexShader);
 			mProgram.AttachShader(&mBlurFragmentShader);
 			mProgram.Link();
+
+			// Calculate circle coordinates
+			const float phiItvl = float(Math::EDX_TWO_PI) / float(CIRCLE_VERTEX_COUNT - 1);
+
+			float phi = 0.0f;
+			for (int i = 0; i < CIRCLE_VERTEX_COUNT - 1; i++)
+			{
+				mCircleCoords[i].x = Math::Sin(phi);
+				mCircleCoords[i].y = -Math::Cos(phi);
+				phi += phiItvl;
+			}
+			mCircleCoords[CIRCLE_VERTEX_COUNT - 1] = mCircleCoords[0];
 		}
 
 		GUIPainter::~GUIPainter()
@@ -178,6 +190,7 @@ namespace EDX
 				DrawRect(iX0, iY0, iX1, iY1, depth);
 			}
 		}
+
 		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, float depth, const bool filled, const Color& color)
 		{
 			auto Draw = [](int iX0, int iY0, int iX1, int iY1, float depth)
@@ -194,15 +207,148 @@ namespace EDX
 
 			glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glColor4fv((float*)&color);
-			if (!filled)
+
+			if (filled)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				Draw(iX0 - 1, iY0, iX1, iY1 + 1, depth);
+			}
+			else
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				Draw(iX0, iY0, iX1, iY1, depth);
 			}
-			else
+		}
+
+		void GUIPainter::DrawRoundedRect(int x0, int y0, int x1, int y1, float depth, float radius, const bool filled, const Color& color) const
+		{
+			glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glColor4fv((float*)&color);
+			if (filled)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				Draw(iX0 - 1, iY0, iX1, iY1 + 1, depth);
+				glBegin(GL_TRIANGLE_FAN);
+
+				const int quaterVertexCount = CIRCLE_VERTEX_COUNT / 4;
+				// Center vertex
+				glVertex3f((x0 + x1) * 0.5f, (y0 + y1) * 0.5f, depth);
+
+				glVertex3f(x0 + radius, y0, depth);
+				glVertex3f(x1 - radius, y0, depth);
+				for (auto i = 0; i < quaterVertexCount; i++)
+				{
+					float _x = x1 - radius + mCircleCoords[i].x * radius;
+					float _y = y0 + radius + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+				glVertex3f(x1, y0 + radius, depth);
+				glVertex3f(x1, y1 - radius, depth);
+				for (auto i = quaterVertexCount; i < 2 * quaterVertexCount; i++)
+				{
+					float _x = x1 - radius + mCircleCoords[i].x * radius;
+					float _y = y1 - radius + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+				glVertex3f(x1 - radius, y1, depth);
+				glVertex3f(x0 + radius, y1, depth);
+				for (auto i = 2 * quaterVertexCount; i < 3 * quaterVertexCount; i++)
+				{
+					float _x = x0 + radius + mCircleCoords[i].x * radius;
+					float _y = y1 - radius + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+				glVertex3f(x0, y1 - radius, depth);
+				glVertex3f(x0, y0 + radius, depth);
+				for (auto i = 3 * quaterVertexCount; i < 4 * quaterVertexCount; i++)
+				{
+					float _x = x0 + radius + mCircleCoords[i].x * radius;
+					float _y = y0 + radius + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+
+				glEnd();
+			}
+			else
+			{
+				radius += 1;
+
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glBegin(GL_LINE_STRIP);
+
+				const int quaterVertexCount = CIRCLE_VERTEX_COUNT / 4;
+
+				glVertex3f(x0 + radius, y0, depth);
+				glVertex3f(x1 - radius, y0, depth);
+				for (auto i = 0; i < quaterVertexCount; i++)
+				{
+					float _x = x1 - radius + mCircleCoords[i].x * radius;
+					float _y = y0 + radius + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+
+				glVertex3f(x1, y1 - radius, depth);
+				for (auto i = quaterVertexCount; i < 2 * quaterVertexCount; i++)
+				{
+					float _x = x1 - radius + mCircleCoords[i].x * radius;
+					float _y = y1 - radius + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+
+				glVertex3f(x0 + radius, y1, depth);
+				for (auto i = 2 * quaterVertexCount; i < 3 * quaterVertexCount; i++)
+				{
+					float _x = x0 + radius + mCircleCoords[i].x * radius;
+					float _y = y1 - radius + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+
+				glVertex3f(x0, y0 + radius, depth);
+				for (auto i = 3 * quaterVertexCount; i < 4 * quaterVertexCount; i++)
+				{
+					float _x = x0 + radius + mCircleCoords[i].x * radius;
+					float _y = y0 + radius + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+
+				glEnd();
+			}
+		}
+
+		void GUIPainter::DrawSphere(int x, int y, float depth, int radius, bool filled, const Color& color) const
+		{
+			glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glColor4fv((float*)&color);
+
+			if (filled)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glBegin(GL_TRIANGLE_FAN);
+
+				// Center vertex
+				glVertex3f(x, y, depth);
+
+				for (auto i = 0; i < CIRCLE_VERTEX_COUNT; i++)
+				{
+					float _x = x + mCircleCoords[i].x * radius;
+					float _y = y + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+
+				glEnd();
+			}
+			else
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glBegin(GL_LINE_STRIP);
+
+				for (auto i = 0; i < CIRCLE_VERTEX_COUNT; i++)
+				{
+					float _x = x + mCircleCoords[i].x * radius;
+					float _y = y + mCircleCoords[i].y * radius;
+					glVertex3f(_x, _y, depth);
+				}
+
+				glEnd();
 			}
 		}
 
@@ -997,9 +1143,9 @@ namespace EDX
 			glDepthFunc(GL_LEQUAL);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
-			glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
 
 			// Draw blurred background
+			glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
 			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 			glBegin(GL_QUADS);
 
@@ -1115,39 +1261,64 @@ namespace EDX
 				}
 			}
 
+			float btnRadius = 5.0f;
 			if (States->HoveredId == Id && States->ActiveId == Id)
 			{
-				GUIPainter::Instance()->DrawRect(btnRect.left + 1,
+				GUIPainter::Instance()->DrawRoundedRect(btnRect.left + 1,
 					btnRect.top + 1,
 					btnRect.right - 1,
 					btnRect.bottom - 1,
 					GUIPainter::DEPTH_MID,
+					btnRadius,
 					true,
 					Color(1.0f, 1.0f, 1.0f, 0.65f));
+				//GUIPainter::Instance()->DrawRect(btnRect.left + 1,
+				//	btnRect.top + 1,
+				//	btnRect.right - 1,
+				//	btnRect.bottom - 1,
+				//	GUIPainter::DEPTH_MID,
+				//	true,
+				//	Color(1.0f, 1.0f, 1.0f, 0.65f));
 
 				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
 			else if (States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id)
 			{
-				GUIPainter::Instance()->DrawRect(btnRect.left,
+				GUIPainter::Instance()->DrawRoundedRect(btnRect.left,
 					btnRect.top,
 					btnRect.right,
 					btnRect.bottom,
 					GUIPainter::DEPTH_MID,
+					btnRadius,
 					true,
 					Color(1.0f, 1.0f, 1.0f, 0.5f));
+				//GUIPainter::Instance()->DrawRect(btnRect.left,
+				//	btnRect.top,
+				//	btnRect.right,
+				//	btnRect.bottom,
+				//	GUIPainter::DEPTH_MID,
+				//	true,
+				//	Color(1.0f, 1.0f, 1.0f, 0.5f));
 
 				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawRect(btnRect.left,
+				GUIPainter::Instance()->DrawRoundedRect(btnRect.left,
 					btnRect.top,
 					btnRect.right,
 					btnRect.bottom,
 					GUIPainter::DEPTH_MID,
+					btnRadius,
 					false,
 					Color(1.0f, 1.0f, 1.0f, 0.5f));
+				//GUIPainter::Instance()->DrawRect(btnRect.left,
+				//	btnRect.top,
+				//	btnRect.right,
+				//	btnRect.bottom,
+				//	GUIPainter::DEPTH_MID,
+				//	false,
+				//	Color(1.0f, 1.0f, 1.0f, 0.5f));
 
 				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			}
@@ -1155,7 +1326,7 @@ namespace EDX
 			SIZE textExtent;
 			GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), str, strlen(str), &textExtent);
 			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
-			GUIPainter::Instance()->DrawString(States->CurrentPosX + width / 2 - textExtent.cx / 2, States->CurrentPosY + height / 2 - textExtent.cy / 2 + 4, GUIPainter::DEPTH_MID, str);
+			GUIPainter::Instance()->DrawString(States->CurrentPosX + width / 2 - textExtent.cx / 2, States->CurrentPosY + height / 2 - textExtent.cy / 2 + 3, GUIPainter::DEPTH_MID, str);
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
 				States->CurrentPosY += height + Padding;
@@ -1258,7 +1429,7 @@ namespace EDX
 			Color btnColor = States->ActiveId == Id || States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 
 			GUIPainter::Instance()->DrawRect(mainRect.left, mainRect.top, mainRect.right, mainRect.bottom, GUIPainter::DEPTH_MID, false, btnColor);
-			GUIPainter::Instance()->DrawRect(mainRect.right - Height, mainRect.top + 1, mainRect.right - 1, mainRect.bottom, GUIPainter::DEPTH_MID, true, btnColor);
+			GUIPainter::Instance()->DrawRect(mainRect.right - Height, mainRect.top + 1, mainRect.right - 1, mainRect.bottom - 1, GUIPainter::DEPTH_MID, true, btnColor);
 
 			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1305,7 +1476,7 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
-		bool EDXGui::InputText(string& buf, const int width)
+		bool EDXGui::InputText(string& buf, const int width, const bool autoSelectAll)
 		{
 			const int Height = 18;
 			const int Indent = 4;
@@ -1335,7 +1506,24 @@ namespace EDX
 
 			if (PtInRect(&rect, mousePt))
 			{
-				if (States->MouseState.Action == MouseAction::LButtonDown)
+				if (States->MouseState.Action == MouseAction::LButtonDbClick || (States->MouseState.Action == MouseAction::LButtonDown && autoSelectAll))
+				{
+					States->ActiveId = Id;
+					if (States->EditingId != Id)
+					{
+						States->BufferedString = buf;
+						States->EditingId = Id;
+					}
+
+					CalcCharWidthPrefixSum();
+
+					// Place cursor
+					States->CursorPos = Indent + (States->BufferedString.length() > 0 ? *States->StrWidthPrefixSum.rbegin() : 0);
+					States->CursorIdx = States->BufferedString.length();
+
+					States->SelectIdx = 0;
+				}
+				else if (States->MouseState.Action == MouseAction::LButtonDown)
 				{
 					// Set activated
 					States->ActiveId = Id;
@@ -1355,21 +1543,6 @@ namespace EDX
 					States->CursorPos = Indent + ((charIt == States->StrWidthPrefixSum.begin()) ? 0 : *(charIt - 1));
 
 					States->SelectIdx = States->CursorIdx;
-				}
-				else if (States->MouseState.Action == MouseAction::LButtonDbClick)
-				{
-					States->ActiveId = Id;
-					if (States->EditingId != Id)
-					{
-						States->BufferedString = buf;
-						States->EditingId = Id;
-					}
-
-					// Place cursor
-					States->CursorPos = Indent + (States->BufferedString.length() > 0 ? *States->StrWidthPrefixSum.rbegin() : 0);
-					States->CursorIdx = States->BufferedString.length();
-
-					States->SelectIdx = 0;
 				}
 
 				States->HoveredId = Id;
@@ -1556,7 +1729,7 @@ namespace EDX
 			_itoa(digit, buf, 10);
 
 			string str(buf);
-			InputText(str, 60);
+			InputText(str, 60, true);
 
 			digit = atoi(str.c_str());
 

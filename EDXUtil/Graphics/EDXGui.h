@@ -40,6 +40,10 @@ namespace EDX
 			float mGaussianWeights[BLUR_SAMPLE];
 			Vector2 mGaussianOffsets[BLUR_SAMPLE];
 
+			// Precomputed coordinates for circle
+			static const int CIRCLE_VERTEX_COUNT = 12;
+			Vector2 mCircleCoords[CIRCLE_VERTEX_COUNT];
+
 			static const char* GUIPainter::ScreenQuadVertShaderSource;
 			static const char* GUIPainter::GaussianBlurFragShaderSource;
 
@@ -81,6 +85,11 @@ namespace EDX
 			void DrawLine(int iX0, int iY0, int iX1, int iY1);
 			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth,
 				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f));
+			void DrawRoundedRect(int iX0, int iY0, int iX1, int iY1, float depth, float radius,
+				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f)) const;
+			void DrawSphere(int x, int y, float depth, int radius, bool filled, const Color& color) const;
+
+			// Deprecated
 			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize,
 				const Color& interiorColor = Color(0.0f, 0.0f, 0.0f, 0.5f), const Color& borderColor = Color(1.0f, 1.0f, 1.0f, 0.5f));
 
@@ -405,7 +414,7 @@ namespace EDX
 			static bool Bottun(const char* str, const int width = 140, const int height = 22);
 			static void CheckBox(const char* str, bool& checked);
 			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
-			static bool InputText(string& str, const int width = 100);
+			static bool InputText(string& str, const int width = 100, const bool autoSelectAll = false);
 			static bool InputDigit(int& digit, const char* notation);
 
 			template<typename T>
@@ -417,7 +426,7 @@ namespace EDX
 
 				const int Width = 140;
 				const int ButtonSize = 12;
-				const int ButtonSize_2 = 6;
+				const int ButtonSize_2 = 7;
 				const int SlideBase = States->CurrentPosX + ButtonSize_2;
 				const int SlideEnd = States->CurrentPosX + Width - ButtonSize_2;
 
@@ -472,12 +481,14 @@ namespace EDX
 				Color color = States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 
 				// Rendering
+				// First half bar
 				GUIPainter::Instance()->DrawRect(States->CurrentPosX,
 					States->CurrentPosY + ButtonSize_2 - 1,
 					buttonX - ButtonSize_2,
 					States->CurrentPosY + ButtonSize_2 + 1,
 					GUIPainter::DEPTH_MID,
 					true, color);
+				// Second half bar
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4fv((float*)&color);
 				glBegin(GL_LINE_STRIP);
@@ -489,12 +500,14 @@ namespace EDX
 
 				glEnd();
 
-				GUIPainter::Instance()->DrawRect(buttonX - ButtonSize_2 + 1,
-					States->CurrentPosY,
-					buttonX + ButtonSize_2,
-					States->CurrentPosY + ButtonSize,
-					GUIPainter::DEPTH_MID,
-					true, color);
+				// Button
+				GUIPainter::Instance()->DrawSphere(buttonX, States->CurrentPosY + ButtonSize_2, GUIPainter::DEPTH_MID, ButtonSize_2, true, color);
+				//GUIPainter::Instance()->DrawRect(buttonX - ButtonSize_2 + 1,
+				//	States->CurrentPosY,
+				//	buttonX + ButtonSize_2,
+				//	States->CurrentPosY + ButtonSize,
+				//	GUIPainter::DEPTH_MID,
+				//	true, color);
 
 				if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
 					States->CurrentPosY += ButtonSize + Padding;
