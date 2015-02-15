@@ -78,12 +78,12 @@ namespace EDX
 			void BlurBackgroundTexture(int x0, int y0, int x1, int y1);
 			void DrawBackgroundTexture(int x0, int y0, int x1, int y1);
 
-			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth);
-			void DrawLineStrip(int iX0, int iY0, int iX1, int iY1);
+			void DrawLine(int iX0, int iY0, int iX1, int iY1);
+			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth,
+				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f));
 			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize,
 				const Color& interiorColor = Color(0.0f, 0.0f, 0.0f, 0.5f), const Color& borderColor = Color(1.0f, 1.0f, 1.0f, 0.5f));
 
-			void DrawChar(int x, int y, float depth, const char ch);
 			void DrawString(int x, int y, float depth, const char* strText, int length = -1);
 
 		private:
@@ -472,12 +472,12 @@ namespace EDX
 				Color color = States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 
 				// Rendering
-				GUIPainter::Instance()->DrawBorderedRect(States->CurrentPosX,
+				GUIPainter::Instance()->DrawRect(States->CurrentPosX,
 					States->CurrentPosY + ButtonSize_2 - 1,
 					buttonX - ButtonSize_2,
-					States->CurrentPosY + ButtonSize_2 + 2,
+					States->CurrentPosY + ButtonSize_2 + 1,
 					GUIPainter::DEPTH_MID,
-					0, color);
+					true, color);
 				glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 				glColor4fv((float*)&color);
 				glBegin(GL_LINE_STRIP);
@@ -489,12 +489,12 @@ namespace EDX
 
 				glEnd();
 
-				GUIPainter::Instance()->DrawBorderedRect(buttonX - ButtonSize_2,
+				GUIPainter::Instance()->DrawRect(buttonX - ButtonSize_2 + 1,
 					States->CurrentPosY,
 					buttonX + ButtonSize_2,
 					States->CurrentPosY + ButtonSize,
 					GUIPainter::DEPTH_MID,
-					0, color);
+					true, color);
 
 				if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
 					States->CurrentPosY += ButtonSize + Padding;

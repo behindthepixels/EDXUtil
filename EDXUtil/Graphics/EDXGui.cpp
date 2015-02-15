@@ -178,37 +178,42 @@ namespace EDX
 				DrawRect(iX0, iY0, iX1, iY1, depth);
 			}
 		}
-
-		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, float depth)
+		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, float depth, const bool filled, const Color& color)
 		{
-			glBegin(GL_QUADS);
+			auto Draw = [](int iX0, int iY0, int iX1, int iY1, float depth)
+			{
+				glBegin(GL_QUADS);
 
-			glVertex3f(iX0, iY0, depth);
-			glVertex3f(iX1, iY0, depth);
-			glVertex3f(iX1, iY1, depth);
-			glVertex3f(iX0, iY1, depth);
+				glVertex3f(iX0, iY0, depth);
+				glVertex3f(iX1, iY0, depth);
+				glVertex3f(iX1, iY1, depth);
+				glVertex3f(iX0, iY1, depth);
 
-			glEnd();
+				glEnd();
+			};
+
+			glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glColor4fv((float*)&color);
+			if (!filled)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				Draw(iX0, iY0, iX1, iY1, depth);
+			}
+			else
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				Draw(iX0 - 1, iY0, iX1, iY1 + 1, depth);
+			}
 		}
 
-		void GUIPainter::DrawLineStrip(int iX0, int iY0, int iX1, int iY1)
+		void GUIPainter::DrawLine(int iX0, int iY0, int iX1, int iY1)
 		{
-			glBegin(GL_LINE_STRIP);
+			glBegin(GL_LINES);
 
 			glVertex2i(iX0, iY0);
-			glVertex2i(iX1, iY0);
 			glVertex2i(iX1, iY1);
-			glVertex2i(iX0, iY1);
 
 			glEnd();
-		}
-
-		void GUIPainter::DrawChar(int x, int y, float depth, const char ch)
-		{
-			glListBase(mTextListBase);
-
-			glRasterPos3f(x, y + 10, depth);
-			glCallLists(1, GL_UNSIGNED_BYTE, &ch);
 		}
 
 		void GUIPainter::DrawString(int x, int y, float depth, const char* strText, int length)
@@ -307,7 +312,7 @@ namespace EDX
 			glBlendColor(1.0f, 1.0f, 1.0f, 0.5f);
 
 			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-			GUIPainter::Instance()->DrawRect(0, 0, mWidth, mHeight, GUIPainter::DEPTH_FAR);
+			GUIPainter::Instance()->DrawBorderedRect(0, 0, mWidth, mHeight, GUIPainter::DEPTH_FAR, 0);
 
 			for (int i = 0; i < mvControls.size(); i++)
 			{
@@ -996,7 +1001,14 @@ namespace EDX
 
 			// Draw blurred background
 			glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
-			GUIPainter::Instance()->DrawRect(0, 0, States->ScreenWidth, States->ScreenHeight, GUIPainter::DEPTH_FAR);
+			glBegin(GL_QUADS);
+
+			glVertex3f(0, 0, GUIPainter::DEPTH_FAR);
+			glVertex3f(States->ScreenWidth, 0, GUIPainter::DEPTH_FAR);
+			glVertex3f(States->ScreenWidth, States->ScreenHeight, GUIPainter::DEPTH_FAR);
+			glVertex3f(0, States->ScreenHeight, GUIPainter::DEPTH_FAR);
+
+			glEnd();
 		}
 		void EDXGui::EndDialog()
 		{
@@ -1105,36 +1117,37 @@ namespace EDX
 
 			if (States->HoveredId == Id && States->ActiveId == Id)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(btnRect.left,
+				GUIPainter::Instance()->DrawRect(btnRect.left + 1,
 					btnRect.top + 1,
 					btnRect.right - 1,
-					btnRect.bottom,
+					btnRect.bottom - 1,
 					GUIPainter::DEPTH_MID,
-					0,
+					true,
 					Color(1.0f, 1.0f, 1.0f, 0.65f));
 
 				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
 			else if (States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id)
 			{
-				GUIPainter::Instance()->DrawBorderedRect(btnRect.left - 1,
+				GUIPainter::Instance()->DrawRect(btnRect.left,
 					btnRect.top,
 					btnRect.right,
-					btnRect.bottom + 1,
+					btnRect.bottom,
 					GUIPainter::DEPTH_MID,
-					0,
+					true,
 					Color(1.0f, 1.0f, 1.0f, 0.5f));
 
 				glColor4f(0.15f, 0.15f, 0.15f, 0.15f);
 			}
 			else
 			{
-				GUIPainter::Instance()->DrawBorderedRect(btnRect.left,
+				GUIPainter::Instance()->DrawRect(btnRect.left,
 					btnRect.top,
 					btnRect.right,
 					btnRect.bottom,
 					GUIPainter::DEPTH_MID,
-					2);
+					false,
+					Color(1.0f, 1.0f, 1.0f, 0.5f));
 
 				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			}
@@ -1189,22 +1202,21 @@ namespace EDX
 			}
 
 			Color color1 = States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
-			GUIPainter::Instance()->DrawBorderedRect(boxRect.left,
+			GUIPainter::Instance()->DrawRect(boxRect.left,
 				boxRect.top,
 				boxRect.right,
 				boxRect.bottom,
 				GUIPainter::DEPTH_MID,
-				2,
-				Color(0.0f),
+				false,
 				color1);
 
 			Color color2 = checked ? color1 : States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.15f) : Color::BLACK;
-			GUIPainter::Instance()->DrawBorderedRect(boxRect.left + 1,
+			GUIPainter::Instance()->DrawRect(boxRect.left + 2,
 				boxRect.top + 2,
 				boxRect.right - 2,
-				boxRect.bottom - 1,
+				boxRect.bottom - 2,
 				GUIPainter::DEPTH_MID,
-				0,
+				true,
 				color2);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1245,8 +1257,8 @@ namespace EDX
 
 			Color btnColor = States->ActiveId == Id || States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 
-			GUIPainter::Instance()->DrawBorderedRect(mainRect.left, mainRect.top, mainRect.right, mainRect.bottom, GUIPainter::DEPTH_MID, 2, Color(0.0f), btnColor);
-			GUIPainter::Instance()->DrawBorderedRect(mainRect.right - Height, mainRect.top + 1, mainRect.right - 1, mainRect.bottom, GUIPainter::DEPTH_MID, 0, btnColor);
+			GUIPainter::Instance()->DrawRect(mainRect.left, mainRect.top, mainRect.right, mainRect.bottom, GUIPainter::DEPTH_MID, false, btnColor);
+			GUIPainter::Instance()->DrawRect(mainRect.right - Height, mainRect.top + 1, mainRect.right - 1, mainRect.bottom, GUIPainter::DEPTH_MID, true, btnColor);
 
 			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1265,14 +1277,14 @@ namespace EDX
 					States->MouseState.Action = MouseAction::None;
 				}
 
-				GUIPainter::Instance()->DrawBorderedRect(dropDownRect.left, dropDownRect.top + 1, dropDownRect.right, dropDownRect.bottom, GUIPainter::DEPTH_NEAR, 0, 0.5f * Color::WHITE);
+				GUIPainter::Instance()->DrawRect(dropDownRect.left, dropDownRect.top + 1, dropDownRect.right, dropDownRect.bottom, GUIPainter::DEPTH_NEAR, true, Color(0.5f, 0.5f, 0.5f, 1.0f));
 
 				int hoveredIdx = Math::Clamp((mousePt.y - dropDownRect.top) / ItemHeight, 0, numItems - 1);
 				for (auto i = 0; i < numItems; i++)
 				{
 					if (i == hoveredIdx)
 					{
-						GUIPainter::Instance()->DrawBorderedRect(dropDownRect.left, dropDownRect.top + 2 + hoveredIdx * ItemHeight, dropDownRect.right - 1, dropDownRect.top + 1 + (hoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, 0, Color(0.85f, 0.85f, 0.85f, 0.5f));
+						GUIPainter::Instance()->DrawRect(dropDownRect.left, dropDownRect.top + 2 + hoveredIdx * ItemHeight, dropDownRect.right - 1, dropDownRect.top + 1 + (hoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, true, Color(0.85f, 0.85f, 0.85f, 0.5f));
 
 						glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 						glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
@@ -1471,12 +1483,12 @@ namespace EDX
 			}
 
 			Color color = States->HoveredId == Id || States->ActiveId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
-			GUIPainter::Instance()->DrawBorderedRect(rect.left,
+			GUIPainter::Instance()->DrawRect(rect.left,
 				rect.top,
 				rect.right,
 				rect.bottom,
 				GUIPainter::DEPTH_MID,
-				1, Color(0.0f), color);
+				false, color);
 
 			string& renderedStr = States->ActiveId != Id ? buf : States->BufferedString;
 
@@ -1491,12 +1503,12 @@ namespace EDX
 				auto minIdx = Math::Min(States->CursorIdx, States->SelectIdx);
 				auto maxIdx = Math::Max(States->CursorIdx, States->SelectIdx);
 
-				GUIPainter::Instance()->DrawBorderedRect(States->CurrentPosX + Indent + States->StrWidthPrefixSum[minIdx],
+				GUIPainter::Instance()->DrawRect(States->CurrentPosX + Indent + States->StrWidthPrefixSum[minIdx],
 					States->CurrentPosY + 3,
 					States->CurrentPosX + Indent + States->StrWidthPrefixSum[maxIdx],
 					States->CurrentPosY + 16,
 					GUIPainter::DEPTH_MID,
-					0,
+					true,
 					color);
 
 				glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1509,7 +1521,7 @@ namespace EDX
 			}
 
 			if (States->ActiveId == Id) // Draw cursor
-				GUIPainter::Instance()->DrawLineStrip(States->CurrentPosX + States->CursorPos, States->CurrentPosY + 3, States->CurrentPosX + States->CursorPos, States->CurrentPosY + 16);
+				GUIPainter::Instance()->DrawLine(States->CurrentPosX + States->CursorPos, States->CurrentPosY + 3, States->CurrentPosX + States->CursorPos, States->CurrentPosY + 16);
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
 				States->CurrentPosY += Height + Padding;
