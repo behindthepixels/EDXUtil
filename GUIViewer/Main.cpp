@@ -67,25 +67,40 @@ void OnRender(Object* pSender, EventArgs args)
 	EDXGui::Slider<int>("Slider 1", &counter, 0.0f, 20.0f);
 	static bool checked = false;
 	EDXGui::CheckBox("Check Box", checked);
-	EDXGui::RadioButton("Radio Button 1", 3, counter);
-	EDXGui::RadioButton("Radio Button 2", 4, counter);
-	EDXGui::RadioButton("Radio Button 3", 5, counter);
-	if (EDXGui::Bottun("Button 2"))
-		buf = "";
-	static int selected = 0;
-	ComboBoxItem items[] = {
-		{ 1, "Item 1" },
-		{ 2, "Item 2" },
-		{ 3, "Item 3" },
-	};
-	EDXGui::ComboBox(items, 3, selected);
-	if (EDXGui::Bottun("Button 3"))
-		counter -= 3;
+	if (checked)
+	{
+		EDXGui::RadioButton("Radio Button 1", 3, counter);
+		EDXGui::RadioButton("Radio Button 2", 4, counter);
+		EDXGui::RadioButton("Radio Button 3", 5, counter);
+		if (EDXGui::Bottun("Button 2"))
+			buf = "";
+	}
+	static bool show = true;
+	if (EDXGui::CollapsingHeader("Header", show))
+	{
+		static int selected = 0;
+		ComboBoxItem items[] = {
+				{ 1, "Item 1" },
+				{ 2, "Item 2" },
+				{ 3, "Item 3" },
+		};
+		EDXGui::ComboBox(items, 3, selected);
+		if (EDXGui::Bottun("Button 3"))
+			counter -= 3;
 
-	EDXGui::Text("Cursor Idx: %i", EDXGui::States->CursorIdx);
-	EDXGui::InputText(buf);
-	EDXGui::InputText(buf2);
-	EDXGui::InputDigit(counter, "Number:");
+		EDXGui::CloseHeaderSection();
+	}
+
+	static bool show2 = true;
+	if (EDXGui::CollapsingHeader("Header2", show2))
+	{
+		EDXGui::Text("Cursor Idx: %i", EDXGui::States->CursorIdx);
+		EDXGui::InputText(buf);
+		EDXGui::InputText(buf2);
+		EDXGui::InputDigit(counter, "Number:");
+
+		EDXGui::CloseHeaderSection();
+	}
 
 	EDXGui::EndDialog();
 	hoveredId = EDXGui::States->HoveredId;

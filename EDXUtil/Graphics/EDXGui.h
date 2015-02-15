@@ -87,7 +87,7 @@ namespace EDX
 				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f));
 			void DrawRoundedRect(int iX0, int iY0, int iX1, int iY1, float depth, float radius,
 				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f)) const;
-			void DrawSphere(int x, int y, float depth, int radius, bool filled, const Color& color) const;
+			void DrawCircle(int x, int y, float depth, int radius, bool filled, const Color& color) const;
 
 			// Deprecated
 			void DrawBorderedRect(int iX0, int iY0, int iX1, int iY1, float depth, int iBorderSize,
@@ -377,6 +377,7 @@ namespace EDX
 			int DialogHeight;
 			int CurrentPosX;
 			int CurrentPosY;
+			int WidgetEndX;
 			LayoutStrategy CurrentLayoutStrategy;
 			GrowthStrategy CurrentGrowthStrategy;
 
@@ -411,7 +412,9 @@ namespace EDX
 			static void HandleKeyboardEvent(const KeyboardEventArgs& keyArgs);
 
 			static void Text(const char* str, ...);
-			static bool Bottun(const char* str, const int width = 140, const int height = 22);
+			static bool CollapsingHeader(const char* str, bool& collapsed);
+			static void CloseHeaderSection() { States->CurrentPosX -= 16; }
+			static bool Bottun(const char* str, const int width = 200, const int height = 22);
 			static void CheckBox(const char* str, bool& checked);
 			static void RadioButton(const char* str, int activeVal, int& currentVal);
 			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
@@ -425,11 +428,10 @@ namespace EDX
 				Text(str, "%s: %.2f", str, pVal);
 				States->CurrentPosY -= 5;
 
-				const int Width = 140;
 				const int ButtonSize = 12;
 				const int ButtonSize_2 = 7;
 				const int SlideBase = States->CurrentPosX + ButtonSize_2;
-				const int SlideEnd = States->CurrentPosX + Width - ButtonSize_2;
+				const int SlideEnd = States->WidgetEndX - ButtonSize_2;
 
 				int Id = States->CurrentId++;
 
@@ -496,14 +498,14 @@ namespace EDX
 				glBegin(GL_LINE_STRIP);
 
 				glVertex2i(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 - 1);
-				glVertex2i(States->CurrentPosX + Width, States->CurrentPosY + ButtonSize_2 - 1);
-				glVertex2i(States->CurrentPosX + Width, States->CurrentPosY + ButtonSize_2 + 1);
+				glVertex2i(States->WidgetEndX, States->CurrentPosY + ButtonSize_2 - 1);
+				glVertex2i(States->WidgetEndX, States->CurrentPosY + ButtonSize_2 + 1);
 				glVertex2i(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 + 1);
 
 				glEnd();
 
 				// Button
-				GUIPainter::Instance()->DrawSphere(buttonX, States->CurrentPosY + ButtonSize_2, GUIPainter::DEPTH_MID, ButtonSize_2, true, color);
+				GUIPainter::Instance()->DrawCircle(buttonX, States->CurrentPosY + ButtonSize_2, GUIPainter::DEPTH_MID, ButtonSize_2, true, color);
 				//GUIPainter::Instance()->DrawRect(buttonX - ButtonSize_2 + 1,
 				//	States->CurrentPosY,
 				//	buttonX + ButtonSize_2,

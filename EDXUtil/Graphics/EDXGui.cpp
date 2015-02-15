@@ -314,7 +314,7 @@ namespace EDX
 			}
 		}
 
-		void GUIPainter::DrawSphere(int x, int y, float depth, int radius, bool filled, const Color& color) const
+		void GUIPainter::DrawCircle(int x, int y, float depth, int radius, bool filled, const Color& color) const
 		{
 			glBlendColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glColor4fv((float*)&color);
@@ -1114,8 +1114,9 @@ namespace EDX
 				States->DialogHeight = States->ScreenHeight;
 				States->DialogPosX = States->ScreenWidth - States->DialogWidth;
 				States->DialogPosY = 0;
-				States->CurrentPosX = 30;
-				States->CurrentPosY = 30;
+				States->CurrentPosX = 25;
+				States->CurrentPosY = 25;
+				States->WidgetEndX = States->DialogWidth - 25;
 			}
 
 			glMatrixMode(GL_PROJECTION);
@@ -1208,7 +1209,6 @@ namespace EDX
 		void EDXGui::Text(const char* str, ...)
 		{
 			const int Height = 10;
-			const int Width = 140;
 
 			++States->CurrentId;
 
@@ -1219,7 +1219,7 @@ namespace EDX
 			int size = vsnprintf(buff, sizeof(buff) - 1, str, args);
 
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			GUIPainter::Instance()->DrawString(States->CurrentPosX, States->CurrentPosY, 0.5f, buff);
+			GUIPainter::Instance()->DrawString(States->CurrentPosX, States->CurrentPosY, GUIPainter::DEPTH_MID, buff);
 
 			va_end(args);
 
@@ -1229,13 +1229,72 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
+		bool EDXGui::CollapsingHeader(const char* str, bool& collapsed)
+		{
+			const int Height = 30;
+			const int TextHeight = 11;
+
+			int Id = States->CurrentId++;
+
+			RECT headerRect;
+			if (collapsed) // Draw dots
+				SetRect(&headerRect, States->CurrentPosX, States->CurrentPosY, States->WidgetEndX, States->CurrentPosY + Height);
+			else
+				SetRect(&headerRect, States->CurrentPosX, States->CurrentPosY, States->WidgetEndX, States->CurrentPosY + Height);
+
+			POINT mousePt;
+			mousePt.x = States->MouseState.x;
+			mousePt.y = States->MouseState.y;
+			bool inRect = PtInRect(&headerRect, mousePt);
+
+			if (inRect)
+			{
+				if (States->MouseState.Action == MouseAction::LButtonDown)
+					States->ActiveId = Id;
+
+				States->HoveredId = Id;
+			}
+
+			if (States->MouseState.Action == MouseAction::LButtonUp)
+			{
+				if (States->ActiveId == Id)
+				{
+					States->ActiveId = -1;
+					if (inRect)
+						collapsed = !collapsed;
+				}
+			}
+
+			// Draw header text
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			GUIPainter::Instance()->DrawString(States->CurrentPosX, States->CurrentPosY, GUIPainter::DEPTH_MID, str);
+
+			// Draw Line
+			Color color = States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id ?
+				Color(1.0f, 1.0f, 1.0f, 1.0f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+			glColor4fv((float*)&color);
+			GUIPainter::Instance()->DrawLine(States->CurrentPosX, States->CurrentPosY + TextHeight + 1, States->WidgetEndX, States->CurrentPosY + TextHeight + 1);
+
+			if (collapsed) // Draw dots
+				GUIPainter::Instance()->DrawString(States->WidgetEndX - 15, States->CurrentPosY + TextHeight + 6, GUIPainter::DEPTH_MID, "...");
+			else
+				States->CurrentPosX += 16;
+
+			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States->CurrentPosY += (collapsed ? Height : TextHeight) + Padding;
+			else
+				States->CurrentPosX += 5;
+
+			return !collapsed;
+		}
+
 		bool EDXGui::Bottun(const char* str, const int width, const int height)
 		{
 			bool trigger = false;
 			int Id = States->CurrentId++;
 
 			RECT btnRect;
-			SetRect(&btnRect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + width, States->CurrentPosY + height);
+			SetRect(&btnRect, States->CurrentPosX, States->CurrentPosY, Math::Min(States->CurrentPosX + width, States->WidgetEndX), States->CurrentPosY + height);
 
 			POINT mousePt;
 			mousePt.x = States->MouseState.x;
@@ -1326,7 +1385,7 @@ namespace EDX
 			SIZE textExtent;
 			GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), str, strlen(str), &textExtent);
 			glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
-			GUIPainter::Instance()->DrawString(States->CurrentPosX + width / 2 - textExtent.cx / 2, States->CurrentPosY + height / 2 - textExtent.cy / 2 + 3, GUIPainter::DEPTH_MID, str);
+			GUIPainter::Instance()->DrawString((btnRect.right + btnRect.left - textExtent.cx) / 2, (btnRect.top + btnRect.bottom - textExtent.cy) / 2 + 3, GUIPainter::DEPTH_MID, str);
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
 				States->CurrentPosY += height + Padding;
@@ -1436,7 +1495,7 @@ namespace EDX
 			}
 
 			Color color1 = States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
-			GUIPainter::Instance()->DrawSphere((boxRect.left + boxRect.right) * 0.5f,
+			GUIPainter::Instance()->DrawCircle((boxRect.left + boxRect.right) / 2,
 				(boxRect.bottom + boxRect.top) * 0.5f,
 				GUIPainter::DEPTH_MID,
 				CircleRadius,
@@ -1444,7 +1503,7 @@ namespace EDX
 				color1);
 
 			Color color2 = currentVal == activeVal ? color1 : States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.15f) : Color::BLACK;
-			GUIPainter::Instance()->DrawSphere((boxRect.left + boxRect.right) * 0.5f,
+			GUIPainter::Instance()->DrawCircle((boxRect.left + boxRect.right) / 2,
 				(boxRect.bottom + boxRect.top) * 0.5f,
 				GUIPainter::DEPTH_MID,
 				CircleRadius - 2,
@@ -1473,7 +1532,7 @@ namespace EDX
 			mousePt.y = States->MouseState.y;
 
 			RECT mainRect;
-			SetRect(&mainRect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + Width, States->CurrentPosY + Height);
+			SetRect(&mainRect, States->CurrentPosX, States->CurrentPosY, States->WidgetEndX, States->CurrentPosY + Height);
 			if (PtInRect(&mainRect, mousePt))
 			{
 				if (States->MouseState.Action == MouseAction::LButtonDown)
@@ -1499,7 +1558,7 @@ namespace EDX
 			if (States->ActiveId == Id)
 			{
 				RECT dropDownRect;
-				SetRect(&dropDownRect, States->CurrentPosX, States->CurrentPosY + Height, States->CurrentPosX + Width - Height, States->CurrentPosY + Height + 1 + numItems * ItemHeight);
+				SetRect(&dropDownRect, States->CurrentPosX, States->CurrentPosY + Height, States->WidgetEndX - Height, States->CurrentPosY + Height + 1 + numItems * ItemHeight);
 
 				if (PtInRect(&dropDownRect, mousePt) && States->MouseState.Action == MouseAction::LButtonDown)
 				{
@@ -1559,7 +1618,7 @@ namespace EDX
 			int Id = States->CurrentId++;
 
 			RECT rect;
-			SetRect(&rect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + width, States->CurrentPosY + Height);
+			SetRect(&rect, States->CurrentPosX, States->CurrentPosY, Math::Min(States->CurrentPosX + width, States->WidgetEndX), States->CurrentPosY + Height);
 
 			POINT mousePt;
 			mousePt.x = States->MouseState.x;
@@ -1612,7 +1671,7 @@ namespace EDX
 			{
 				if (States->EditingId == Id)
 				{
-					States->ActiveId = -1;
+					//States->ActiveId = -1;
 					States->EditingId = -1;
 					buf = States->BufferedString;
 				}
