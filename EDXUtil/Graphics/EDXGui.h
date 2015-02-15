@@ -413,6 +413,7 @@ namespace EDX
 			static void Text(const char* str, ...);
 			static bool Bottun(const char* str, const int width = 140, const int height = 22);
 			static void CheckBox(const char* str, bool& checked);
+			static void RadioButton(const char* str, int activeVal, int& currentVal);
 			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
 			static bool InputText(string& str, const int width = 100, const bool autoSelectAll = false);
 			static bool InputDigit(int& digit, const char* notation);
@@ -478,7 +479,8 @@ namespace EDX
 					if (States->ActiveId == Id)
 						States->ActiveId = -1;
 
-				Color color = States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+				Color color = States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id ?
+					Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 
 				// Rendering
 				// First half bar

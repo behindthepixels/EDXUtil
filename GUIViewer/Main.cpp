@@ -54,10 +54,11 @@ void OnRender(Object* pSender, EventArgs args)
 	static string buf("fuck");
 	static string buf2("you");
 	static int counter = 0;
+	static int hoveredId = 0;
 	EDXGui::BeginDialog();
 
 	EDXGui::Text("Active Id: %i", EDXGui::States->ActiveId);
-	EDXGui::Text("Hovered Id: %i", EDXGui::States->HoveredId);
+	EDXGui::Text("Hovered Id: %i", hoveredId);
 	EDXGui::Text("Editing Id: %i", EDXGui::States->EditingId);
 	EDXGui::Text("L Down: %i", EDXGui::States->MouseState.lDown ? 1 : 0);
 	EDXGui::Text("Value: %i", counter);
@@ -66,6 +67,9 @@ void OnRender(Object* pSender, EventArgs args)
 	EDXGui::Slider<int>("Slider 1", &counter, 0.0f, 20.0f);
 	static bool checked = false;
 	EDXGui::CheckBox("Check Box", checked);
+	EDXGui::RadioButton("Radio Button 1", 3, counter);
+	EDXGui::RadioButton("Radio Button 2", 4, counter);
+	EDXGui::RadioButton("Radio Button 3", 5, counter);
 	if (EDXGui::Bottun("Button 2"))
 		buf = "";
 	static int selected = 0;
@@ -84,6 +88,7 @@ void OnRender(Object* pSender, EventArgs args)
 	EDXGui::InputDigit(counter, "Number:");
 
 	EDXGui::EndDialog();
+	hoveredId = EDXGui::States->HoveredId;
 }
 
 void OnResize(Object* pSender, ResizeEventArgs args)

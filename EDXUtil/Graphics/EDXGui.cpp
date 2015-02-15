@@ -1399,6 +1399,67 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
+		void EDXGui::RadioButton(const char* str, int activeVal, int& currentVal)
+		{
+			const int CircleDiameter = 12;
+			const int CircleRadius = CircleDiameter / 2;
+
+			int Id = States->CurrentId++;
+
+			RECT boxRect;
+			SetRect(&boxRect, States->CurrentPosX, States->CurrentPosY, States->CurrentPosX + CircleDiameter, States->CurrentPosY + CircleDiameter);
+
+			POINT mousePt;
+			mousePt.x = States->MouseState.x;
+			mousePt.y = States->MouseState.y;
+
+			if (PtInRect(&boxRect, mousePt))
+			{
+				if (States->MouseState.Action == MouseAction::LButtonDown)
+					States->ActiveId = Id;
+				if (States->MouseState.Action == MouseAction::LButtonUp)
+				{
+					if (States->ActiveId == Id)
+					{
+						States->ActiveId = -1;
+						currentVal = activeVal;
+					}
+				}
+
+				States->HoveredId = Id;
+			}
+			else
+			{
+				if (States->MouseState.Action == MouseAction::Move)
+					if (States->ActiveId == Id)
+						States->ActiveId = -1;
+			}
+
+			Color color1 = States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+			GUIPainter::Instance()->DrawSphere((boxRect.left + boxRect.right) * 0.5f,
+				(boxRect.bottom + boxRect.top) * 0.5f,
+				GUIPainter::DEPTH_MID,
+				CircleRadius,
+				false,
+				color1);
+
+			Color color2 = currentVal == activeVal ? color1 : States->HoveredId == Id && States->ActiveId == -1 ? Color(1.0f, 1.0f, 1.0f, 0.15f) : Color::BLACK;
+			GUIPainter::Instance()->DrawSphere((boxRect.left + boxRect.right) * 0.5f,
+				(boxRect.bottom + boxRect.top) * 0.5f,
+				GUIPainter::DEPTH_MID,
+				CircleRadius - 2,
+				true,
+				color2);
+
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			GUIPainter::Instance()->DrawString(States->CurrentPosX + CircleDiameter + 7, States->CurrentPosY + 2, GUIPainter::DEPTH_MID, str);
+
+			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States->CurrentPosY += CircleDiameter + Padding;
+			else
+				States->CurrentPosX += 5;
+		}
+
 		void EDXGui::ComboBox(const ComboBoxItem* pItems, int numItems, int& selected)
 		{
 			const int Width = 140;
