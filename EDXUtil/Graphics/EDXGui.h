@@ -419,6 +419,7 @@ namespace EDX
 			static void HandleKeyboardEvent(const KeyboardEventArgs& keyArgs);
 
 			static void Text(const char* str, ...);
+			static void MultilineText(const char* str, ...);
 			static bool CollapsingHeader(const char* str, bool& collapsed);
 			static void CloseHeaderSection() { States->CurrentPosX -= 16; }
 			static bool Bottun(const char* str, const int width = 99999, const int height = 22);

@@ -1242,7 +1242,7 @@ namespace EDX
 		{
 			const int Height = 10;
 
-			++States->CurrentId;
+			States->CurrentId++;
 
 			va_list args;
 			va_start(args, str);
@@ -1250,13 +1250,75 @@ namespace EDX
 			char buff[1024];
 			int size = vsnprintf(buff, sizeof(buff) - 1, str, args);
 
+			va_end(args);
+
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 			GUIPainter::Instance()->DrawString(States->CurrentPosX, States->CurrentPosY, GUIPainter::DEPTH_MID, buff);
 
-			va_end(args);
-
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
 				States->CurrentPosY += Height + Padding;
+			else
+				States->CurrentPosX += 5;
+		}
+
+		void EDXGui::MultilineText(const char* str, ...)
+		{
+			const int LineHeight = 16;
+			States->CurrentId++;
+
+			// Print va string
+			va_list args;
+			va_start(args, str);
+
+			char buff[4096];
+			int size = vsnprintf(buff, sizeof(buff) - 1, str, args);
+
+			va_end(args);
+
+			// Calculate line count
+			vector<int> lineIdx;
+			lineIdx.clear();
+			lineIdx.push_back(0);
+			string reformattedStr;
+			auto lineLength = 0;
+			for (auto i = 0; i < size; i++)
+			{
+				if (buff[i] == '\n')
+				{
+					reformattedStr += '\0';
+					lineLength = 0;
+					lineIdx.push_back(reformattedStr.length());
+				}
+				else
+				{
+					SIZE textExtent;
+					GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &buff[i], 1, &textExtent);
+
+					lineLength += textExtent.cx;
+
+					if (lineLength < States->WidgetEndX - States->CurrentPosX)
+						reformattedStr += buff[i];
+					else
+					{
+						reformattedStr += '\0';
+						lineLength = 0;
+						lineIdx.push_back(reformattedStr.length());
+					}
+				}
+			}
+
+			// Render text
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			for (auto i = 0; i < lineIdx.size(); i++)
+			{
+				GUIPainter::Instance()->DrawString(States->CurrentPosX,
+					States->CurrentPosY + i * LineHeight,
+					GUIPainter::DEPTH_MID,
+					reformattedStr.c_str() + lineIdx[i]);
+			}
+
+			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
+				States->CurrentPosY += lineIdx.size() * LineHeight + Padding;
 			else
 				States->CurrentPosX += 5;
 		}

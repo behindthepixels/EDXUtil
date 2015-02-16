@@ -113,6 +113,8 @@ void OnRender(Object* pSender, EventArgs args)
 		{
 			EDXGui::Text("Multiple dialogs");
 			EDXGui::Bottun("Another btn");
+
+			EDXGui::MultilineText("yyyyyyyyyyy!\nSSSSSSSSSSSSSS!\nWWWWWWWWWWWWW!\nShowing Multiple line texts\naasdgsaufnguxagfuysdgnxfjdgakdysgxfjyaregfydngkjfgjdygnjysdgajxgndajgdjjdgnkunhoa\nABCDEFG.");
 		}
 		EDXGui::EndDialog();
 	}
