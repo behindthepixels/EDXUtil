@@ -82,11 +82,11 @@ namespace EDX
 			void BlurBackgroundTexture(int x0, int y0, int x1, int y1);
 			void DrawBackgroundTexture(int x0, int y0, int x1, int y1);
 
-			void DrawLine(int iX0, int iY0, int iX1, int iY1);
+			void DrawLine(int iX0, int iY0, int iX1, int iY1, float depth);
 			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth,
-				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f));
+				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f), const Color& blendedColor = Color::BLACK);
 			void DrawRoundedRect(int iX0, int iY0, int iX1, int iY1, float depth, float radius,
-				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f)) const;
+				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f), const Color& blendedColor = Color::BLACK) const;
 			void DrawCircle(int x, int y, float depth, int radius, bool filled, const Color& color) const;
 
 			// Deprecated
@@ -385,6 +385,7 @@ namespace EDX
 			int HoveredId;
 			int ActiveId;
 			MouseEventArgs MouseState;
+			MouseEventArgs GlobalMouseState;
 			KeyboardEventArgs KeyState;
 
 			// Text edit states
@@ -405,7 +406,13 @@ namespace EDX
 		public:
 			static void Init();
 			static void Release();
-			static void BeginDialog(LayoutStrategy layoutStrategy = LayoutStrategy::DockRight);
+			static void BeginFrame();
+			static void EndFrame();
+			static void BeginDialog(LayoutStrategy layoutStrategy = LayoutStrategy::DockRight,
+				const int x = 25,
+				const int y = 25,
+				const int dialogWidth = 250,
+				const int dialogHeight = 420);
 			static void EndDialog();
 			static void Resize(int screenWidth, int screenHeight);
 			static void HandleMouseEvent(const MouseEventArgs& mouseArgs);
@@ -414,7 +421,7 @@ namespace EDX
 			static void Text(const char* str, ...);
 			static bool CollapsingHeader(const char* str, bool& collapsed);
 			static void CloseHeaderSection() { States->CurrentPosX -= 16; }
-			static bool Bottun(const char* str, const int width = 200, const int height = 22);
+			static bool Bottun(const char* str, const int width = 99999, const int height = 22);
 			static void CheckBox(const char* str, bool& checked);
 			static void RadioButton(const char* str, int activeVal, int& currentVal);
 			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);

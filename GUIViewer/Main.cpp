@@ -55,6 +55,10 @@ void OnRender(Object* pSender, EventArgs args)
 	static string buf2("you");
 	static int counter = 0;
 	static int hoveredId = 0;
+	static bool showSecondDialog = true;
+
+	EDXGui::BeginFrame();
+
 	EDXGui::BeginDialog();
 
 	EDXGui::Text("Active Id: %i", EDXGui::States->ActiveId);
@@ -67,14 +71,11 @@ void OnRender(Object* pSender, EventArgs args)
 	EDXGui::Slider<int>("Slider 1", &counter, 0.0f, 20.0f);
 	static bool checked = false;
 	EDXGui::CheckBox("Check Box", checked);
-	if (checked)
-	{
-		EDXGui::RadioButton("Radio Button 1", 3, counter);
-		EDXGui::RadioButton("Radio Button 2", 4, counter);
-		EDXGui::RadioButton("Radio Button 3", 5, counter);
-		if (EDXGui::Bottun("Button 2"))
-			buf = "";
-	}
+	EDXGui::RadioButton("Radio Button 1", 3, counter);
+	EDXGui::RadioButton("Radio Button 2", 4, counter);
+	EDXGui::RadioButton("Radio Button 3", 5, counter);
+	if (EDXGui::Bottun("Button 2"))
+		buf = "";
 	static bool show = true;
 	if (EDXGui::CollapsingHeader("Header", show))
 	{
@@ -102,8 +103,23 @@ void OnRender(Object* pSender, EventArgs args)
 		EDXGui::CloseHeaderSection();
 	}
 
+	EDXGui::CheckBox("Multiple Dialog", showSecondDialog);
+
 	EDXGui::EndDialog();
+
+	if (showSecondDialog)
+	{
+		EDXGui::BeginDialog(LayoutStrategy::Floating);
+		{
+			EDXGui::Text("Multiple dialogs");
+			EDXGui::Bottun("Another btn");
+		}
+		EDXGui::EndDialog();
+	}
+
 	hoveredId = EDXGui::States->HoveredId;
+
+	EDXGui::EndFrame();
 }
 
 void OnResize(Object* pSender, ResizeEventArgs args)
