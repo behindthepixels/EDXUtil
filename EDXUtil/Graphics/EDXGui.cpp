@@ -1093,6 +1093,7 @@ namespace EDX
 			States->ActiveId = -1;
 			States->KeyState.key = char(Key::None);
 			States->EditingId = -1;
+			States->ScrollerInitY = 0.0f;
 		}
 
 		void EDXGui::Release()
@@ -1122,35 +1123,35 @@ namespace EDX
 			States->CurrentLayoutStrategy = layoutStrategy;
 			States->CurrentGrowthStrategy = GrowthStrategy::Vertical;
 
-			if (States->CurrentLayoutStrategy == LayoutStrategy::DockRight)
+			switch (States->CurrentLayoutStrategy)
 			{
-				States->DialogWidth = 200;
-				States->DialogHeight = States->ScreenHeight;
-				States->DialogPosX = States->ScreenWidth - States->DialogWidth;
-				States->DialogPosY = 0;
-				States->CurrentPosX = 25;
-				States->CurrentPosY = 25;
-				States->WidgetEndX = States->DialogWidth - 25;
-			}
-			else if (States->CurrentLayoutStrategy == LayoutStrategy::DockLeft)
-			{
-				States->DialogWidth = 200;
-				States->DialogHeight = States->ScreenHeight;
-				States->DialogPosX = 0;
-				States->DialogPosY = 0;
-				States->CurrentPosX = 25;
-				States->CurrentPosY = 25;
-				States->WidgetEndX = States->DialogWidth - 25;
-			}
-			else if (States->CurrentLayoutStrategy == LayoutStrategy::Floating)
-			{
-				States->DialogWidth = dialogWidth;
-				States->DialogHeight = dialogHeight;
-				States->DialogPosX = x;
-				States->DialogPosY = y;
-				States->CurrentPosX = 30;
-				States->CurrentPosY = 30;
-				States->WidgetEndX = States->DialogWidth - 30;
+			case LayoutStrategy::DockRight:
+					States->DialogWidth = 200;
+					States->DialogHeight = States->ScreenHeight;
+					States->DialogPosX = States->ScreenWidth - States->DialogWidth;
+					States->DialogPosY = 0;
+					States->CurrentPosX = 25;
+					States->CurrentPosY = 25;
+					States->WidgetEndX = States->DialogWidth - 25;
+				break;
+			case LayoutStrategy::DockLeft:
+					States->DialogWidth = 200;
+					States->DialogHeight = States->ScreenHeight;
+					States->DialogPosX = 0;
+					States->DialogPosY = 0;
+					States->CurrentPosX = 25;
+					States->CurrentPosY = 25;
+					States->WidgetEndX = States->DialogWidth - 25;
+				break;
+			case LayoutStrategy::Floating:
+					States->DialogWidth = dialogWidth;
+					States->DialogHeight = dialogHeight;
+					States->DialogPosX = x;
+					States->DialogPosY = y;
+					States->CurrentPosX = 25;
+					States->CurrentPosY = 25;
+					States->WidgetEndX = States->DialogWidth - 25;
+				break;
 			}
 
 			States->MouseState = States->GlobalMouseState;
@@ -1262,25 +1263,11 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
-		void EDXGui::MultilineText(const char* str, ...)
+		int EDXGui::ReformatLongText(const char* buff, vector<int>& lineIdx, string& reformattedStr)
 		{
-			const int LineHeight = 16;
-			States->CurrentId++;
-
-			// Print va string
-			va_list args;
-			va_start(args, str);
-
-			char buff[4096];
-			int size = vsnprintf(buff, sizeof(buff) - 1, str, args);
-
-			va_end(args);
-
-			// Calculate line count
-			vector<int> lineIdx;
+			auto size = strlen(buff);
 			lineIdx.clear();
 			lineIdx.push_back(0);
-			string reformattedStr;
 			auto lineLength = 0;
 			for (auto i = 0; i < size; i++)
 			{
@@ -1308,9 +1295,31 @@ namespace EDX
 				}
 			}
 
+			return lineIdx.size();
+		}
+
+		void EDXGui::MultilineText(const char* str, ...)
+		{
+			const int LineHeight = 16;
+			States->CurrentId++;
+
+			// Print va string
+			va_list args;
+			va_start(args, str);
+
+			char buff[4096];
+			int size = vsnprintf(buff, sizeof(buff) - 1, str, args);
+
+			va_end(args);
+
+			// Calculate line count
+			vector<int> lineIdx;
+			string reformattedStr;
+			const auto lineCount = ReformatLongText(buff, lineIdx, reformattedStr);
+
 			// Render text
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-			for (auto i = 0; i < lineIdx.size(); i++)
+			for (auto i = 0; i < lineCount; i++)
 			{
 				GUIPainter::Instance()->DrawString(States->CurrentPosX,
 					States->CurrentPosY + i * LineHeight,
@@ -1319,7 +1328,7 @@ namespace EDX
 			}
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States->CurrentPosY += lineIdx.size() * LineHeight + Padding;
+				States->CurrentPosY += lineCount * LineHeight + Padding;
 			else
 				States->CurrentPosX += 5;
 		}
@@ -1963,6 +1972,143 @@ namespace EDX
 			digit = atoi(str.c_str());
 
 			return true;
+		}
+
+		void EDXGui::Scroller(int limitLen, int actualLen, float& lin)
+		{
+			int Id = States->CurrentId++;
+
+			const int BarBase = States->CurrentPosY;
+			const int Diff = 2;
+			const int InnerBase = BarBase + Diff;
+
+			float ratio = limitLen / float(actualLen);
+			int scrollBarLen = limitLen * ratio;
+			int scrollBarStart = Math::Lerp(InnerBase, BarBase + limitLen - Diff - scrollBarLen, lin);
+
+			const int ScrollBase = InnerBase + scrollBarLen / 2;
+			const int ScrollEnd = limitLen - scrollBarLen / 2;
+
+			int scrollPos = (int)Math::Lerp(ScrollBase, ScrollEnd, lin);
+
+			RECT barRect;
+			SetRect(&barRect,
+				States->DialogWidth - 15,
+				BarBase,
+				States->DialogWidth - 7,
+				BarBase + limitLen);
+
+			POINT mousePt;
+			mousePt.x = States->MouseState.x;
+			mousePt.y = States->MouseState.y;
+			if (PtInRect(&barRect, mousePt))
+			{
+				if (States->MouseState.Action == MouseAction::LButtonDown)
+					States->ActiveId = Id;
+
+				if (States->MouseState.Action == MouseAction::LButtonUp)
+				{
+					scrollPos = Math::Clamp(States->MouseState.y, ScrollBase, ScrollEnd);
+					lin = Math::LinStep(scrollPos, ScrollBase, ScrollEnd);
+
+					if (States->ActiveId == Id)
+						States->ActiveId = -1;
+				}
+
+				States->HoveredId = Id;
+			}
+
+			if (States->MouseState.Action == MouseAction::Move && States->MouseState.lDown)
+			{
+				if (States->ActiveId == Id)
+				{
+					scrollPos = Math::Clamp(States->MouseState.y, ScrollBase, ScrollEnd);
+					lin = Math::LinStep(scrollPos, ScrollBase, ScrollEnd);
+				}
+			}
+
+
+			if (States->MouseState.Action == MouseAction::LButtonUp)
+				if (States->ActiveId == Id)
+					States->ActiveId = -1;
+
+			Color color = States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id ?
+				Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+
+			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 15,
+				BarBase,
+				States->DialogWidth - 7,
+				BarBase + limitLen,
+				GUIPainter::DEPTH_MID,
+				4,
+				false,
+				color);
+
+			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 13,
+				scrollBarStart,
+				States->DialogWidth - 9,
+				scrollBarStart + scrollBarLen,
+				GUIPainter::DEPTH_MID,
+				2,
+				true,
+				color);
+		}
+
+		void EDXGui::BeginScrollableArea(int areaHeight, int& contentHeight, float& scroller)
+		{
+			glEnable(GL_SCISSOR_TEST);
+			glScissor(States->DialogPosX,
+				States->ScreenHeight - (States->DialogPosY + States->CurrentPosY + areaHeight),
+				States->DialogWidth,
+				areaHeight);
+
+			if (contentHeight > areaHeight)
+				Scroller(areaHeight, contentHeight, scroller);
+
+			States->ScrollerInitY = Math::Lerp(States->CurrentPosY, States->CurrentPosY - (contentHeight - areaHeight), scroller);
+			States->OrigY = States->CurrentPosY;
+			States->CurrentPosY = States->ScrollerInitY;
+		}
+
+		void EDXGui::EndScrollableArea(int areaHeight, int& contentHeight, float& scroller)
+		{
+			contentHeight = States->CurrentPosY - States->ScrollerInitY;
+			States->CurrentPosY = States->OrigY + areaHeight + Padding;
+
+			glDisable(GL_SCISSOR_TEST);
+		}
+
+		void EDXGui::Console(const char* str,
+			const int x,
+			const int y,
+			const int width,
+			const int height)
+		{
+			const int TotalPadding = 80;
+
+			BeginDialog(LayoutStrategy::Floating, x, y, width, height);
+			{
+				static float scroller = 0.0f;
+				static int contentHeight = 0;
+				BeginScrollableArea(height - TotalPadding, contentHeight, scroller);
+
+				MultilineText(str);
+
+				EndScrollableArea(height - TotalPadding, contentHeight, scroller);
+
+				glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+				GUIPainter::Instance()->DrawLine(States->CurrentPosX - 10,
+					States->CurrentPosY,
+					States->CurrentPosX + States->DialogWidth - 50,
+					States->CurrentPosY,
+					GUIPainter::DEPTH_MID);
+
+				States->CurrentPosY += Padding;
+
+				string buf;
+				InputText(buf, width - 120);
+			}
+			EndDialog();
 		}
 	}
 }

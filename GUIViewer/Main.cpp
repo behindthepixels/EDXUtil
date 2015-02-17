@@ -119,6 +119,8 @@ void OnRender(Object* pSender, EventArgs args)
 		EDXGui::EndDialog();
 	}
 
+	EDXGui::Console("Line.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.", 300);
+
 	hoveredId = EDXGui::States->HoveredId;
 
 	EDXGui::EndFrame();

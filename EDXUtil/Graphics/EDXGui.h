@@ -395,6 +395,10 @@ namespace EDX
 			int SelectIdx;
 			string BufferedString;
 			vector<int> StrWidthPrefixSum;
+
+			// Scroller states
+			int ScrollerInitY;
+			int OrigY;
 		};
 
 		class EDXGui
@@ -420,6 +424,7 @@ namespace EDX
 
 			static void Text(const char* str, ...);
 			static void MultilineText(const char* str, ...);
+			static int ReformatLongText(const char* str, vector<int>& lineIdx, string& reformattedStr);
 			static bool CollapsingHeader(const char* str, bool& collapsed);
 			static void CloseHeaderSection() { States->CurrentPosX -= 16; }
 			static bool Button(const char* str, const int width = 99999, const int height = 22);
@@ -428,6 +433,15 @@ namespace EDX
 			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
 			static bool InputText(string& str, const int width = 100, const bool autoSelectAll = false);
 			static bool InputDigit(int& digit, const char* notation);
+			static void Scroller(int limitLen, int actualLen, float& lin);
+			static void BeginScrollableArea(int areaHeight, int& contentHeight, float& scroller);
+			static void EndScrollableArea(int areaHeight, int& contentHeight, float& scroller);
+
+			static void Console(const char* str,
+				const int x = 30,
+				const int y = 30,
+				const int width = 640,
+				const int height = 480);
 
 			template<typename T>
 			static void Slider(const char* str, T* pVal, T min, T max)
