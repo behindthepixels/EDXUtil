@@ -1184,6 +1184,7 @@ namespace EDX
 			glDepthFunc(GL_LEQUAL);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
+			glBlendEquation(GL_FUNC_ADD);
 
 			// Draw blurred background
 			if (States->CurrentLayoutStrategy == LayoutStrategy::Floating)
@@ -1382,7 +1383,7 @@ namespace EDX
 			return !collapsed;
 		}
 
-		bool EDXGui::Bottun(const char* str, const int width, const int height)
+		bool EDXGui::Button(const char* str, const int width, const int height)
 		{
 			bool trigger = false;
 			int Id = States->CurrentId++;
@@ -1870,13 +1871,26 @@ namespace EDX
 				States->SelectIdx = States->CursorIdx;
 			}
 
-			Color color = States->HoveredId == Id || States->ActiveId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
+			Color color = States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 			GUIPainter::Instance()->DrawRect(rect.left,
 				rect.top,
 				rect.right,
 				rect.bottom,
 				GUIPainter::DEPTH_MID,
 				false, color);
+
+			if (States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id) // Draw high lighted background if active or hovered
+			{
+				glPushAttrib(GL_COLOR_BUFFER_BIT);
+				glBlendFunc(GL_DST_COLOR, GL_CONSTANT_ALPHA);
+				GUIPainter::Instance()->DrawRect(rect.left,
+					rect.top,
+					rect.right,
+					rect.bottom,
+					GUIPainter::DEPTH_MID,
+					true, Color(1.0f));
+				glPopAttrib();
+			}
 
 			string& renderedStr = States->ActiveId != Id ? buf : States->BufferedString;
 
@@ -1930,12 +1944,12 @@ namespace EDX
 			auto oldY = States->CurrentPosY;
 
 			States->CurrentPosX += 62;
-			if (EDXGui::Bottun("-", 22, 18))
+			if (EDXGui::Button("-", 22, 18))
 				digit--;
 
 			States->CurrentPosX += 24;
 			States->CurrentPosY = oldY;
-			if (EDXGui::Bottun("+", 22, 18))
+			if (EDXGui::Button("+", 22, 18))
 				digit++;
 
 			States->CurrentPosX = oldX;

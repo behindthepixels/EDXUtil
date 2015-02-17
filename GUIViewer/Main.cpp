@@ -66,7 +66,7 @@ void OnRender(Object* pSender, EventArgs args)
 	EDXGui::Text("Editing Id: %i", EDXGui::States->EditingId);
 	EDXGui::Text("L Down: %i", EDXGui::States->MouseState.lDown ? 1 : 0);
 	EDXGui::Text("Value: %i", counter);
-	if (EDXGui::Bottun("Button 1"))
+	if (EDXGui::Button("Button 1"))
 		counter += 1;
 	EDXGui::Slider<int>("Slider 1", &counter, 0.0f, 20.0f);
 	static bool checked = false;
@@ -74,7 +74,7 @@ void OnRender(Object* pSender, EventArgs args)
 	EDXGui::RadioButton("Radio Button 1", 3, counter);
 	EDXGui::RadioButton("Radio Button 2", 4, counter);
 	EDXGui::RadioButton("Radio Button 3", 5, counter);
-	if (EDXGui::Bottun("Button 2"))
+	if (EDXGui::Button("Button 2"))
 		buf = "";
 	static bool show = true;
 	if (EDXGui::CollapsingHeader("Header", show))
@@ -86,7 +86,7 @@ void OnRender(Object* pSender, EventArgs args)
 				{ 3, "Item 3" },
 		};
 		EDXGui::ComboBox(items, 3, selected);
-		if (EDXGui::Bottun("Button 3"))
+		if (EDXGui::Button("Button 3"))
 			counter -= 3;
 
 		EDXGui::CloseHeaderSection();
@@ -112,7 +112,7 @@ void OnRender(Object* pSender, EventArgs args)
 		EDXGui::BeginDialog(LayoutStrategy::Floating);
 		{
 			EDXGui::Text("Multiple dialogs");
-			EDXGui::Bottun("Another btn");
+			EDXGui::Button("Another btn");
 
 			EDXGui::MultilineText("yyyyyyyyyyy!\nSSSSSSSSSSSSSS!\nWWWWWWWWWWWWW!\nShowing Multiple line texts\naasdgsaufnguxagfuysdgnxfjdgakdysgxfjyaregfydngkjfgjdygnjysdgajxgndajgdjjdgnkunhoa\nABCDEFG.");
 		}

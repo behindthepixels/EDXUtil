@@ -422,7 +422,7 @@ namespace EDX
 			static void MultilineText(const char* str, ...);
 			static bool CollapsingHeader(const char* str, bool& collapsed);
 			static void CloseHeaderSection() { States->CurrentPosX -= 16; }
-			static bool Bottun(const char* str, const int width = 99999, const int height = 22);
+			static bool Button(const char* str, const int width = 99999, const int height = 22);
 			static void CheckBox(const char* str, bool& checked);
 			static void RadioButton(const char* str, int activeVal, int& currentVal);
 			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
