@@ -1700,7 +1700,7 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
-		bool EDXGui::InputText(string& buf, const int width, const bool autoSelectAll)
+		bool EDXGui::InputText(string& buf, const int width, const bool autoSelectAll, const bool autoClearOnEnter)
 		{
 			const int Height = 18;
 			const int Indent = 4;
@@ -1813,8 +1813,19 @@ namespace EDX
 					if (States->EditingId == Id && States->ActiveId == Id)
 					{
 						buf = States->BufferedString;
-						States->EditingId = -1;
-						States->ActiveId = -1;
+						if (autoClearOnEnter)
+						{
+							States->BufferedString = "";
+
+							States->CursorIdx = 0;
+							States->CursorPos = Indent;
+							CalcCharWidthPrefixSum();
+						}
+						else
+						{
+							States->EditingId = -1;
+							States->ActiveId = -1;
+						}
 					}
 					break;
 				}
@@ -2119,7 +2130,7 @@ namespace EDX
 				int textId = States->CurrentId;
 				bool active = States->CurrentId == States->ActiveId;
 				static string inputTextBuffer;
-				InputText(inputTextBuffer, width - 120);
+				InputText(inputTextBuffer, width - 120, false, true);
 
 				States->CurrentPosX += width - 110;
 				States->CurrentPosY = inputY;
