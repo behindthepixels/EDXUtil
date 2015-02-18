@@ -1801,11 +1801,21 @@ namespace EDX
 					States->CursorPos -= States->StrWidthPrefixSum[orgIdx] - States->StrWidthPrefixSum[States->CursorIdx];
 					break;
 				}
-				case char(Key::RightArrow) :
+				case char(Key::RightArrow):
 				{
 					auto orgIdx = States->CursorIdx++;
 					States->CursorIdx = Math::Min(States->CursorIdx, States->BufferedString.length());
 					States->CursorPos += States->StrWidthPrefixSum[States->CursorIdx] - States->StrWidthPrefixSum[orgIdx];
+					break;
+				}
+				case char(Key::Enter):
+				{
+					if (States->EditingId == Id && States->ActiveId == Id)
+					{
+						buf = States->BufferedString;
+						States->EditingId = -1;
+						States->ActiveId = -1;
+					}
 					break;
 				}
 				case char(Key::BackSpace) :
@@ -1897,7 +1907,7 @@ namespace EDX
 					rect.right,
 					rect.bottom,
 					GUIPainter::DEPTH_MID,
-					true, Color(1.0f));
+					true, Color(0.6f));
 				glPopAttrib();
 			}
 
@@ -2092,23 +2102,40 @@ namespace EDX
 				static int contentHeight = 0;
 				BeginScrollableArea(height - TotalPadding, contentHeight, scroller);
 
-				MultilineText(str);
+				MultilineText(States->ConsoleTextBuffer.c_str());
 
 				EndScrollableArea(height - TotalPadding, contentHeight, scroller);
 
 				glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 				GUIPainter::Instance()->DrawLine(States->CurrentPosX - 10,
 					States->CurrentPosY,
-					States->CurrentPosX + States->DialogWidth - 50,
+					States->DialogWidth - 20,
 					States->CurrentPosY,
 					GUIPainter::DEPTH_MID);
 
 				States->CurrentPosY += Padding;
+				auto inputY = States->CurrentPosY;
 
-				string buf;
-				InputText(buf, width - 120);
+				int textId = States->CurrentId;
+				bool active = States->CurrentId == States->ActiveId;
+				static string inputTextBuffer;
+				InputText(inputTextBuffer, width - 120);
+
+				States->CurrentPosX += width - 110;
+				States->CurrentPosY = inputY;
+				if (Button("Enter", 70, 19) || States->KeyState.key == char(Key::Enter) && active)
+				{
+					ConsoleCommand(inputTextBuffer.c_str());
+					inputTextBuffer = "";
+				}
 			}
 			EndDialog();
+		}
+
+		void EDXGui::ConsoleCommand(const char* command)
+		{
+			States->ConsoleTextBuffer += command;
+			States->ConsoleTextBuffer += '\n';
 		}
 	}
 }

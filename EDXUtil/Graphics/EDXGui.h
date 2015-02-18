@@ -399,6 +399,9 @@ namespace EDX
 			// Scroller states
 			int ScrollerInitY;
 			int OrigY;
+
+			// Console states
+			string ConsoleTextBuffer;
 		};
 
 		class EDXGui
@@ -442,6 +445,7 @@ namespace EDX
 				const int y = 30,
 				const int width = 640,
 				const int height = 480);
+			static void ConsoleCommand(const char* command);
 
 			template<typename T>
 			static void Slider(const char* str, T* pVal, T min, T max)
