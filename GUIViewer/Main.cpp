@@ -36,7 +36,7 @@ void OnInit(Object* pSender, EventArgs args)
 
 	int channel;
 	string c = Application::GetBaseDirectory();
-	c += "\\Sponza.jpg";
+	c += "\\Background.jpg";
 	gImage = (_byte*)Bitmap::ReadFromFile<Color4b>(c.c_str(), &gWidth, &gHeight, &channel);
 	assert(gImage);
 }
