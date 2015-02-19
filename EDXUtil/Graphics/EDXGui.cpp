@@ -1305,7 +1305,7 @@ namespace EDX
 			int scrollBarStart = Math::Lerp(InnerBase, BarBase + limitLen - Diff - scrollBarLen, lin);
 
 			const int ScrollBase = InnerBase + scrollBarLen / 2;
-			const int ScrollEnd = limitLen - scrollBarLen / 2;
+			const int ScrollEnd = InnerBase + limitLen - scrollBarLen / 2;
 
 			int scrollPos = (int)Math::Lerp(ScrollBase, ScrollEnd, lin);
 

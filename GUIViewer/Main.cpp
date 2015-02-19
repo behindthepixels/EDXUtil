@@ -118,9 +118,15 @@ void OnRender(Object* pSender, EventArgs args)
 			static string multiLineText = "Multiple lines of texts and wrapped texts supported:\n";
 
 			if (EDXGui::Button("Add Texts"))
-				multiLineText += "Adding more texts!";
+				multiLineText += "Adding more texts! ";
+
+			static float scroller = 0.0f;
+			static int contentHeight = 0;
+			EDXGui::BeginScrollableArea(320, contentHeight, scroller);
 
 			EDXGui::MultilineText(multiLineText.c_str());
+
+			EDXGui::EndScrollableArea(320, contentHeight, scroller);
 		}
 		EDXGui::EndDialog();
 	}
@@ -174,7 +180,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdArgs, int cmdS
 	mainWindow->SetkeyboardHandler(KeyboardEvent(OnKeyboardEvent));
 	mainWindow->SetRelease(NotifyEvent(OnRelease));
 
-	mainWindow->Create(L"EDXGui", 1280, 800);
+	mainWindow->Create(L"EDXGui", 1280, 720);
 
 	Application::Run(mainWindow);
 
