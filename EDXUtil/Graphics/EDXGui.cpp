@@ -1296,6 +1296,9 @@ namespace EDX
 		{
 			int Id = States->CurrentId++;
 
+			if (actualLen <= limitLen)
+				return;
+
 			const int BarBase = States->CurrentPosY;
 			const int Diff = 2;
 			const int InnerBase = BarBase + Diff;
@@ -1380,8 +1383,7 @@ namespace EDX
 				States->DialogWidth,
 				areaHeight);
 
-			if (contentHeight > areaHeight)
-				Scroller(areaHeight, contentHeight, scroller);
+			Scroller(areaHeight, contentHeight, scroller);
 
 			States->ScrollerInitY = Math::Lerp(States->CurrentPosY, States->CurrentPosY - (contentHeight - areaHeight), scroller);
 			States->OrigY = States->CurrentPosY;
@@ -1424,14 +1426,13 @@ namespace EDX
 				States->CurrentPosY += Padding;
 				auto inputY = States->CurrentPosY;
 
-				int textId = States->CurrentId;
-				bool active = States->CurrentId == States->ActiveId;
 				static string inputTextBuffer;
 				InputText(inputTextBuffer, width - 120, false, true);
+				bool textActive = States->CurrentId - 1 == States->ActiveId;
 
 				States->CurrentPosX += width - 110;
 				States->CurrentPosY = inputY;
-				if (Button("Enter", 70, 19) || States->KeyState.key == char(Key::Enter) && active)
+				if (Button("Enter", 70, 19) || States->KeyState.key == char(Key::Enter) && textActive)
 				{
 					ConsoleCommand(inputTextBuffer.c_str());
 					inputTextBuffer = "";
