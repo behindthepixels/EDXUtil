@@ -1408,7 +1408,7 @@ namespace EDX
 
 			BeginDialog(LayoutStrategy::Floating, x, y, width, height);
 			{
-				static float scroller = 1.0f;
+				static float scroller = 0.0f;
 				static int contentHeight = 0;
 				BeginScrollableArea(height - TotalPadding, contentHeight, scroller);
 
@@ -1436,6 +1436,7 @@ namespace EDX
 				{
 					ConsoleCommand(inputTextBuffer.c_str());
 					inputTextBuffer = "";
+					scroller = 1.0f;
 				}
 			}
 			EndDialog();
