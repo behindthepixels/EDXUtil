@@ -928,6 +928,9 @@ namespace EDX
 
 			int Id = States->CurrentId++;
 
+			static bool LDownCurrentFrame;
+			LDownCurrentFrame = false;
+
 			POINT mousePt;
 			mousePt.x = States->MouseState.x;
 			mousePt.y = States->MouseState.y;
@@ -942,6 +945,8 @@ namespace EDX
 						States->ActiveId = Id;
 					else if (States->ActiveId == Id)
 						States->ActiveId = -1;
+
+					LDownCurrentFrame = true;
 				}
 
 				States->HoveredId = Id;
@@ -961,12 +966,17 @@ namespace EDX
 				RECT dropDownRect;
 				SetRect(&dropDownRect, States->CurrentPosX, States->CurrentPosY + Height, States->WidgetEndX - Height, States->CurrentPosY + Height + 1 + numItems * ItemHeight);
 
-				if (PtInRect(&dropDownRect, mousePt) && States->MouseState.Action == MouseAction::LButtonDown)
+				if (States->MouseState.Action == MouseAction::LButtonDown)
 				{
-					selected = (mousePt.y - dropDownRect.top) / ItemHeight;
-					States->ActiveId = -1;
-					States->HoveredId = Id;
-					States->MouseState.Action = MouseAction::None;
+					if (PtInRect(&dropDownRect, mousePt))
+						selected = (mousePt.y - dropDownRect.top) / ItemHeight;
+
+					if (!LDownCurrentFrame)
+					{
+						States->ActiveId = -1;
+						States->HoveredId = Id;
+						States->MouseState.Action = MouseAction::None;
+					}
 				}
 
 				GUIPainter::Instance()->DrawRect(dropDownRect.left, dropDownRect.top + 1, dropDownRect.right, dropDownRect.bottom, GUIPainter::DEPTH_NEAR, true, Color(0.25f, 0.25f, 0.25f, 1.0f));
