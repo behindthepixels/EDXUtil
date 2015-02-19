@@ -51,59 +51,62 @@ void OnRender(Object* pSender, EventArgs args)
 	glRasterPos3f(0.0f, 0.0f, 1.0f);
 	glDrawPixels(gWidth, gHeight, GL_RGBA, GL_UNSIGNED_BYTE, gImage);
 
-	static string buf("fuck");
-	static string buf2("you");
-	static int counter = 0;
-	static int hoveredId = 0;
-	static bool showSecondDialog = true;
-
 	EDXGui::BeginFrame();
-
 	EDXGui::BeginDialog();
 
-	EDXGui::Text("Active Id: %i", EDXGui::States->ActiveId);
-	EDXGui::Text("Hovered Id: %i", hoveredId);
-	EDXGui::Text("Editing Id: %i", EDXGui::States->EditingId);
-	EDXGui::Text("L Down: %i", EDXGui::States->MouseState.lDown ? 1 : 0);
-	EDXGui::Text("Value: %i", counter);
+	EDXGui::Text("Right docked dialog");
+
+	static string buf("");
+	EDXGui::Text(buf.c_str());
 	if (EDXGui::Button("Button 1"))
-		counter += 1;
-	EDXGui::Slider<int>("Slider 1", &counter, 0.0f, 20.0f);
-	static bool checked = false;
-	EDXGui::CheckBox("Check Box", checked);
-	EDXGui::RadioButton("Radio Button 1", 3, counter);
-	EDXGui::RadioButton("Radio Button 2", 4, counter);
-	EDXGui::RadioButton("Radio Button 3", 5, counter);
+		buf = "Button 1 clicked";
 	if (EDXGui::Button("Button 2"))
-		buf = "";
+		buf = "Button 2 clicked";
+
+	static float counter1 = 0;
+	static int counter2 = 0;
+
+	//EDXGui::Text("Value 1: %f", counter1);
+	EDXGui::Slider<float>("Float slider", &counter1, 0.0f, 20.0f);
+	//EDXGui::Text("Value 2: %i", counter2);
+	EDXGui::Slider<int>("Int slider", &counter2, 0, 5);
+
 	static bool show = true;
-	if (EDXGui::CollapsingHeader("Header", show))
+	if (EDXGui::CollapsingHeader("Collapsing Header", show))
 	{
-		static int selected = 0;
-		ComboBoxItem items[] = {
-				{ 1, "Item 1" },
-				{ 2, "Item 2" },
-				{ 3, "Item 3" },
-		};
-		EDXGui::ComboBox(items, 3, selected);
-		if (EDXGui::Button("Button 3"))
-			counter -= 3;
+		static bool checked = false;
+		EDXGui::CheckBox("Check Box", checked);
+
+		static int radioVal;
+		EDXGui::RadioButton("Radio Button 1", 1, radioVal);
+		EDXGui::RadioButton("Radio Button 2", 2, radioVal);
+		EDXGui::RadioButton("Radio Button 3", 3, radioVal);
 
 		EDXGui::CloseHeaderSection();
 	}
 
-	static bool show2 = true;
-	if (EDXGui::CollapsingHeader("Header2", show2))
-	{
-		EDXGui::Text("Cursor Idx: %i", EDXGui::States->CursorIdx);
-		EDXGui::InputText(buf);
-		EDXGui::InputText(buf2);
-		EDXGui::InputDigit(counter, "Number:");
+	static int selected = 0;
+	ComboBoxItem items[] = {
+			{ 1, "Item 1" },
+			{ 2, "Item 2" },
+			{ 3, "Item 3" },
+	};
+	EDXGui::ComboBox(items, 3, selected);
 
-		EDXGui::CloseHeaderSection();
-	}
 
+	static string textBuf1("Text field 1");
+	static string textBuf2("Text field 2");
+	EDXGui::InputText(textBuf1);
+	EDXGui::InputText(textBuf2);
+
+	static int digitInput;
+	EDXGui::InputDigit(digitInput, "Digit input");
+
+	static bool showSecondDialog = true;
 	EDXGui::CheckBox("Multiple Dialog", showSecondDialog);
+
+	static bool showConsole = true;
+	EDXGui::CheckBox("Show Console", showConsole);
 
 	EDXGui::EndDialog();
 
@@ -111,17 +114,19 @@ void OnRender(Object* pSender, EventArgs args)
 	{
 		EDXGui::BeginDialog(LayoutStrategy::Floating);
 		{
-			EDXGui::Text("Multiple dialogs");
-			EDXGui::Button("Another btn");
+			EDXGui::Text("Multiple dialogs supported");
+			static string multiLineText = "Multiple lines of texts and wrapped texts supported:\n";
 
-			EDXGui::MultilineText("yyyyyyyyyyy!\nSSSSSSSSSSSSSS!\nWWWWWWWWWWWWW!\nShowing Multiple line texts\naasdgsaufnguxagfuysdgnxfjdgakdysgxfjyaregfydngkjfgjdygnjysdgajxgndajgdjjdgnkunhoa\nABCDEFG.");
+			if (EDXGui::Button("Add Texts"))
+				multiLineText += "Adding more texts!";
+
+			EDXGui::MultilineText(multiLineText.c_str());
 		}
 		EDXGui::EndDialog();
 	}
 
-	EDXGui::Console("Line.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.\nLine.", 300);
-
-	hoveredId = EDXGui::States->HoveredId;
+	if (showConsole)
+		EDXGui::Console("", 300);
 
 	EDXGui::EndFrame();
 }

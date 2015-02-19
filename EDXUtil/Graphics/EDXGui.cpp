@@ -38,7 +38,7 @@ namespace EDX
 				vec4 sample = 0.0f;
 				for(int i = 0; i < 13; i++)
 				{
-					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 3);
+					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 2);
 				}
 				gl_FragColor = vec4(sample.rgb, 1.0);
 			})";
@@ -98,7 +98,7 @@ namespace EDX
 			mFBHeight = height;
 
 			// Init background texture
-			mColorRBO.SetStorage(width >> 3, height >> 3, ImageFormat::RGBA);
+			mColorRBO.SetStorage(width >> 2, height >> 2, ImageFormat::RGBA);
 			mFBO.Attach(FrameBufferAttachment::Color0, &mColorRBO);
 
 			CalcGaussianBlurWeightsAndOffsets();
@@ -120,7 +120,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Draw);
 			mFBO.Bind();
 
-			glViewport(0, 0, mFBWidth >> 3, mFBHeight >> 3);
+			glViewport(0, 0, mFBWidth >> 2, mFBHeight >> 2);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			mProgram.Use();
@@ -158,7 +158,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Read);
 			mFBO.Bind();
 
-			glBlitFramebuffer(x0 >> 3, y0 >> 3, x1 >> 3, y1 >> 3, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glBlitFramebuffer((x0 + 3) >> 2, (y0 - 3) >> 2, (x1 - 3) >> 2, (y1 + 3) >> 2, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 			mFBO.UnBind();
 		}
@@ -386,8 +386,8 @@ namespace EDX
 				return g;
 			};
 
-			float tu = 1.0f / (float)mFBWidth * 8;
-			float tv = 1.0f / (float)mFBHeight * 8;
+			float tu = 1.0f / (float)mFBWidth * 4;
+			float tv = 1.0f / (float)mFBHeight * 4;
 
 			float totalWeight = 0.0f;
 			int index = 0;
@@ -1176,6 +1176,10 @@ namespace EDX
 				States->DialogPosX + States->DialogWidth, States->ScreenHeight - (States->DialogPosY + States->DialogHeight));
 			GUIPainter::Instance()->DrawBackgroundTexture(States->DialogPosX, States->ScreenHeight - States->DialogPosY,
 				States->DialogPosX + States->DialogWidth, States->ScreenHeight - (States->DialogPosY + States->DialogHeight));
+			GUIPainter::Instance()->BlurBackgroundTexture(States->DialogPosX, States->ScreenHeight - States->DialogPosY,
+				States->DialogPosX + States->DialogWidth, States->ScreenHeight - (States->DialogPosY + States->DialogHeight));
+			GUIPainter::Instance()->DrawBackgroundTexture(States->DialogPosX, States->ScreenHeight - States->DialogPosY,
+				States->DialogPosX + States->DialogWidth, States->ScreenHeight - (States->DialogPosY + States->DialogHeight));
 
 			glTranslatef(States->DialogPosX, States->ScreenHeight - States->DialogPosY, 0.0f);
 			glScalef(1.0f, -1.0f, 1.0f);
@@ -1263,41 +1267,6 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
-		int EDXGui::ReformatLongText(const char* buff, vector<int>& lineIdx, string& reformattedStr)
-		{
-			auto size = strlen(buff);
-			lineIdx.clear();
-			lineIdx.push_back(0);
-			auto lineLength = 0;
-			for (auto i = 0; i < size; i++)
-			{
-				if (buff[i] == '\n')
-				{
-					reformattedStr += '\0';
-					lineLength = 0;
-					lineIdx.push_back(reformattedStr.length());
-				}
-				else
-				{
-					SIZE textExtent;
-					GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &buff[i], 1, &textExtent);
-
-					lineLength += textExtent.cx;
-
-					if (lineLength < States->WidgetEndX - States->CurrentPosX)
-						reformattedStr += buff[i];
-					else
-					{
-						reformattedStr += '\0';
-						lineLength = 0;
-						lineIdx.push_back(reformattedStr.length());
-					}
-				}
-			}
-
-			return lineIdx.size();
-		}
-
 		void EDXGui::MultilineText(const char* str, ...)
 		{
 			const int LineHeight = 16;
@@ -1315,10 +1284,37 @@ namespace EDX
 			// Calculate line count
 			vector<int> lineIdx;
 			string reformattedStr;
-			const auto lineCount = ReformatLongText(buff, lineIdx, reformattedStr);
+			lineIdx.clear();
+			lineIdx.push_back(0);
+			auto lineLength = 0;
+			for (auto i = 0; i < size; i++)
+			{
+				if (buff[i] == '\n')
+				{
+					reformattedStr += '\0';
+					lineLength = 0;
+					lineIdx.push_back(reformattedStr.length());
+				}
+				else
+				{
+					reformattedStr += buff[i];
+
+					SIZE textExtent;
+					GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), &buff[i], 1, &textExtent);
+					lineLength += textExtent.cx;
+
+					if (lineLength >= States->WidgetEndX - States->CurrentPosX)
+					{
+						reformattedStr += '\0';
+						lineLength = 0;
+						lineIdx.push_back(reformattedStr.length());
+					}
+				}
+			}
 
 			// Render text
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			const auto lineCount = lineIdx.size();
 			for (auto i = 0; i < lineCount; i++)
 			{
 				GUIPainter::Instance()->DrawString(States->CurrentPosX,
