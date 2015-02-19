@@ -71,7 +71,7 @@ void OnRender(Object* pSender, EventArgs args)
 	//EDXGui::Text("Value 2: %i", counter2);
 	EDXGui::Slider<int>("Int slider", &counter2, 0, 5);
 
-	static bool show = true;
+	static bool show = false;
 	if (EDXGui::CollapsingHeader("Collapsing Header", show))
 	{
 		static bool checked = false;
@@ -81,6 +81,13 @@ void OnRender(Object* pSender, EventArgs args)
 		EDXGui::RadioButton("Radio Button 1", 1, radioVal);
 		EDXGui::RadioButton("Radio Button 2", 2, radioVal);
 		EDXGui::RadioButton("Radio Button 3", 3, radioVal);
+
+		static bool show2 = true;
+		if (EDXGui::CollapsingHeader("Collapsing Header 2", show2))
+		{
+			EDXGui::Button("Hidden Button");
+			EDXGui::CloseHeaderSection();
+		}
 
 		EDXGui::CloseHeaderSection();
 	}
