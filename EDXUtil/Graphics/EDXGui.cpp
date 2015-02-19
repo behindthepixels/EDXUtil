@@ -1668,14 +1668,14 @@ namespace EDX
 					States->MouseState.Action = MouseAction::None;
 				}
 
-				GUIPainter::Instance()->DrawRect(dropDownRect.left, dropDownRect.top + 1, dropDownRect.right, dropDownRect.bottom, GUIPainter::DEPTH_NEAR, true, Color(0.5f, 0.5f, 0.5f, 1.0f));
+				GUIPainter::Instance()->DrawRect(dropDownRect.left, dropDownRect.top + 1, dropDownRect.right, dropDownRect.bottom, GUIPainter::DEPTH_NEAR, true, Color(0.25f, 0.25f, 0.25f, 1.0f));
 
 				int hoveredIdx = Math::Clamp((mousePt.y - dropDownRect.top) / ItemHeight, 0, numItems - 1);
 				for (auto i = 0; i < numItems; i++)
 				{
 					if (i == hoveredIdx)
 					{
-						GUIPainter::Instance()->DrawRect(dropDownRect.left, dropDownRect.top + 2 + hoveredIdx * ItemHeight, dropDownRect.right - 1, dropDownRect.top + 1 + (hoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, true, Color(0.85f, 0.85f, 0.85f, 0.5f));
+						GUIPainter::Instance()->DrawRect(dropDownRect.left, dropDownRect.top + 2 + hoveredIdx * ItemHeight, dropDownRect.right - 1, dropDownRect.top + 1 + (hoveredIdx + 1) * ItemHeight, GUIPainter::DEPTH_NEAR, true, Color(0.4f, 0.4f, 0.4f, 0.5f));
 
 						glBlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 						glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
