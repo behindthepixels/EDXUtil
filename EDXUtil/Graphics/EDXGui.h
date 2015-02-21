@@ -76,20 +76,20 @@ namespace EDX
 				}
 			}
 
-			HDC GetDC() { return mHDC; }
+			HDC GetDC() const { return mHDC; }
 
 			void Resize(int width, int height);
 			void BlurBackgroundTexture(int x0, int y0, int x1, int y1);
 			void DrawBackgroundTexture(int x0, int y0, int x1, int y1);
 
-			void DrawLine(int iX0, int iY0, int iX1, int iY1, float depth);
+			void DrawLine(int iX0, int iY0, int iX1, int iY1, float depth) const;
 			void DrawRect(int iX0, int iY0, int iX1, int iY1, float depth,
-				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f), const Color& blendedColor = Color::BLACK);
+				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f), const Color& blendedColor = Color::BLACK) const;
 			void DrawRoundedRect(int iX0, int iY0, int iX1, int iY1, float depth, float radius,
 				const bool filled = false, const Color& color = Color(1.0f, 1.0f, 1.0f, 0.5f), const Color& blendedColor = Color::BLACK) const;
 			void DrawCircle(int x, int y, float depth, int radius, bool filled, const Color& color) const;
 
-			void DrawString(int x, int y, float depth, const char* strText, int length = -1);
+			void DrawString(int x, int y, float depth, const char* strText, int length = -1) const;
 
 		private:
 			void CalcGaussianBlurWeightsAndOffsets();

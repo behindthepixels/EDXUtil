@@ -163,7 +163,7 @@ namespace EDX
 			mFBO.UnBind();
 		}
 
-		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, float depth, const bool filled, const Color& color, const Color& blendedColor)
+		void GUIPainter::DrawRect(int iX0, int iY0, int iX1, int iY1, float depth, const bool filled, const Color& color, const Color& blendedColor) const
 		{
 			auto Draw = [](int iX0, int iY0, int iX1, int iY1, float depth)
 			{
@@ -324,7 +324,7 @@ namespace EDX
 			}
 		}
 
-		void GUIPainter::DrawLine(int iX0, int iY0, int iX1, int iY1, float depth)
+		void GUIPainter::DrawLine(int iX0, int iY0, int iX1, int iY1, float depth) const
 		{
 			glBegin(GL_LINES);
 
@@ -334,7 +334,7 @@ namespace EDX
 			glEnd();
 		}
 
-		void GUIPainter::DrawString(int x, int y, float depth, const char* strText, int length)
+		void GUIPainter::DrawString(int x, int y, float depth, const char* strText, int length) const
 		{
 			glListBase(mTextListBase);
 
@@ -1124,7 +1124,7 @@ namespace EDX
 						{
 							States->BufferedString = "";
 
-							States->CursorIdx = 0;
+							States->CursorIdx = States->SelectIdx = 0;
 							States->CursorPos = Indent;
 							CalcCharWidthPrefixSum();
 						}
@@ -1175,6 +1175,52 @@ namespace EDX
 					States->CursorIdx = States->StrWidthPrefixSum.size() - 1;
 					break;
 
+				case '\x1':
+					States->SelectIdx = 0;
+					States->CursorIdx = States->BufferedString.length();
+					States->CursorPos = *States->StrWidthPrefixSum.rbegin() + Indent;
+					break;
+
+				case '\x3': // Copy
+					if (States->CursorIdx != States->SelectIdx)
+					{
+						auto offset = Math::Min(States->CursorIdx, States->SelectIdx);
+						Application::GetMainWindow()->CopyToClipBoard(States->BufferedString.c_str() + offset, Math::Abs(States->CursorIdx - States->SelectIdx) + 1);
+					}
+					break;
+
+				case '\x16': // Paste
+				{
+					string tmpStr;
+					if (Application::GetMainWindow()->PasteFromClipBoard(tmpStr))
+					{
+						SIZE textExtent;
+						auto minIdx = Math::Min(States->CursorIdx, States->SelectIdx);
+						auto maxIdx = Math::Max(States->CursorIdx, States->SelectIdx);
+						GetTextExtentPoint32A(GUIPainter::Instance()->GetDC(), tmpStr.c_str(), tmpStr.length(), &textExtent);
+						if (*States->StrWidthPrefixSum.rbegin() + textExtent.cx -
+							(States->StrWidthPrefixSum[maxIdx] - States->StrWidthPrefixSum[minIdx]) >= width - Indent)
+							break; // Limit string length to input frame width
+
+						if (States->CursorIdx != States->SelectIdx) // When in selection mode, erase all charactors selected
+						{
+							States->BufferedString.erase(minIdx, maxIdx - minIdx);
+							States->BufferedString.insert(minIdx, tmpStr);
+							States->CursorIdx = States->SelectIdx = minIdx + tmpStr.length();
+						}
+						else
+						{
+							States->BufferedString.insert(States->CursorIdx, tmpStr);
+							States->CursorIdx = States->SelectIdx = States->CursorIdx + tmpStr.length();
+						}
+
+						// Place cursor
+						CalcCharWidthPrefixSum();
+						States->CursorPos = Indent + States->StrWidthPrefixSum[States->CursorIdx];
+					}
+					break;
+				}
+
 				default:
 					if (States->KeyState.key < ' ' || States->KeyState.key > '~' || States->KeyState.ctrlDown)
 						break; // Displayable charactors only
@@ -1202,10 +1248,10 @@ namespace EDX
 
 					States->CursorPos += textExtent.cx;
 					States->CursorIdx++;
-				}
 
-				// Terminate selection when any key is pressed
-				States->SelectIdx = States->CursorIdx;
+					// Terminate selection when any key is pressed
+					States->SelectIdx = States->CursorIdx;
+				}
 			}
 
 			Color color = States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id ? Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
@@ -1395,7 +1441,7 @@ namespace EDX
 
 			Scroller(areaHeight, contentHeight, scroller);
 
-			States->ScrollerInitY = Math::Lerp(States->CurrentPosY, States->CurrentPosY - (contentHeight - areaHeight), scroller);
+			States->ScrollerInitY = Math::Lerp(States->CurrentPosY, States->CurrentPosY - Math::Max(0, contentHeight - areaHeight), scroller);
 			States->OrigY = States->CurrentPosY;
 			States->CurrentPosY = States->ScrollerInitY;
 		}
@@ -1442,7 +1488,7 @@ namespace EDX
 
 				States->CurrentPosX += width - 110;
 				States->CurrentPosY = inputY;
-				if (Button("Enter", 70, 19) || States->KeyState.key == char(Key::Enter) && textActive)
+				if ((Button("Enter", 70, 19) || States->KeyState.key == char(Key::Enter) && textActive) && inputTextBuffer.length() > 0)
 				{
 					ConsoleCommand(inputTextBuffer.c_str());
 					inputTextBuffer = "";

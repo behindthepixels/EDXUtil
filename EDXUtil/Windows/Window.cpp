@@ -181,6 +181,55 @@ namespace EDX
 		return true;
 	}
 
+	void Window::CopyToClipBoard(const char* str, int strLength) const
+	{
+		OpenClipboard(mhWnd);
+		EmptyClipboard();
+		HGLOBAL hg = GlobalAlloc(GMEM_MOVEABLE, strLength);
+		if (!hg)
+		{
+			CloseClipboard();
+			return;
+		}
+		memcpy(GlobalLock(hg), str, strLength);
+		GlobalUnlock(hg);
+		SetClipboardData(CF_TEXT, hg);
+		CloseClipboard();
+		//GlobalFree(hg);
+	}
+
+	bool Window::PasteFromClipBoard(string& str) const
+	{
+		if (!IsClipboardFormatAvailable(CF_TEXT))
+			return false;
+		if (!OpenClipboard(mhWnd))
+			return false;
+
+		HGLOBAL hglb = GetClipboardData(CF_TEXT);
+		if (hglb == NULL)
+		{
+			CloseClipboard();
+			return false;
+		}
+		else
+		{
+			char* pStr = (char*)GlobalLock(hglb);
+			if (pStr != nullptr)
+			{
+				str = pStr;
+				GlobalUnlock(hglb);
+			}
+			else
+			{
+				CloseClipboard();
+				return false;
+			}
+		}
+
+		CloseClipboard();
+		return true;
+	}
+
 	bool GLWindow::Create(const wstring& strTitle,
 		const uint iWidth,
 		const uint iHeight)

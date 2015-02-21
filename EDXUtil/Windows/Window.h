@@ -56,6 +56,8 @@ namespace EDX
 		void SetkeyboardHandler(const KeyboardEvent& keyboardEvent) { mKeyboardEvent = keyboardEvent; }
 
 		bool OpenFileDialog(const char* initDir, const char* ext, const char* filter, char outPath[MAX_PATH]) const;
+		void CopyToClipBoard(const char* str, int strLength) const;
+		bool PasteFromClipBoard(string& str) const;
 
 		virtual bool ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
