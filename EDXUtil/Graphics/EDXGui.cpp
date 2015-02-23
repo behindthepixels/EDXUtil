@@ -38,7 +38,7 @@ namespace EDX
 				vec4 sample = 0.0f;
 				for(int i = 0; i < 13; i++)
 				{
-					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 2);
+					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 3);
 				}
 				gl_FragColor = vec4(sample.rgb, 1.0);
 			})";
@@ -98,7 +98,7 @@ namespace EDX
 			mFBHeight = height;
 
 			// Init background texture
-			mColorRBO.SetStorage(width >> 2, height >> 2, ImageFormat::RGBA);
+			mColorRBO.SetStorage((width + 7) >> 3, (height + 7) >> 3, ImageFormat::RGBA);
 			mFBO.Attach(FrameBufferAttachment::Color0, &mColorRBO);
 
 			CalcGaussianBlurWeightsAndOffsets();
@@ -120,7 +120,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Draw);
 			mFBO.Bind();
 
-			glViewport(0, 0, mFBWidth >> 2, mFBHeight >> 2);
+			glViewport(0, 0, (mFBWidth + 7) >> 3, (mFBHeight + 7) >> 3);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			mProgram.Use();
@@ -158,7 +158,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Read);
 			mFBO.Bind();
 
-			glBlitFramebuffer((x0 + 3) >> 2, (y0 - 3) >> 2, (x1 - 3) >> 2, (y1 + 3) >> 2, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glBlitFramebuffer((x0 + 7) >> 3, (y0 - 7) >> 3, (x1 - 7) >> 3, (y1 + 7) >> 3, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 			mFBO.UnBind();
 		}
@@ -358,8 +358,8 @@ namespace EDX
 				return g;
 			};
 
-			float tu = 1.0f / (float)mFBWidth * 4;
-			float tv = 1.0f / (float)mFBHeight * 4;
+			float tu = 1.0f / (float)mFBWidth * 8;
+			float tv = 1.0f / (float)mFBHeight * 8;
 
 			float totalWeight = 0.0f;
 			int index = 0;
@@ -395,6 +395,7 @@ namespace EDX
 			States->KeyState.key = char(Key::None);
 			States->EditingId = -1;
 			States->ScrollerInitY = 0.0f;
+			States->ConsoleScroller = 1.0f;
 		}
 
 		void EDXGui::Release()
@@ -1106,6 +1107,7 @@ namespace EDX
 					auto orgIdx = States->CursorIdx--;
 					States->CursorIdx = Math::Max(States->CursorIdx, 0);
 					States->CursorPos -= States->StrWidthPrefixSum[orgIdx] - States->StrWidthPrefixSum[States->CursorIdx];
+					States->SelectIdx = States->CursorIdx;
 					break;
 				}
 				case char(Key::RightArrow):
@@ -1113,6 +1115,7 @@ namespace EDX
 					auto orgIdx = States->CursorIdx++;
 					States->CursorIdx = Math::Min(States->CursorIdx, States->BufferedString.length());
 					States->CursorPos += States->StrWidthPrefixSum[States->CursorIdx] - States->StrWidthPrefixSum[orgIdx];
+					States->SelectIdx = States->CursorIdx;
 					break;
 				}
 				case char(Key::Enter):
@@ -1134,9 +1137,10 @@ namespace EDX
 							States->ActiveId = -1;
 						}
 					}
+					States->SelectIdx = States->CursorIdx;
 					break;
 				}
-				case char(Key::BackSpace) :
+				case char(Key::BackSpace):
 					if (States->CursorIdx != States->SelectIdx) // When in selection mode, erase all charactors selected
 					{
 						auto minIdx = Math::Min(States->CursorIdx, States->SelectIdx);
@@ -1156,6 +1160,7 @@ namespace EDX
 						States->CursorPos -= shift;
 						States->CursorIdx--;
 					}
+					States->SelectIdx = States->CursorIdx;
 					break;
 				//case char(Key::Delete) :
 				//	if (States->CursorIdx < States->BufferedString.length())
@@ -1169,10 +1174,12 @@ namespace EDX
 				case char(Key::Home):
 					States->CursorPos = Indent;
 					States->CursorIdx = 0;
+					States->SelectIdx = States->CursorIdx;
 					break;
 				case char(Key::End) :
 					States->CursorPos = *States->StrWidthPrefixSum.rbegin() + Indent;
 					States->CursorIdx = States->StrWidthPrefixSum.size() - 1;
+					States->SelectIdx = States->CursorIdx;
 					break;
 
 				case '\x1':
@@ -1249,7 +1256,7 @@ namespace EDX
 					States->CursorPos += textExtent.cx;
 					States->CursorIdx++;
 
-					// Terminate selection when any key is pressed
+					// Terminate selection when any charactor key is pressed
 					States->SelectIdx = States->CursorIdx;
 				}
 			}
@@ -1464,13 +1471,12 @@ namespace EDX
 
 			BeginDialog(LayoutStrategy::Floating, x, y, width, height);
 			{
-				static float scroller = 0.0f;
 				static int contentHeight = 0;
-				BeginScrollableArea(height - TotalPadding, contentHeight, scroller);
+				BeginScrollableArea(height - TotalPadding, contentHeight, States->ConsoleScroller);
 
 				MultilineText(States->ConsoleTextBuffer.c_str());
 
-				EndScrollableArea(height - TotalPadding, contentHeight, scroller);
+				EndScrollableArea(height - TotalPadding, contentHeight, States->ConsoleScroller);
 
 				glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 				GUIPainter::Instance()->DrawLine(States->CurrentPosX - 10,
@@ -1492,7 +1498,6 @@ namespace EDX
 				{
 					ConsoleCommand(inputTextBuffer.c_str());
 					inputTextBuffer = "";
-					scroller = 1.0f;
 				}
 			}
 			EndDialog();
@@ -1502,6 +1507,7 @@ namespace EDX
 		{
 			States->ConsoleTextBuffer += command;
 			States->ConsoleTextBuffer += '\n';
+			States->ConsoleScroller = 1.0f;
 		}
 	}
 }

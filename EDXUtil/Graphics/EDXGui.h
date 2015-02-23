@@ -152,6 +152,7 @@ namespace EDX
 
 			// Console states
 			string ConsoleTextBuffer;
+			float ConsoleScroller;
 		};
 
 		class EDXGui
