@@ -482,6 +482,10 @@ namespace EDX
 				States->DialogPosX + States->DialogWidth, States->ScreenHeight - (States->DialogPosY + States->DialogHeight));
 			GUIPainter::Instance()->DrawBackgroundTexture(States->DialogPosX, States->ScreenHeight - States->DialogPosY,
 				States->DialogPosX + States->DialogWidth, States->ScreenHeight - (States->DialogPosY + States->DialogHeight));
+			GUIPainter::Instance()->BlurBackgroundTexture(States->DialogPosX, States->ScreenHeight - States->DialogPosY,
+				States->DialogPosX + States->DialogWidth, States->ScreenHeight - (States->DialogPosY + States->DialogHeight));
+			GUIPainter::Instance()->DrawBackgroundTexture(States->DialogPosX, States->ScreenHeight - States->DialogPosY,
+				States->DialogPosX + States->DialogWidth, States->ScreenHeight - (States->DialogPosY + States->DialogHeight));
 
 			glTranslatef(States->DialogPosX, States->ScreenHeight - States->DialogPosY, 0.0f);
 			glScalef(1.0f, -1.0f, 1.0f);
@@ -536,14 +540,18 @@ namespace EDX
 			GUIPainter::Instance()->Resize(screenWidth, screenHeight);
 		}
 
-		void EDXGui::HandleMouseEvent(const MouseEventArgs& mouseArgs)
+		bool EDXGui::HandleMouseEvent(const MouseEventArgs& mouseArgs)
 		{
 			States->GlobalMouseState = mouseArgs;
+
+			return States->ActiveId != -1;
 		}
 
-		void EDXGui::HandleKeyboardEvent(const KeyboardEventArgs& keyArgs)
+		bool EDXGui::HandleKeyboardEvent(const KeyboardEventArgs& keyArgs)
 		{
 			States->KeyState = keyArgs;
+
+			return States->ActiveId != -1;
 		}
 
 		void EDXGui::Text(const char* str, ...)

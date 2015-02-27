@@ -173,8 +173,8 @@ namespace EDX
 				const int dialogHeight = 420);
 			static void EndDialog();
 			static void Resize(int screenWidth, int screenHeight);
-			static void HandleMouseEvent(const MouseEventArgs& mouseArgs);
-			static void HandleKeyboardEvent(const KeyboardEventArgs& keyArgs);
+			static bool HandleMouseEvent(const MouseEventArgs& mouseArgs);
+			static bool HandleKeyboardEvent(const KeyboardEventArgs& keyArgs);
 
 			static void Text(const char* str, ...);
 			static void MultilineText(const char* str, ...);
