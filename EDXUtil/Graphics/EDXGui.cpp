@@ -929,8 +929,12 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
-		void EDXGui::ComboBox(const ComboBoxItem* pItems, int numItems, int& selected)
+		void EDXGui::ComboBox(const char* lable, const ComboBoxItem* pItems, int numItems, int& selected)
 		{
+			// Print slider text
+			Text(lable);
+			States->CurrentPosY -= 5;
+
 			const int Width = 140;
 			const int Height = 18;
 			const int ItemHeight = 20;

@@ -35,6 +35,10 @@ namespace EDX
 		virtual void SetFilter(const TextureFilter filter)
 		{
 		}
+
+		virtual bool Editable() const { return false; }
+		virtual T GetValue() const = 0;
+		virtual void SetValue(const T& value) = 0;
 	};
 
 	template<class T>
@@ -59,6 +63,16 @@ namespace EDX
 		__forceinline T Sample(const Vec<Dim, float>& texCoord, const Vec<Dim, float> differentials[Dim], TextureFilter filter) const
 		{
 			return mVal;
+		}
+
+		bool Editable() const { return true; }
+		T GetValue() const
+		{
+			return mVal;
+		}
+		void SetValue(const T& value)
+		{
+			this->mVal = value;
 		}
 	};
 
@@ -144,6 +158,15 @@ namespace EDX
 		bool HasAlpha() const
 		{
 			return mHasAlpha;
+		}
+
+		bool Editable() const { return false; }
+		TRet GetValue() const
+		{
+			return TRet(0);
+		}
+		void SetValue(const TRet& value)
+		{
 		}
 
 		static TMem GammaCorrect(TMem tIn, float fGamma = 2.2)

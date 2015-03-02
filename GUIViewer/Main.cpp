@@ -98,7 +98,7 @@ void OnRender(Object* pSender, EventArgs args)
 			{ 2, "Item 2" },
 			{ 3, "Item 3" },
 	};
-	EDXGui::ComboBox(items, 3, selected);
+	EDXGui::ComboBox("Combo box", items, 3, selected);
 
 
 	static string textBuf1("Text field 1");

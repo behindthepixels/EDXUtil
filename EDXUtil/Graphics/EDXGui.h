@@ -183,7 +183,7 @@ namespace EDX
 			static bool Button(const char* str, const int width = 99999, const int height = 22);
 			static void CheckBox(const char* str, bool& checked);
 			static void RadioButton(const char* str, int activeVal, int& currentVal);
-			static void ComboBox(const ComboBoxItem* pItems, int numItems, int& selected);
+			static void ComboBox(const char* lable, const ComboBoxItem* pItems, int numItems, int& selected);
 			static bool InputText(string& str, const int width = 100, const bool autoSelectAll = false, const bool autoClearOnEnter = false);
 			static bool InputDigit(int& digit, const char* notation);
 			static void Scroller(int limitLen, int actualLen, float& lin);
@@ -202,7 +202,7 @@ namespace EDX
 			{
 				// Print slider text
 				Text("%s: %.2f", str, (float)*pVal);
-				States->CurrentPosY -= 5;
+				States->CurrentPosY -= 9;
 
 				const int ButtonSize = 12;
 				const int ButtonSize_2 = 7;
@@ -240,7 +240,7 @@ namespace EDX
 					States->HoveredId = Id;
 				}
 
-				if (States->MouseState.Action == MouseAction::Move)
+				if (States->MouseState.Action == MouseAction::Move && States->MouseState.lDown)
 				{
 					if (States->ActiveId == Id)
 					{
@@ -273,10 +273,10 @@ namespace EDX
 				glColor4fv((float*)&color);
 				glBegin(GL_LINE_STRIP);
 
-				glVertex2i(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 - 1);
-				glVertex2i(States->WidgetEndX, States->CurrentPosY + ButtonSize_2 - 1);
-				glVertex2i(States->WidgetEndX, States->CurrentPosY + ButtonSize_2 + 1);
-				glVertex2i(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 + 1);
+				glVertex3f(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 - 1, GUIPainter::DEPTH_MID);
+				glVertex3f(States->WidgetEndX, States->CurrentPosY + ButtonSize_2 - 1, GUIPainter::DEPTH_MID);
+				glVertex3f(States->WidgetEndX, States->CurrentPosY + ButtonSize_2 + 1, GUIPainter::DEPTH_MID);
+				glVertex3f(buttonX + ButtonSize_2, States->CurrentPosY + ButtonSize_2 + 1, GUIPainter::DEPTH_MID);
 
 				glEnd();
 
