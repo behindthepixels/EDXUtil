@@ -392,6 +392,7 @@ namespace EDX
 		{
 			States = new GuiStates;
 			States->ActiveId = -1;
+			States->ActiveDialogId = -1;
 			States->KeyState.key = char(Key::None);
 			States->EditingId = -1;
 			States->ScrollerInitY = 0.0f;
@@ -407,6 +408,7 @@ namespace EDX
 		void EDXGui::BeginFrame()
 		{
 			States->CurrentId = 0;
+			States->CurrentDialogId = 0;
 			States->HoveredId = -1;
 		}
 
@@ -422,6 +424,8 @@ namespace EDX
 			const int dialogWidth,
 			const int dialogHeight)
 		{
+			int dialogId = States->CurrentDialogId++;
+
 			States->CurrentLayoutStrategy = layoutStrategy;
 			States->CurrentGrowthStrategy = GrowthStrategy::Vertical;
 
@@ -459,6 +463,22 @@ namespace EDX
 			States->MouseState = States->GlobalMouseState;
 			States->MouseState.x = States->GlobalMouseState.x - States->DialogPosX;
 			States->MouseState.y = States->GlobalMouseState.y - States->DialogPosY;
+
+			RECT dialogRect;
+			SetRect(&dialogRect, 0, 0, States->DialogWidth, States->DialogHeight);
+			POINT mousePt;
+			mousePt.x = States->MouseState.x;
+			mousePt.y = States->MouseState.y;
+			if (PtInRect(&dialogRect, mousePt))
+			{
+				if (States->MouseState.Action == MouseAction::LButtonDown)
+					States->ActiveDialogId = dialogId;
+			}
+			if (States->MouseState.Action == MouseAction::LButtonUp)
+			{
+				if (States->ActiveDialogId == dialogId)
+					States->ActiveDialogId = -1;
+			}
 
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
@@ -544,14 +564,14 @@ namespace EDX
 		{
 			States->GlobalMouseState = mouseArgs;
 
-			return States->ActiveId != -1;
+			return States->ActiveDialogId != -1;
 		}
 
 		bool EDXGui::HandleKeyboardEvent(const KeyboardEventArgs& keyArgs)
 		{
 			States->KeyState = keyArgs;
 
-			return States->ActiveId != -1;
+			return States->ActiveDialogId != -1;
 		}
 
 		void EDXGui::Text(const char* str, ...)

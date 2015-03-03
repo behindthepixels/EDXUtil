@@ -134,6 +134,8 @@ namespace EDX
 			int CurrentId;
 			int HoveredId;
 			int ActiveId;
+			int CurrentDialogId;
+			int ActiveDialogId;
 			MouseEventArgs MouseState;
 			MouseEventArgs GlobalMouseState;
 			KeyboardEventArgs KeyState;
@@ -215,7 +217,7 @@ namespace EDX
 				int buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
 
 				RECT barRect;
-				SetRect(&barRect, States->CurrentPosX, States->CurrentPosY, SlideEnd, States->CurrentPosY + ButtonSize);
+				SetRect(&barRect, States->CurrentPosX, States->CurrentPosY, States->WidgetEndX, States->CurrentPosY + ButtonSize);
 
 				POINT mousePt;
 				mousePt.x = States->MouseState.x;
