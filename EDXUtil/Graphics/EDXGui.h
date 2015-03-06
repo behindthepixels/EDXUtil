@@ -199,6 +199,31 @@ namespace EDX
 				const int height = 480);
 			static void ConsoleCommand(const char* command);
 
+			static void ColorSlider(Color* pColor)
+			{
+				const int Dist = 5;
+				auto initX = States->CurrentPosX;
+				auto initY = States->CurrentPosY;
+				auto initEndX = States->WidgetEndX;
+				auto stride = (initEndX - initX - Dist - Dist) / 3.0f;
+
+				States->WidgetEndX = initX + stride;
+				Slider<float>("R", &pColor->r, 0.0f, 1.0f);
+
+				States->CurrentPosX += stride + Dist;
+				States->CurrentPosY = initY;
+				States->WidgetEndX = initX + 2 * stride + Dist;
+				Slider<float>("G", &pColor->g, 0.0f, 1.0f);
+
+				States->CurrentPosX += stride + Dist;
+				States->CurrentPosY = initY;
+				States->WidgetEndX = initX + 3 * stride + 2 * Dist;
+				Slider<float>("B", &pColor->b, 0.0f, 1.0f);
+
+				States->CurrentPosX = initX;
+				States->WidgetEndX = initEndX;
+			}
+
 			template<typename T>
 			static void Slider(const char* str, T* pVal, T min, T max)
 			{

@@ -36,9 +36,17 @@ namespace EDX
 		{
 		}
 
-		virtual bool Editable() const { return false; }
-		virtual T GetValue() const = 0;
-		virtual void SetValue(const T& value) = 0;
+		virtual T GetValue() const
+		{
+			return T(0);
+		}
+		virtual void SetValue(const T& value)
+		{
+		}
+		virtual const char* GetFilePath() const
+		{
+			return "";
+		}
 	};
 
 	template<class T>
@@ -65,7 +73,6 @@ namespace EDX
 			return mVal;
 		}
 
-		bool Editable() const { return true; }
 		T GetValue() const
 		{
 			return mVal;
@@ -131,6 +138,7 @@ namespace EDX
 		bool mHasAlpha;
 		TextureFilter mTexFilter;
 		Mipmap2D<TMem> mTexels;
+		char mFilePath[260];
 
 	public:
 		ImageTexture(const char* strFile, const float gamma = 2.2f);
@@ -160,13 +168,9 @@ namespace EDX
 			return mHasAlpha;
 		}
 
-		bool Editable() const { return false; }
-		TRet GetValue() const
+		const char* GetFilePath() const
 		{
-			return TRet(0);
-		}
-		void SetValue(const TRet& value)
-		{
+			return mFilePath;
 		}
 
 		static TMem GammaCorrect(TMem tIn, float fGamma = 2.2)
