@@ -43,10 +43,6 @@ namespace EDX
 		virtual void SetValue(const T& value)
 		{
 		}
-		virtual const char* GetFilePath() const
-		{
-			return "";
-		}
 	};
 
 	template<class T>
@@ -138,7 +134,6 @@ namespace EDX
 		bool mHasAlpha;
 		TextureFilter mTexFilter;
 		Mipmap2D<TMem> mTexels;
-		char mFilePath[260];
 
 	public:
 		ImageTexture(const char* strFile, const float gamma = 2.2f);
@@ -166,11 +161,6 @@ namespace EDX
 		bool HasAlpha() const
 		{
 			return mHasAlpha;
-		}
-
-		const char* GetFilePath() const
-		{
-			return mFilePath;
 		}
 
 		static TMem GammaCorrect(TMem tIn, float fGamma = 2.2)

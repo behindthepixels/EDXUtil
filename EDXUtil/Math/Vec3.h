@@ -158,6 +158,16 @@ namespace EDX
 	namespace Math
 	{
 		template<class T>
+		__forceinline Vec<3, T> ToVec3(const Vec<2, T>& vCopyFrom, T val = T(Math::EDX_ZERO))
+		{
+			return Vec<3, T>(vCopyFrom.x, vCopyFrom.y, val);
+		}
+		template<class T>
+		__forceinline Vec<3, T> ToVec3(const Vec<3, T>& vCopyFrom)
+		{
+			return vCopyFrom;
+		}
+		template<class T>
 		__forceinline T Dot(const Vec<3, T>& vec1, const Vec<3, T>& vec2)
 		{
 			return vec1.x * vec2.x + vec1.y * vec2.y + vec1.z * vec2.z;

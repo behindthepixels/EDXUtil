@@ -499,8 +499,11 @@ namespace EDX
 
 			Vector3 vEdge1 = pt2 - pt1;
 			Vector3 vEdge2 = pt3 - pt1;
-
-			vFaceNormals[i] = Math::Normalize(Math::Cross(vEdge1, vEdge2));
+			Vector3 crossProd = Math::Cross(vEdge1, vEdge2);
+			if (Math::Length(crossProd) > 0.0f)
+				vFaceNormals[i] = Math::Normalize(crossProd);
+			else
+				vFaceNormals[i] = Vector3::ZERO;
 		}
 
 		struct VertexFace
@@ -543,7 +546,11 @@ namespace EDX
 					vNormal /= float(iFaceCount);
 				else
 					vNormal = vFaceNormals[i];
-				vNormal = Math::Normalize(vNormal);
+
+				if (Math::Length(vNormal) > 0.0f)
+					vNormal = Math::Normalize(vNormal);
+				else
+					vNormal = Vector3::ZERO;
 
 				MeshVertex& vert = mVertices[face.aiIndices[j]];
 				if (vert.normal == Vector3::ZERO)

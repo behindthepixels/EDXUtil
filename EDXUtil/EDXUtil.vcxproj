@@ -30,6 +30,7 @@
     <ClInclude Include="Math\BoundingBox.h" />
     <ClInclude Include="Math\Constants.h" />
     <ClInclude Include="Math\EDXMath.h" />
+    <ClInclude Include="Math\FFT.h" />
     <ClInclude Include="Math\Matrix.h" />
     <ClInclude Include="Math\Ray.h" />
     <ClInclude Include="Math\Vec2.h" />
@@ -63,6 +64,7 @@
     <ClCompile Include="Graphics\ObjMesh.cpp" />
     <ClCompile Include="Graphics\OpenGL.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="Math\FFT.cpp" />
     <ClCompile Include="Math\Matrix.cpp" />
     <ClCompile Include="Windows\Application.cpp" />
     <ClCompile Include="Windows\Bitmap.cpp" />

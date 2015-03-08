@@ -181,8 +181,6 @@ namespace EDX
 		mTexInvWidth = 1.0f / float(mTexWidth);
 		mTexInvHeight = 1.0f / float(mTexHeight);
 
-		strcpy_s(mFilePath, 260, strFile);
-
 		SafeDelete(pRawTex);
 	}
 

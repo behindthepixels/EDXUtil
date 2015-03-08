@@ -511,7 +511,6 @@ namespace EDX
 			glScalef(1.0f, -1.0f, 1.0f);
 
 			glLineWidth(1.0f);
-			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LEQUAL);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_CONSTANT_ALPHA);
@@ -543,6 +542,8 @@ namespace EDX
 
 				glEnd();
 			}
+
+			glEnable(GL_DEPTH_TEST);
 		}
 		void EDXGui::EndDialog()
 		{
