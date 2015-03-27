@@ -254,14 +254,16 @@ namespace EDX
 					
 					if (States->MouseState.Action == MouseAction::LButtonUp)
 					{
-						buttonX = Math::Clamp(States->MouseState.x, SlideBase, SlideEnd);
-						float btnLin = Math::LinStep(buttonX, SlideBase, SlideEnd);
-						*pVal = (T)Math::Lerp(min, max, btnLin);
-						float lin = Math::LinStep(*pVal, min, max);
-						buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
-
 						if (States->ActiveId == Id)
+						{
+							buttonX = Math::Clamp(States->MouseState.x, SlideBase, SlideEnd);
+							float btnLin = Math::LinStep(buttonX, SlideBase, SlideEnd);
+							*pVal = (T)Math::Lerp(min, max, btnLin);
+							float lin = Math::LinStep(*pVal, min, max);
+							buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
+
 							States->ActiveId = -1;
+						}
 					}
 
 					States->HoveredId = Id;
