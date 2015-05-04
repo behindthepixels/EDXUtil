@@ -104,7 +104,7 @@ namespace EDX
 			glUniform3i = (PFNGLUNIFORM3IPROC)wglGetProcAddress("glUniform3i");
 			glUniform4i = (PFNGLUNIFORM4IPROC)wglGetProcAddress("glUniform4i");
 			glUniformMatrix3fv = (PFNGLUNIFORMMATRIX3FVPROC)wglGetProcAddress("glUniformMatrix3fv");
-			glUniformMatrix4fv = (PFNGLUNIFORMMATRIX3FVPROC)wglGetProcAddress("glUniformMatrix4fv");
+			glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)wglGetProcAddress("glUniformMatrix4fv");
 			glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation");
 			glBindFragDataLocation = (PFNGLBINDFRAGDATALOCATIONEXTPROC)wglGetProcAddress("glBindFragDataLocationEXT");
 
@@ -271,7 +271,7 @@ namespace EDX
 		void Program::SetUniform(const char * name, const Matrix& value, bool transpose)
 		{
 			int loc = glGetUniformLocation(mHandle, name);
-			glUniformMatrix4fv(loc, 16, transpose, (float*)value.m);
+			glUniformMatrix4fv(loc, 1, transpose, (float*)value.m);
 		}
 
 		void Program::BindFragDataLocation(const char * name, int loc)

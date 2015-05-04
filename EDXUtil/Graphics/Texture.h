@@ -113,6 +113,11 @@ namespace EDX
 		T SampleLevel_Linear(const Vec<Dim, float>& texCoord, const int level) const;
 		T Sample_Nearest(const Vec<Dim, float>& texCoord) const;
 
+		const T* GetMemoryPtr(const int level = 0) const
+		{
+			assert(level < mNumLevels);
+			return mpLeveledTexels[level].Data();
+		}
 		const int GetNumLevels() const
 		{
 			return mNumLevels;
@@ -166,6 +171,10 @@ namespace EDX
 		static TMem GammaCorrect(TMem tIn, float fGamma = 2.2)
 		{
 			return Math::Pow(tIn, fGamma);
+		}
+		static const TMem* GetLevelMemoryPtr(const ImageTexture<TRet, TMem>& tex, const int level = 0)
+		{
+			return tex.mTexels.GetMemoryPtr(level);
 		}
 		//static Color ConvertOut(const Color4b& in)
 		//{
