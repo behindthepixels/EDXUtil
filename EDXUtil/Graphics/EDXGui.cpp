@@ -38,7 +38,7 @@ namespace EDX
 				vec4 sample = 0.0f;
 				for(int i = 0; i < 13; i++)
 				{
-					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 3);
+					sample += weights[i] * texture2DLod(texSampler, texCoord + offsets[i], 2);
 				}
 				gl_FragColor = vec4(sample.rgb, 1.0);
 			})";
@@ -98,7 +98,7 @@ namespace EDX
 			mFBHeight = height;
 
 			// Init background texture
-			mColorRBO.SetStorage((width + 7) >> 3, (height + 7) >> 3, ImageFormat::RGBA);
+			mColorRBO.SetStorage((width + 7) >> 2, (height + 7) >> 2, ImageFormat::RGBA);
 			mFBO.Attach(FrameBufferAttachment::Color0, &mColorRBO);
 
 			CalcGaussianBlurWeightsAndOffsets();
@@ -120,7 +120,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Draw);
 			mFBO.Bind();
 
-			glViewport(0, 0, (mFBWidth + 7) >> 3, (mFBHeight + 7) >> 3);
+			glViewport(0, 0, (mFBWidth + 7) >> 2, (mFBHeight + 7) >> 2);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			mProgram.Use();
@@ -158,7 +158,7 @@ namespace EDX
 			mFBO.SetTarget(FrameBufferTarget::Read);
 			mFBO.Bind();
 
-			glBlitFramebuffer((x0 + 7) >> 3, (y0 - 7) >> 3, (x1 - 7) >> 3, (y1 + 7) >> 3, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			glBlitFramebuffer((x0 + 7) >> 2, (y0 - 7) >> 2, (x1 - 7) >> 2, (y1 + 7) >> 2, x0, y0, x1, y1, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 			mFBO.UnBind();
 		}
@@ -358,8 +358,8 @@ namespace EDX
 				return g;
 			};
 
-			float tu = 1.0f / (float)mFBWidth * 8;
-			float tv = 1.0f / (float)mFBHeight * 8;
+			float tu = 1.0f / (float)mFBWidth * 4;
+			float tv = 1.0f / (float)mFBHeight * 4;
 
 			float totalWeight = 0.0f;
 			int index = 0;

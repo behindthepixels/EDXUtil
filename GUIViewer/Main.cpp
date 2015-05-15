@@ -8,20 +8,6 @@
 using namespace EDX;
 using namespace EDX::GUI;
 
-double PI = 3.141592653f;
-double mAmp = 250;
-float mPhase = 0;
-double mPeriod = 500;
-double mConst = 500;
-double mTotalPeriod = 500;
-float mStraightLength = 0;
-float mHalfRatio = 0.5;
-bool mMod;
-
-float gSlide;
-bool gChecked;
-int gCombo;
-
 _byte* gImage;
 int gWidth = 0, gHeight = 0;
 
