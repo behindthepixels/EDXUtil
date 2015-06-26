@@ -262,7 +262,7 @@ namespace EDX
 		}
 		__forceinline float SphericalPhi(const Vector3& vec)
 		{
-			float p = Math::Atan2(vec.z, vec.x);
+			float p = Math::Atan2(-vec.z, vec.x);
 			return (p < 0.0f) ? p + float(Math::EDX_TWO_PI) : p;
 		}
 
