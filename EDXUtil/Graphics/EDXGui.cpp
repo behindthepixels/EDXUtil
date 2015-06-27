@@ -660,7 +660,7 @@ namespace EDX
 				States->CurrentPosX += 5;
 		}
 
-		bool EDXGui::CollapsingHeader(const char* str, bool& collapsed)
+		bool EDXGui::CollapsingHeader(const char* str, bool& show)
 		{
 			const int Height = 30;
 			const int TextHeight = 11;
@@ -668,7 +668,7 @@ namespace EDX
 			int Id = States->CurrentId++;
 
 			RECT headerRect;
-			if (collapsed) // Draw dots
+			if (!show) // Draw dots
 				SetRect(&headerRect, States->CurrentPosX, States->CurrentPosY, States->WidgetEndX, States->CurrentPosY + Height);
 			else
 				SetRect(&headerRect, States->CurrentPosX, States->CurrentPosY, States->WidgetEndX, States->CurrentPosY + TextHeight);
@@ -692,7 +692,7 @@ namespace EDX
 				{
 					States->ActiveId = -1;
 					if (inRect)
-						collapsed = !collapsed;
+						show = !show;
 				}
 			}
 
@@ -706,17 +706,17 @@ namespace EDX
 			glColor4fv((float*)&color);
 			GUIPainter::Instance()->DrawLine(States->CurrentPosX, States->CurrentPosY + TextHeight + 1, States->WidgetEndX, States->CurrentPosY + TextHeight + 1, GUIPainter::DEPTH_MID);
 
-			if (collapsed) // Draw dots
+			if (!show) // Draw dots
 				GUIPainter::Instance()->DrawString(States->WidgetEndX - 15, States->CurrentPosY + TextHeight + 6, GUIPainter::DEPTH_MID, "...");
 			else
 				States->CurrentPosX += 16;
 
 			if (States->CurrentGrowthStrategy == GrowthStrategy::Vertical)
-				States->CurrentPosY += (collapsed ? Height : TextHeight) + Padding;
+				States->CurrentPosY += (!show ? Height : TextHeight) + Padding;
 			else
 				States->CurrentPosX += 5;
 
-			return !collapsed;
+			return show;
 		}
 
 		bool EDXGui::Button(const char* str, const int width, const int height)

@@ -225,8 +225,10 @@ namespace EDX
 			}
 
 			template<typename T>
-			static void Slider(const char* str, T* pVal, T min, T max)
+			static bool Slider(const char* str, T* pVal, T min, T max)
 			{
+				bool modified = false;
+
 				// Print slider text
 				Text("%s: %.2f", str, (float)*pVal);
 				States->CurrentPosY -= 9;
@@ -261,6 +263,7 @@ namespace EDX
 							*pVal = (T)Math::Lerp(min, max, btnLin);
 							float lin = Math::LinStep(*pVal, min, max);
 							buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
+							modified = true;
 
 							States->ActiveId = -1;
 						}
@@ -278,6 +281,7 @@ namespace EDX
 						*pVal = (T)Math::Lerp(min, max, btnLin);
 						float lin = Math::LinStep(*pVal, min, max);
 						buttonX = (int)Math::Lerp(SlideBase, SlideEnd, lin);
+						modified = true;
 					}
 				}
 
@@ -322,6 +326,8 @@ namespace EDX
 					States->CurrentPosY += ButtonSize + Padding;
 				else
 					States->CurrentPosX += 5;
+
+				return modified;
 			}
 		};
 	}
