@@ -337,6 +337,8 @@ namespace EDX
 
 	template class ImageTexture<Color, Color4b>;
 	template class ImageTexture<Color, Color>;
+	template class ImageTexture<float, float>;
 	template class Mipmap<2, Color4b>;
 	template class Mipmap<2, Color>;
+	template class Mipmap<2, float>;
 }

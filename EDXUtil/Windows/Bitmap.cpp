@@ -145,5 +145,11 @@ namespace EDX
 	{
 		return (Color4b*)stbi_load(strFile, pWidth, pHeight, pChannel, 4);
 	}
+
+	template<>
+	float* Bitmap::ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel)
+	{
+		return (float*)stbi_loadf(strFile, pWidth, pHeight, pChannel, 1);
+	}
 }
 

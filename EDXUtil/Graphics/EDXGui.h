@@ -172,7 +172,7 @@ namespace EDX
 				const int x = 25,
 				const int y = 25,
 				const int dialogWidth = 250,
-				const int dialogHeight = 420);
+				const int dialogHeight = 500);
 			static void EndDialog();
 			static void Resize(int screenWidth, int screenHeight);
 			static bool HandleMouseEvent(const MouseEventArgs& mouseArgs);
