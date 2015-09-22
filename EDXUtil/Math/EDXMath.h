@@ -23,17 +23,21 @@ namespace EDX
 			if (tVal > max) return max;
 			return tVal;
 		}
+		inline float Sign(float val) { return val >= 0.0f ? 1.0f : -1.0f; }
 		inline float Saturate(float val) { return Clamp(val, 0.0f, 1.0f); }
 		inline float Pow(float val, float fPow) { return powf(val, fPow); }
 		template <class T> inline T Abs(T tVal) { return tVal >= 0 ? tVal : -tVal; }
 		inline float Sqrt(float val) { return sqrtf(val); }
+		inline float Exp(float val) { return expf(val); }
 		inline float ToRadians(float fDeg) { return (fDeg / 180.0f) * float(Math::EDX_PI); }
 		inline float ToDegrees(float fRad) { return (fRad / float(Math::EDX_PI)) * 180.0f; }
 		inline float Sin(float val) { return sinf(val); }
 		inline float Cos(float val) { return cosf(val); }
 		inline void SinCos(float val, float& fSin, float& fCos) { fSin = sinf(val); fCos = cosf(val); }
 		inline float Tan(float val) { return tanf(val); }
-		inline float Exp(float val) { return expf(val); }
+		inline float Asin(float val) { return asinf(val); }
+		inline float Acos(float val) { return acosf(val); }
+		inline float Atan(float val) { return atanf(val); }
 		inline float Atan2(float val1, float val2) { return atan2f(val1, val2); }
 
 		inline int FloorToInt(float val) { return (int)val; }
