@@ -162,7 +162,11 @@ namespace EDX
 	public:
 		void Lock()
 		{
-			EnterCriticalSection(&mCriticalSection);
+			// Spin first before entering critical section, causing ring-0 transition and context switch.
+			if (TryEnterCriticalSection(&mCriticalSection) == 0)
+			{
+				EnterCriticalSection(&mCriticalSection);
+			}
 		}
 		void Unlock()
 		{

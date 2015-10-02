@@ -103,6 +103,12 @@ namespace EDX
 			__forceinline operator float() const { return std::numeric_limits<float>::epsilon(); }
 		} EDX_EPSILON;
 
+		static struct OneMinusEpsilon
+		{
+			__forceinline operator double() const { return 1.0 - std::numeric_limits<double>::epsilon(); }
+			__forceinline operator float() const { return 1.0f - std::numeric_limits<float>::epsilon(); }
+		} EDX_ONE_MINUS_EPS;
+
 		static struct Pi
 		{
 			__forceinline operator double() const { return 3.14159265358979323846; }

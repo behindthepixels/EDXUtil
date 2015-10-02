@@ -21,12 +21,11 @@ namespace EDX
 	{
 		Color Pow(const Color& color, float pow)
 		{
-			Color ret;
-			ret.r = Math::Pow(color.r, pow);
-			ret.g = Math::Pow(color.g, pow);
-			ret.b = Math::Pow(color.b, pow);
-			ret.a = color.a;
-			return ret;
+			float r = Math::Pow(color.r, pow);
+			float g = Math::Pow(color.g, pow);
+			float b = Math::Pow(color.b, pow);
+			float a = color.a;
+			return Color(r, g, b, a);
 		}
 
 		Color4b Pow(const Color4b& color, float pow)
