@@ -110,6 +110,13 @@ namespace EDX
 			}
 			return ret;
 		}
+		inline int FloorLog2(int val)
+		{
+			unsigned long lz = 0;
+			if (_BitScanReverse(&lz, val))
+				return lz;
+			return 0;
+		}
 
 		template<uint Dim> class Pow2
 		{

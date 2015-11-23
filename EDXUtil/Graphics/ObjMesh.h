@@ -99,6 +99,7 @@ namespace EDX
 			const Vector3& scl,
 			const Vector3& rot,
 			const char* path,
+			const bool forceComputeNormal = false,
 			const bool makeLeftHanded = true);
 		void LoadPlane(const Vector3& pos,
 			const Vector3& scl,

@@ -8,12 +8,13 @@ namespace EDX
 		const Vector3& scl,
 		const Vector3& rot,
 		const char* strPath,
+		const bool forceComputeNormal,
 		const bool makeLeftHanded)
 	{
 		vector<Vector3> positionBuf;
 		vector<Vector3> normalBuf;
 		vector<float> texCoordBuf;
-		int iSmoothingGroup = 0;
+		int iSmoothingGroup = forceComputeNormal ? 1 : 0;
 		bool hasSmoothGroup = false;
 		int iCurrentMtl = 0;
 		char strMaterialFilename[MAX_PATH] = { 0 };
@@ -292,7 +293,7 @@ namespace EDX
 		mBounds = Matrix::TransformBBox(BoundingBox(minPt, maxPt), mWorld);
 
 		// Recompute per-vertex normals
-		if (hasSmoothGroup || !mNormaled)
+		if (forceComputeNormal || hasSmoothGroup || !mNormaled)
 			ComputeVertexNormals();
 
 		// Delete cache
