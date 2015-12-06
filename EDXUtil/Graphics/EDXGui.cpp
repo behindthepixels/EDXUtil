@@ -480,6 +480,8 @@ namespace EDX
 					States->ActiveDialogId = -1;
 			}
 
+			glClear(GL_DEPTH_BUFFER_BIT);
+
 			glMatrixMode(GL_PROJECTION);
 			glPushMatrix();
 			glLoadIdentity();
@@ -1395,6 +1397,9 @@ namespace EDX
 			if (actualLen <= limitLen)
 				return;
 
+			States->ScrollerActive = true;
+			glTranslatef(-ScrollerPadding, 0.0f, 0.0f);
+
 			const int BarBase = States->CurrentPosY;
 			const int Diff = 2;
 			const int InnerBase = BarBase + Diff;
@@ -1421,11 +1426,17 @@ namespace EDX
 			if (PtInRect(&barRect, mousePt))
 			{
 				if (States->MouseState.Action == MouseAction::LButtonDown)
+				{
 					States->ActiveId = Id;
+					if (Math::Abs(States->MouseState.y - scrollPos) > scrollBarLen / 2)
+						States->ScrollerBtnDownOffset = 0;
+					else
+						States->ScrollerBtnDownOffset = States->MouseState.y - scrollPos;
+				}
 
 				if (States->MouseState.Action == MouseAction::LButtonUp)
 				{
-					scrollPos = Math::Clamp(States->MouseState.y, ScrollBase, ScrollEnd);
+					scrollPos = Math::Clamp(States->MouseState.y - States->ScrollerBtnDownOffset, ScrollBase, ScrollEnd);
 					lin = Math::LinStep(scrollPos, ScrollBase, ScrollEnd);
 
 					if (States->ActiveId == Id)
@@ -1439,7 +1450,7 @@ namespace EDX
 			{
 				if (States->ActiveId == Id)
 				{
-					scrollPos = Math::Clamp(States->MouseState.y, ScrollBase, ScrollEnd);
+					scrollPos = Math::Clamp(States->MouseState.y - States->ScrollerBtnDownOffset, ScrollBase, ScrollEnd);
 					lin = Math::LinStep(scrollPos, ScrollBase, ScrollEnd);
 				}
 			}
@@ -1452,18 +1463,18 @@ namespace EDX
 			Color color = States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id ?
 				Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 
-			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 15,
+			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 15 + ScrollerPadding,
 				BarBase,
-				States->DialogWidth - 7,
+				States->DialogWidth - 7 + ScrollerPadding,
 				BarBase + limitLen,
 				GUIPainter::DEPTH_MID,
 				4,
 				false,
 				color);
 
-			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 13,
+			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 13 + ScrollerPadding,
 				scrollBarStart,
-				States->DialogWidth - 9,
+				States->DialogWidth - 9 + ScrollerPadding,
 				scrollBarStart + scrollBarLen,
 				GUIPainter::DEPTH_MID,
 				2,
@@ -1490,6 +1501,12 @@ namespace EDX
 		{
 			contentHeight = States->CurrentPosY - States->ScrollerInitY;
 			States->CurrentPosY = States->OrigY + areaHeight + Padding;
+
+			if (States->ScrollerActive)
+			{
+				glTranslatef(ScrollerPadding, 0.0f, 0.0f);
+				States->ScrollerActive = false;
+			}
 
 			glDisable(GL_SCISSOR_TEST);
 		}

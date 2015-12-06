@@ -151,6 +151,8 @@ namespace EDX
 			// Scroller states
 			int ScrollerInitY;
 			int OrigY;
+			int ScrollerBtnDownOffset;
+			bool ScrollerActive;
 
 			// Console states
 			string ConsoleTextBuffer;
@@ -162,6 +164,7 @@ namespace EDX
 		private:
 			static GuiStates* States;
 			static const int Padding = 10;
+			static const int ScrollerPadding = 8;
 
 		public:
 			static void Init();
