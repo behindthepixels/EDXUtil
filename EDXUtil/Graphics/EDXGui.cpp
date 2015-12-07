@@ -1398,7 +1398,7 @@ namespace EDX
 				return;
 
 			States->ScrollerActive = true;
-			glTranslatef(-ScrollerPadding, 0.0f, 0.0f);
+			States->CurrentPosX -= ScrollerPadding;
 
 			const int BarBase = States->CurrentPosY;
 			const int Diff = 2;
@@ -1463,18 +1463,18 @@ namespace EDX
 			Color color = States->HoveredId == Id && States->ActiveId == -1 || States->ActiveId == Id ?
 				Color(1.0f, 1.0f, 1.0f, 0.65f) : Color(1.0f, 1.0f, 1.0f, 0.5f);
 
-			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 15 + ScrollerPadding,
+			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 15,
 				BarBase,
-				States->DialogWidth - 7 + ScrollerPadding,
+				States->DialogWidth - 7,
 				BarBase + limitLen,
 				GUIPainter::DEPTH_MID,
 				4,
 				false,
 				color);
 
-			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 13 + ScrollerPadding,
+			GUIPainter::Instance()->DrawRoundedRect(States->DialogWidth - 13,
 				scrollBarStart,
-				States->DialogWidth - 9 + ScrollerPadding,
+				States->DialogWidth - 9,
 				scrollBarStart + scrollBarLen,
 				GUIPainter::DEPTH_MID,
 				2,
@@ -1504,7 +1504,7 @@ namespace EDX
 
 			if (States->ScrollerActive)
 			{
-				glTranslatef(ScrollerPadding, 0.0f, 0.0f);
+				States->CurrentPosX += ScrollerPadding;
 				States->ScrollerActive = false;
 			}
 
