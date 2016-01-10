@@ -332,6 +332,11 @@ namespace EDX
 
 				return modified;
 			}
+
+			static int GetCurrentDialogHeight()
+			{
+				return States->CurrentPosY;
+			}
 		};
 	}
 }
