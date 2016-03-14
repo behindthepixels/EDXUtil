@@ -136,6 +136,7 @@ namespace EDX
 	namespace Math
 	{
 		Color Pow(const Color& color, float fP);
+		Color Exp(const Color& color);
 	}
 
 	class Color4b

@@ -32,5 +32,10 @@ namespace EDX
 		{
 			return Pow(Color(color), pow);
 		}
+
+		Color Exp(const Color& color)
+		{
+			return Color(Math::Exp(color.r), Math::Exp(color.g), Math::Exp(color.b));
+		}
 	}
 }

@@ -23,25 +23,26 @@ namespace EDX
 			if (tVal > max) return max;
 			return tVal;
 		}
-		inline float Sign(float val) { return val >= 0.0f ? 1.0f : -1.0f; }
-		inline float Saturate(float val) { return Clamp(val, 0.0f, 1.0f); }
-		inline float Pow(float val, float fPow) { return powf(val, fPow); }
+		inline float Sign(const float val) { return val >= 0.0f ? 1.0f : -1.0f; }
+		inline float Saturate(const float val) { return Clamp(val, 0.0f, 1.0f); }
+		inline float Pow(const float val, float fPow) { return powf(val, fPow); }
 		template <class T> inline T Abs(T tVal) { return tVal >= 0 ? tVal : -tVal; }
-		inline float Sqrt(float val) { return sqrtf(val); }
-		inline float Exp(float val) { return expf(val); }
+		inline float Sqrt(const float val) { return sqrtf(val); }
+		inline float Exp(const float val) { return expf(val); }
+		inline float Log(const float val) { return logf(val); }
 		inline float ToRadians(float fDeg) { return (fDeg / 180.0f) * float(Math::EDX_PI); }
 		inline float ToDegrees(float fRad) { return (fRad / float(Math::EDX_PI)) * 180.0f; }
-		inline float Sin(float val) { return sinf(val); }
-		inline float Cos(float val) { return cosf(val); }
-		inline void SinCos(float val, float& fSin, float& fCos) { fSin = sinf(val); fCos = cosf(val); }
-		inline float Tan(float val) { return tanf(val); }
-		inline float Asin(float val) { return asinf(val); }
-		inline float Acos(float val) { return acosf(val); }
-		inline float Atan(float val) { return atanf(val); }
-		inline float Atan2(float val1, float val2) { return atan2f(val1, val2); }
+		inline float Sin(const float val) { return sinf(val); }
+		inline float Cos(const float val) { return cosf(val); }
+		inline void SinCos(const float val, float& fSin, float& fCos) { fSin = sinf(val); fCos = cosf(val); }
+		inline float Tan(const float val) { return tanf(val); }
+		inline float Asin(const float val) { return asinf(val); }
+		inline float Acos(const float val) { return acosf(val); }
+		inline float Atan(const float val) { return atanf(val); }
+		inline float Atan2(const float val1, const float val2) { return atan2f(val1, val2); }
 
-		inline int FloorToInt(float val) { return (int)val; }
-		inline int CeilToInt(float val)
+		inline int FloorToInt(const float val) { return (int)val; }
+		inline int CeilToInt(const float val)
 		{
 			int ceil = (int)val;
 			if (val - ceil > 1e-5f)
@@ -53,7 +54,7 @@ namespace EDX
 				return ceil;
 			}
 		}
-		inline int RoundToInt(float val) { return FloorToInt(val + 0.5f); }
+		inline int RoundToInt(const float val) { return FloorToInt(val + 0.5f); }
 
 		template <class T1, class T2>
 		inline float LinStep(const T1& tVal, const T2& min, const T2& max)
