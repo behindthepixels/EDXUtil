@@ -96,7 +96,6 @@ namespace EDX
 		static inline Vector3 TransformVector(const Vector3& vVec, const Matrix& mat);
 		static inline Vector3 TransformNormal(const Vector3& nNorm, const Matrix& mat);
 		static inline Ray TransformRay(const Ray& rRay, const Matrix& mat);
-		static inline RayDifferential TransformRayDiff(const RayDifferential& rRay, const Matrix& mat);
 		static inline BoundingBox TransformBBox(const BoundingBox& bbox, const Matrix& mat);
 
 		static const Matrix IDENTITY;
@@ -154,18 +153,6 @@ namespace EDX
 		Ray ray = rRay;
 		ray.mOrg = TransformPoint(ray.mOrg, mat);
 		ray.mDir = TransformVector(ray.mDir, mat);
-
-		return ray;
-	}
-
-	inline RayDifferential Matrix::TransformRayDiff(const RayDifferential& rRay, const Matrix& mat)
-	{
-		RayDifferential ray = RayDifferential(TransformRay(Ray(rRay), mat));
-		ray.mDxOrg = TransformPoint(rRay.mDxOrg, mat);
-		ray.mDyOrg = TransformPoint(rRay.mDyOrg, mat);
-		ray.mDxDir = TransformVector(rRay.mDxDir, mat);
-		ray.mDyDir = TransformVector(rRay.mDyDir, mat);
-		ray.mHasDifferential = rRay.mHasDifferential;
 
 		return ray;
 	}

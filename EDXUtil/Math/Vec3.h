@@ -113,9 +113,9 @@ namespace EDX
 
 		__forceinline void NumericValid() const
 		{
-			assert(!Math::IsNAN(x));
-			assert(!Math::IsNAN(y));
-			assert(!Math::IsNAN(z));
+			//assert(!Math::IsNAN(x));
+			//assert(!Math::IsNAN(y));
+			//assert(!Math::IsNAN(z));
 		}
 
 		static const Vec ZERO;

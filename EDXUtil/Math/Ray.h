@@ -30,27 +30,4 @@ namespace EDX
 
 		inline Vector3 CalcPoint(float fDist) const { return mOrg + mDir * fDist; }
 	};
-
-	class RayDifferential : public Ray
-	{
-	public:
-		Vector3 mDxOrg, mDyOrg;
-		Vector3 mDxDir, mDyDir;
-
-		bool mHasDifferential;
-
-	public:
-		RayDifferential()
-			: Ray(), mHasDifferential(false)
-		{
-		}
-		RayDifferential(const Vector3& vOrig, const Vector3& vDir, float max = float(Math::EDX_INFINITY), float min = 0.0f, int depth = 0)
-			: Ray(vOrig, vDir, max, min, depth), mHasDifferential(false)
-		{
-		}
-		RayDifferential(const Ray& ray)
-			: Ray(ray), mHasDifferential(false)
-		{
-		}
-	};
 }
