@@ -115,6 +115,6 @@ namespace EDX
 	namespace Math
 	{
 		template <>
-		inline bool IsNAN(const FloatSSE& num) { return false; }
+		inline bool IsNaN(const FloatSSE& num) { return false; }
 	}
 }

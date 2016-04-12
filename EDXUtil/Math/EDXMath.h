@@ -10,7 +10,7 @@ namespace EDX
 	namespace Math
 	{
 		template <typename T>
-		inline bool IsNAN(const T& num) { return _isnan(num); }
+		inline bool IsNaN(const T& num) { return _isnan(num); }
 		template <typename T>
 		inline bool IsInfinite(const T& num) { return !_finite(num); }
 		template <typename T>
@@ -41,20 +41,21 @@ namespace EDX
 		inline float Atan(const float val) { return atanf(val); }
 		inline float Atan2(const float val1, const float val2) { return atan2f(val1, val2); }
 
-		inline int FloorToInt(const float val) { return (int)val; }
+		inline int FloorToInt(const float val)
+		{
+			// Note: the x2 is to workaround the rounding-to-nearest-even-number issue when the fraction is .5
+			return _mm_cvt_ss2si(_mm_set_ss(val + val + 0.5f)) >> 1;
+		}
 		inline int CeilToInt(const float val)
 		{
-			int ceil = (int)val;
-			if (val - ceil > 1e-5f)
-			{
-				return ceil + 1;
-			}
-			else
-			{
-				return ceil;
-			}
+			// Note: the x2 is to workaround the rounding-to-nearest-even-number issue when the fraction is .5
+			return -(_mm_cvt_ss2si(_mm_set_ss(-0.5f - (val + val))) >> 1);
 		}
-		inline int RoundToInt(const float val) { return FloorToInt(val + 0.5f); }
+		inline int RoundToInt(const float val)
+		{
+			// Note: the x2 is to workaround the rounding-to-nearest-even-number issue when the fraction is .5
+			return _mm_cvt_ss2si(_mm_set_ss(val + val + 0.5f)) >> 1;
+		}
 
 		template <class T1, class T2>
 		inline float LinStep(const T1& tVal, const T2& min, const T2& max)
@@ -86,37 +87,57 @@ namespace EDX
 		{
 			return (val & (val - 1)) == 0;
 		}
-		inline int RoundUpPowTwo(uint val)
-		{
-			val--;
-			val |= val >> 1;
-			val |= val >> 2;
-			val |= val >> 4;
-			val |= val >> 8;
-			val |= val >> 16;
-			return val + 1;
-		}
+
 		inline int RoundUpTo(const uint val, const uint round)
 		{
 			uint iRet = val + round - (val % round);
 			return iRet;
 		}
-		inline int CeilLog2(int val)
+
+		inline uint FloorLog2(uint value)
 		{
-			int ret = 0;
-			while (val)
+			// Use BSR to return the log2 of the integer
+			unsigned long log2;
+			if (_BitScanReverse(&log2, value) != 0)
 			{
-				val >>= 1;
-				ret++;
+				return log2;
 			}
-			return ret;
-		}
-		inline int FloorLog2(int val)
-		{
-			unsigned long lz = 0;
-			if (_BitScanReverse(&lz, val))
-				return lz;
+
 			return 0;
+		}
+
+		inline uint CountLeadingZeros(uint val)
+		{
+			// Use BSR to return the log2 of the integer
+			unsigned long log2;
+			if (_BitScanReverse(&log2, val) != 0)
+			{
+				return 31 - log2;
+			}
+
+			return 32;
+		}
+
+		inline uint CountTrailingZeros(uint value)
+		{
+			if (value == 0)
+			{
+				return 32;
+			}
+			uint bitIndex;	// 0-based, where the LSB is 0 and MSB is 31
+			_BitScanForward((unsigned long *)&bitIndex, value);	// Scans from LSB to MSB
+			return bitIndex;
+		}
+
+		inline uint CeilLog2(uint val)
+		{
+			int bitMask = ((int)(CountLeadingZeros(val) << 26)) >> 31;
+			return (32 - CountLeadingZeros(val - 1)) & (~bitMask);
+		}
+
+		inline uint RoundUpPowOfTwo(uint val)
+		{
+			return 1 << CeilLog2(val);
 		}
 
 		template<uint Dim> class Pow2
