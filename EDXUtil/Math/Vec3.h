@@ -266,23 +266,6 @@ namespace EDX
 			return (p < 0.0f) ? p + float(Math::EDX_TWO_PI) : p;
 		}
 
-		template<uint Dimension>
-		__forceinline Vec<Dimension, int> FloorToInt(const Vec<Dimension, float>& vec)
-		{
-			Vec<Dimension, int> vRet;
-			for (auto d = 0; d < Dimension; d++)
-				vRet[d] = FloorToInt(vec[d]);
-			return vRet;
-		}
-		template<uint Dimension>
-		__forceinline Vec<Dimension, int> RoundToInt(const Vec<Dimension, float>& vec)
-		{
-			Vec<Dimension, int> vRet;
-			for (auto d = 0; d < Dimension; d++)
-				vRet[d] = RoundToInt(vec[d]);
-			return vRet;
-		}
-
 		__forceinline void CoordinateSystem(const Vector3& vec1, Vector3* vec2, Vector3* vec3)
 		{
 			if (Math::Abs(vec1.x) > Math::Abs(vec1.y))

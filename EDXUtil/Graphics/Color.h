@@ -96,6 +96,11 @@ namespace EDX
 			return Color(r * fInv, g * fInv, b * fInv);
 		}
 
+		Color operator / (const Color& color) const
+		{
+			return Color(r / color.r, g / color.g, b / color.b);
+		}
+
 		Color& operator /= (float val)
 		{
 			float fInv = 1.0f / val;
