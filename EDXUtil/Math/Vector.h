@@ -46,6 +46,23 @@ namespace EDX
 			return LerpFunc<Dim, T>::Func(val, vLin);
 		}
 
+		template<uint Dimension, typename T1, typename T2, typename T3>
+		__forceinline Vec<Dimension, T3> Max(const Vec<Dimension, T1>& vec1, const Vec<Dimension, T1>& vec2)
+		{
+			Vec<Dimension, T3> ret;
+			for (auto d = 0; d < Dimension; d++)
+				ret[d] = Math::Max(vec1[d], vec2[d]);
+			return ret;
+		}
+
+		template<uint Dimension, typename T1, typename T2, typename T3>
+		__forceinline Vec<Dimension, T3> Min(const Vec<Dimension, T1>& vec1, const Vec<Dimension, T1>& vec2)
+		{
+			Vec<Dimension, T3> ret;
+			for (auto d = 0; d < Dimension; d++)
+				ret[d] = Math::Min(vec1[d], vec2[d]);
+			return ret;
+		}
 		template<uint Dimension>
 		__forceinline Vec<Dimension, int> FloorToInt(const Vec<Dimension, float>& vec)
 		{
