@@ -723,7 +723,7 @@ namespace EDX
 
 		bool EDXGui::Button(const char* str, const int width, const int height)
 		{
-			bool trigger = false;
+			bool triggered = false;
 			int Id = States->CurrentId++;
 
 			RECT btnRect;
@@ -749,7 +749,7 @@ namespace EDX
 				{
 					States->ActiveId = -1;
 					if (inRect)
-						trigger = true;
+						triggered = true;
 				}
 			}
 
@@ -825,11 +825,12 @@ namespace EDX
 			else
 				States->CurrentPosX += 5;
 
-			return trigger;
+			return triggered;
 		}
 
-		void EDXGui::CheckBox(const char* str, bool& checked)
+		bool EDXGui::CheckBox(const char* str, bool& checked)
 		{
+			bool triggered = false;
 			const int Width = 140;
 			const int BoxSize = 12;
 
@@ -852,6 +853,7 @@ namespace EDX
 					{
 						States->ActiveId = -1;
 						checked = !checked;
+						triggered = true;
 					}
 				}
 
@@ -889,10 +891,13 @@ namespace EDX
 				States->CurrentPosY += BoxSize + Padding;
 			else
 				States->CurrentPosX += 5;
+
+			return triggered;
 		}
 
-		void EDXGui::RadioButton(const char* str, int activeVal, int& currentVal)
+		bool EDXGui::RadioButton(const char* str, int activeVal, int& currentVal)
 		{
+			bool triggered = false;
 			const int CircleDiameter = 12;
 			const int CircleRadius = CircleDiameter / 2;
 
@@ -915,6 +920,7 @@ namespace EDX
 					{
 						States->ActiveId = -1;
 						currentVal = activeVal;
+						triggered = true;
 					}
 				}
 
@@ -950,6 +956,8 @@ namespace EDX
 				States->CurrentPosY += CircleDiameter + Padding;
 			else
 				States->CurrentPosX += 5;
+
+			return triggered;
 		}
 
 		void EDXGui::ComboBox(const char* lable, const ComboBoxItem* pItems, int numItems, int& selected)

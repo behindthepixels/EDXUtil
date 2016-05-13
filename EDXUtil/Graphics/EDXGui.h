@@ -186,8 +186,8 @@ namespace EDX
 			static bool CollapsingHeader(const char* str, bool& collapsed);
 			static void CloseHeaderSection() { States->CurrentPosX -= 16; }
 			static bool Button(const char* str, const int width = 99999, const int height = 22);
-			static void CheckBox(const char* str, bool& checked);
-			static void RadioButton(const char* str, int activeVal, int& currentVal);
+			static bool CheckBox(const char* str, bool& checked);
+			static bool RadioButton(const char* str, int activeVal, int& currentVal);
 			static void ComboBox(const char* lable, const ComboBoxItem* pItems, int numItems, int& selected);
 			static bool InputText(string& str, const int width = 100, const bool autoSelectAll = false, const bool autoClearOnEnter = false);
 			static bool InputDigit(int& digit, const char* notation);

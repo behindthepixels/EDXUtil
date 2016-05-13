@@ -152,6 +152,7 @@ namespace EDX
 	}
 
 	typedef Vec<3, float>	Vector3;
+	typedef Vec<3, double>	Vector3d;
 	typedef Vec<3, int>		Vector3i;
 	typedef Vec<3, bool>	Vector3b;
 

@@ -82,9 +82,27 @@ namespace EDX
 		}
 
 		template<uint Dimension>
+		__forceinline Vec<Dimension, float> Sqrt(const Vec<Dimension, float>& vec)
+		{
+			Vec<Dimension, float> ret;
+			for (auto d = 0; d < Dimension; d++)
+				ret[d] = Math::Sqrt(vec[d]);
+			return ret;
+		}
+
+		template<uint Dimension>
 		__forceinline Vec<Dimension, float> Exp(const Vec<Dimension, float>& vec)
 		{
 			Vec<Dimension, float> ret;
+			for (auto d = 0; d < Dimension; d++)
+				ret[d] = Math::Exp(vec[d]);
+			return ret;
+		}
+
+		template<uint Dimension>
+		__forceinline Vec<Dimension, double> Exp(const Vec<Dimension, double>& vec)
+		{
+			Vec<Dimension, double> ret;
 			for (auto d = 0; d < Dimension; d++)
 				ret[d] = Math::Exp(vec[d]);
 			return ret;

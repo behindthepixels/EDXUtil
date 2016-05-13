@@ -30,6 +30,7 @@ namespace EDX
 		inline float Sqrt(const float val) { return sqrtf(val); }
 		inline float Square(const float val) { return val * val; }
 		inline float Exp(const float val) { return expf(val); }
+		inline float Exp(const double val) { return exp(val); }
 		inline float Log(const float val) { return logf(val); }
 		inline float ToRadians(float fDeg) { return (fDeg / 180.0f) * float(Math::EDX_PI); }
 		inline float ToDegrees(float fRad) { return (fRad / float(Math::EDX_PI)) * 180.0f; }
