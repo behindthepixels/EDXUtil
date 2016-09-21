@@ -1,10 +1,12 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Core/Types.h"
 #include "../Math/Vector.h"
 #include "../Math/BoundingBox.h"
 #include "Color.h"
-#include <set>
+
+#include "../Containers/Array.h"
+#include "../Core/CString.h"
 
 #define MAX_PATH 260
 
@@ -54,9 +56,9 @@ namespace EDX
 			, transColor(0.0f, 0.0f, 0.0f)
 			, bumpScale(1.0f)
 		{
-			strcpy_s(strName, MAX_PATH, name);
-			memset(strTexturePath, 0, MAX_PATH);
-			memset(strBumpPath, 0, MAX_PATH);
+			CStringUtil::Strcpy(strName, MAX_PATH, name);
+			Memory::Memset(strTexturePath, 0, MAX_PATH);
+			Memory::Memset(strBumpPath, 0, MAX_PATH);
 		}
 
 		bool operator == (const ObjMaterial& rhs) const
@@ -70,15 +72,15 @@ namespace EDX
 	protected:
 		uint mVertexCount, mTriangleCount;
 
-		vector<MeshVertex> mVertices;
-		vector<uint> mIndices;
-		vector<MeshFace> mFaces;
-		vector<CacheEntry*> mCache;
+		Array<MeshVertex> mVertices;
+		Array<uint> mIndices;
+		Array<MeshFace> mFaces;
+		Array<CacheEntry*> mCache;
 
-		vector<ObjMaterial> mMaterials;
-		vector<uint> mMaterialIdx;
-		vector<uint> mSubsetStartIdx;
-		vector<uint> mSubsetMtlIdx;
+		Array<ObjMaterial> mMaterials;
+		Array<uint> mMaterialIdx;
+		Array<uint> mSubsetStartIdx;
+		Array<uint> mSubsetMtlIdx;
 		uint mNumSubsets;
 
 		BoundingBox mBounds;
@@ -116,15 +118,15 @@ namespace EDX
 		void LoadMaterialsFromMtl(const char* path);
 		uint AddVertex(uint iHash, const MeshVertex* pVertex);
 
-		inline const uint* GetIndexAt(int iNum) const { return mIndices.data() + 3 * iNum; }
+		inline const uint* GetIndexAt(int iNum) const { return mIndices.Data() + 3 * iNum; }
 		inline const MeshVertex& GetVertexAt(int iIndex) const { return mVertices[iIndex]; }
 		inline uint GetVertexCount() const { return mVertexCount; }
 		inline uint GetTriangleCount() const { return mTriangleCount; }
 		inline bool IsNormaled() const { return mNormaled; }
 		inline bool IsTextured() const { return mTextured; }
 
-		const vector<ObjMaterial>& GetMaterialInfo() const { return mMaterials; }
-		inline const vector<uint>& GetMaterialIdxBuf() const { return mMaterialIdx; }
+		const Array<ObjMaterial>& GetMaterialInfo() const { return mMaterials; }
+		inline const Array<uint>& GetMaterialIdxBuf() const { return mMaterialIdx; }
 		inline uint GetMaterialIdx(int iTri) const { return mMaterialIdx[iTri]; }
 
 		const uint GetSubsetCount() const { return mNumSubsets; }

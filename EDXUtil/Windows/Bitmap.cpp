@@ -4,7 +4,7 @@
 #include <WinGDI.h>
 
 #include "Bitmap.h"
-#include "../Memory/Memory.h"
+#include "../Core/Memory.h"
 
 //#define STBI_HEADER_FILE_ONLY
 #define STB_IMAGE_IMPLEMENTATION
@@ -64,7 +64,7 @@ namespace EDX
 
 		FILE* pFile = NULL;
 		fopen_s(&pFile, strFilename, "wb");
-		assert(pFile);
+		Assert(pFile);
 
 
 		fwrite(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), pFile);
@@ -73,7 +73,7 @@ namespace EDX
 		fwrite(pPixels, 1, iSize, pFile);
 		fclose(pFile);
 
-		SafeDeleteArray(pPixels);
+		Memory::SafeDeleteArray(pPixels);
 	}
 
 	void Bitmap::SaveBitmapFile(const char* strFilename, const _byte* pData, int iWidth, int iHeight)
@@ -123,7 +123,7 @@ namespace EDX
 
 		FILE* pFile = NULL;
 		fopen_s(&pFile, strFilename, "wb");
-		assert(pFile);
+		Assert(pFile);
 
 		fwrite(&bmpHeader, 1, sizeof(BITMAPFILEHEADER), pFile);
 		fwrite(&bmpInfo, 1, sizeof(BITMAPINFOHEADER), pFile);
@@ -131,7 +131,7 @@ namespace EDX
 		fwrite(pPixels, 1, iSize, pFile);
 		fclose(pFile);
 
-		SafeDeleteArray(pPixels);
+		Memory::SafeDeleteArray(pPixels);
 	}
 
 	template<>

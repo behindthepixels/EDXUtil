@@ -37,8 +37,8 @@ namespace EDX
 		inline bool IsBlack() const { return *this == BLACK; }
 		inline float Luminance() const { return r * 0.212671f + g * 0.715160f + b * 0.072169f; }
 
-		__forceinline const float& operator [] (const size_t idx) const { assert(idx < 4); return (&r)[idx]; }
-		__forceinline		float& operator [] (const size_t idx)		{ assert(idx < 4); return (&r)[idx]; }
+		__forceinline const float& operator [] (const size_t idx) const { Assert(idx < 4); return (&r)[idx]; }
+		__forceinline		float& operator [] (const size_t idx)		{ Assert(idx < 4); return (&r)[idx]; }
 
 		Color operator + (const Color& color) const
 		{
@@ -122,9 +122,9 @@ namespace EDX
 
 		void NumericValid() const
 		{
-			assert(Math::NumericValid(r));
-			assert(Math::NumericValid(g));
-			assert(Math::NumericValid(b));
+			Assert(Math::NumericValid(r));
+			Assert(Math::NumericValid(g));
+			Assert(Math::NumericValid(b));
 		}
 
 		static const Color BLACK;

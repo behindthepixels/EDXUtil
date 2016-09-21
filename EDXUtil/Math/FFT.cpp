@@ -265,8 +265,8 @@ namespace EDX
 				}
 			}
 
-			SafeDeleteArray(pfIndices);
-			SafeDeleteArray(pfWeights);
+			Memory::SafeDeleteArray(pfIndices);
+			Memory::SafeDeleteArray(pfWeights);
 		}
 
 		void FFT::CalcIndices(float* pfIndices) const

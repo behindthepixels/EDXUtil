@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Core/Types.h"
 
 namespace EDX
 {

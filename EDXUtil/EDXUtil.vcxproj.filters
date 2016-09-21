@@ -16,20 +16,20 @@
     <Filter Include="Source Files\Windows">
       <UniqueIdentifier>{75735ea6-bba7-4ca1-a862-07374744282e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Memory">
-      <UniqueIdentifier>{2fdfa320-6d61-4cc1-93ef-b73c1f0c1c5c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Math">
       <UniqueIdentifier>{981541c5-6055-41d4-93c2-4b8f1697f948}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\RNG">
-      <UniqueIdentifier>{a85dc5ab-4dbe-4853-a845-ea1447e2154c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\SIMD">
       <UniqueIdentifier>{3aa073e3-ec69-4ae4-b102-5dd744d29876}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{8637f292-54ad-4d41-b325-104e9ff340b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Containers">
+      <UniqueIdentifier>{3bba6f4c-d6c6-4842-aa6c-781d1989188e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core">
+      <UniqueIdentifier>{4ba8dff4-f7b6-4ae6-94ac-5d38258ad814}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -48,17 +48,8 @@
     <ClInclude Include="Windows\Window.h">
       <Filter>Source Files\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="Windows\Thread.h">
-      <Filter>Source Files\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="Windows\Timer.h">
       <Filter>Source Files\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\RefPtr.h">
-      <Filter>Source Files\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\Memory.h">
-      <Filter>Source Files\Memory</Filter>
     </ClInclude>
     <ClInclude Include="Math\EDXMath.h">
       <Filter>Source Files\Math</Filter>
@@ -77,9 +68,6 @@
     </ClInclude>
     <ClInclude Include="Math\VecBase.h">
       <Filter>Source Files\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="RNG\Random.h">
-      <Filter>Source Files\RNG</Filter>
     </ClInclude>
     <ClInclude Include="SIMD\BoolSSE.h">
       <Filter>Source Files\SIMD</Filter>
@@ -111,9 +99,6 @@
     <ClInclude Include="Math\Vector.h">
       <Filter>Source Files\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Memory\Array.h">
-      <Filter>Source Files\Memory</Filter>
-    </ClInclude>
     <ClInclude Include="Graphics\ObjMesh.h">
       <Filter>Source Files\Graphics</Filter>
     </ClInclude>
@@ -122,9 +107,6 @@
     </ClInclude>
     <ClInclude Include="Windows\Bitmap.h">
       <Filter>Source Files\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\BlockedArray.h">
-      <Filter>Source Files\Memory</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\EDXGui.h">
       <Filter>Source Files\Graphics</Filter>
@@ -144,15 +126,96 @@
     <ClInclude Include="Math\FFT.h">
       <Filter>Source Files\Math</Filter>
     </ClInclude>
+    <ClInclude Include="Containers\Array.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\AllocationPolicies.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Template.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Assertion.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\List.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\Queue.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\Map.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\Set.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\BitArray.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\SparseArray.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Sorting.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Misc.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Function.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\Atomics.h">
+      <Filter>Source Files\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\Algorithm.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\String.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\TypeHash.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Crc.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Char.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\CString.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\SmartPointer.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\MemoryPool.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Memory.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Random.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\BlockedDimensionalArray.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Containers\DimensionalArray.h">
+      <Filter>Source Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Types.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\Threading.h">
+      <Filter>Source Files\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">
       <Filter>Source Files\Windows</Filter>
     </ClCompile>
     <ClCompile Include="Windows\Application.cpp">
-      <Filter>Source Files\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows\Thread.cpp">
       <Filter>Source Files\Windows</Filter>
     </ClCompile>
     <ClCompile Include="Math\Matrix.cpp">
@@ -182,5 +245,25 @@
     <ClCompile Include="Math\FFT.cpp">
       <Filter>Source Files\Math</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Crc.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\CString.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Containers\String.cpp">
+      <Filter>Source Files\Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Debug.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Threading.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="UtilVis.natvis">
+      <Filter>Source Files</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

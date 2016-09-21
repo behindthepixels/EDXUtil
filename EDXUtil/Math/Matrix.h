@@ -113,7 +113,7 @@ namespace EDX
 		float yp = mat.m[1][0] * x + mat.m[1][1] * y + mat.m[1][2] * z + mat.m[1][3];
 		float zp = mat.m[2][0] * x + mat.m[2][1] * y + mat.m[2][2] * z + mat.m[2][3];
 		float wp = mat.m[3][0] * x + mat.m[3][1] * y + mat.m[3][2] * z + mat.m[3][3];
-		assert(wp != 0);
+		Assert(wp != 0);
 		if (wp == 1.0f)
 			return Vector3(xp, yp, zp);
 		else

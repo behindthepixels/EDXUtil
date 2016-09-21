@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Core/Types.h"
 #include "EDXMath.h"
-#include "../Memory/Memory.h"
+#include "../Core/Memory.h"
 #include "Constants.h"
 
 namespace EDX
@@ -34,7 +34,7 @@ namespace EDX
 			
 			void Init1D(int iDim)
 			{
-				assert(IsPowOfTwo(iDim));
+				Assert(IsPowOfTwo(iDim));
 
 				miDimention = iDim;
 
@@ -48,7 +48,7 @@ namespace EDX
 
 			void Init2D(int iDim)
 			{
-				assert(IsPowOfTwo(iDim));
+				Assert(IsPowOfTwo(iDim));
 
 				miDimention = iDim;
 
@@ -69,15 +69,15 @@ namespace EDX
 
 			void SetDim(uint iDim)
 			{
-				assert(IsPowOfTwo(iDim));
+				Assert(IsPowOfTwo(iDim));
 
 				miDimention = iDim;
 				miNumButterflies = logf(iDim) / logf(2.0f);
 				mbIsPingTarget = true;
 
-				SafeDeleteArray(mpButterFlyData);
-				SafeDeleteArray(mpFDataPing);
-				SafeDeleteArray(mpFDataPong);
+				Memory::SafeDeleteArray(mpButterFlyData);
+				Memory::SafeDeleteArray(mpFDataPing);
+				Memory::SafeDeleteArray(mpFDataPong);
 
 				CreateButterflyRes();
 
@@ -86,9 +86,9 @@ namespace EDX
 			}
 			~FFT()
 			{
-				SafeDeleteArray(mpButterFlyData);
-				SafeDeleteArray(mpFDataPing);
-				SafeDeleteArray(mpFDataPong);
+				Memory::SafeDeleteArray(mpButterFlyData);
+				Memory::SafeDeleteArray(mpFDataPing);
+				Memory::SafeDeleteArray(mpFDataPong);
 			}
 
 		private:

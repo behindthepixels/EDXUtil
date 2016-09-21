@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Containers/Array.h"
 #include "Base.h"
 
 namespace EDX
@@ -42,7 +42,7 @@ namespace EDX
 		}
 
 		void* GetOwner() const { return nullptr; }
-		void* GetFuncHandler() const { return (void*)(*(int*)&mHandler); }
+		void* GetFuncHandler() const { return (void*)(*(PTRINT*)&mHandler); }
 
 		virtual Delegate<Params...>* Clone() const
 		{
@@ -73,7 +73,7 @@ namespace EDX
 		}
 
 		void* GetOwner() const { return mpOwner; }
-		void* GetFuncHandler() const { return (void*)(*(int*)&mHandler); }
+		void* GetFuncHandler() const { return (void*)(*(PTRINT*)&mHandler); }
 
 		virtual Delegate<Params...>* Clone() const
 		{
@@ -86,7 +86,7 @@ namespace EDX
 	class Event
 	{
 	protected:
-		vector<Delegate<Params...>*> mListeners;
+		Array<Delegate<Params...>*> mListeners;
 
 	public:
 		Event()
@@ -106,7 +106,7 @@ namespace EDX
 		{
 			Release();
 			for (const auto& it : other.mListeners)
-				mListeners.push_back(it->Clone());
+				mListeners.Add(it->Clone());
 			return *this;
 		}
 
@@ -132,7 +132,7 @@ namespace EDX
 		// For StaticFuncDelegate
 		void Bind(typename StaticFuncDelegate<Params...>::FuncHandler pFunc)
 		{
-			mListeners.push_back(new StaticFuncDelegate<Params...>(pFunc));
+			mListeners.Add(new StaticFuncDelegate<Params...>(pFunc));
 		}
 
 		void Unbind(typename StaticFuncDelegate<Params...>::FuncHandler pFunc)
@@ -153,7 +153,7 @@ namespace EDX
 		template<class Class>
 		void Bind(Class* pListener, typename MemberFuncDelegate<Class, Params...>::FuncHandler pFunc)
 		{
-			mListeners.push_back(new MemberFuncDelegate<Class, Params...>(pListener, pFunc));
+			mListeners.Add(new MemberFuncDelegate<Class, Params...>(pListener, pFunc));
 		}
 
 		template<class Class>
@@ -178,12 +178,12 @@ namespace EDX
 				delete it;
 				it = NULL;
 			}
-			mListeners.clear();
+			mListeners.Clear();
 		}
 
 		bool Attached() const
 		{
-			return !mListeners.empty();
+			return !mListeners.Empty();
 		}
 	};
 

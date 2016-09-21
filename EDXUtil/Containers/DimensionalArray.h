@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
-#include "Memory.h"
+#include "../Core/Types.h"
+#include "../Core/Memory.h"
+#include "../Containers/Array.h"
 #include "../Math/Vector.h"
 
 namespace EDX
@@ -32,12 +33,12 @@ namespace EDX
 			{
 				ret += idx[i] * mStrides[i];
 			}
-			assert(ret < mArraySize);
+			Assert(ret < mArraySize);
 			return ret;
 		}
 		__forceinline Vec<Dimension, uint> Index(size_t linearIdx) const
 		{
-			assert(linearIdx < mArraySize);
+			Assert(linearIdx < mArraySize);
 			Vec<Dimension, uint> vRet;
 			for (int i = Dimension - 1; i >= 0; i--)
 			{
@@ -68,7 +69,7 @@ namespace EDX
 				mArraySize *= mDim[i];
 			}
 
-			assert(mArraySize == oldSize);
+			Assert(mArraySize == oldSize);
 		}
 
 		__forceinline size_t LinearSize() const
@@ -77,7 +78,7 @@ namespace EDX
 		}
 		__forceinline size_t Size(uint iDim) const
 		{
-			assert(iDim < Dimension);
+			Assert(iDim < Dimension);
 			return mDim[iDim];
 		}
 		__forceinline Vec<Dimension, uint> Size() const
@@ -86,35 +87,35 @@ namespace EDX
 		}
 		__forceinline size_t Stride(uint iDim) const
 		{
-			assert(iDim < Dimension);
+			Assert(iDim < Dimension);
 			return mStrides[iDim];
 		}
 	};
 
 	template<size_t Dimension, class T>
-	class Array
+	class DimensionalArray
 	{
 	protected:
 		ArrayIndex<Dimension> mIndex;
 		T* mpData;
 
 	public:
-		Array()
+		DimensionalArray()
 			: mpData(NULL)
 		{
 		}
-		virtual ~Array()
+		virtual ~DimensionalArray()
 		{
 			Free();
 		}
 
-		Array(const Array& rhs)
+		DimensionalArray(const DimensionalArray& rhs)
 			: mpData(NULL)
 		{
 			this->operator=(rhs);
 		}
 
-		Array(Array&& rhs)
+		DimensionalArray(DimensionalArray&& rhs)
 			: mpData(NULL)
 		{
 			this->operator=(std::move(rhs));
@@ -122,11 +123,11 @@ namespace EDX
 
 		void Init(const Vec<Dimension, uint>& size, bool bClear = true)
 		{
-			FreeAligned(mpData);
+			Memory::Free(mpData);
 			mIndex.Init(size);
 
-			mpData = AllocAligned<T>(mIndex.LinearSize());
-			assert(mpData);
+			mpData = Memory::AlignedAlloc<T>(mIndex.LinearSize());
+			Assert(mpData);
 
 			if (bClear)
 				Clear();
@@ -134,7 +135,7 @@ namespace EDX
 
 		void SetData(const T* pData)
 		{
-			memcpy(mpData, pData, LinearSize() * sizeof(T));
+			Memory::Memcpy(mpData, pData, LinearSize() * sizeof(T));
 		}
 
 		void SetDim(const Vec<Dimension, uint>& size)
@@ -144,20 +145,20 @@ namespace EDX
 
 		__forceinline void Clear()
 		{
-			SafeClear(mpData, mIndex.LinearSize());
+			Memory::SafeClear(mpData, mIndex.LinearSize());
 		}
 
-		Array& operator = (const Array& rhs)
+		DimensionalArray& operator = (const DimensionalArray& rhs)
 		{
 			if (Size() != rhs.Size())
 			{
 				Free();
 				Init(rhs.Size());
 			}
-			memcpy(mpData, rhs.mpData, LinearSize() * sizeof(T));
+			Memory::Memcpy(mpData, rhs.mpData, LinearSize() * sizeof(T));
 			return *this;
 		}
-		Array& operator = (Array&& rhs)
+		DimensionalArray& operator = (DimensionalArray&& rhs)
 		{
 			if (Size() != rhs.Size())
 			{
@@ -196,30 +197,31 @@ namespace EDX
 
 		__forceinline T& operator [] (const Vec<Dimension, uint>& idx) { return mpData[LinearIndex(idx)]; }
 		__forceinline const T operator [] (const Vec<Dimension, uint>& idx) const { return mpData[LinearIndex(idx)]; }
-		__forceinline T& operator [] (const size_t idx) { assert(idx < mIndex.LinearSize()); return mpData[idx]; }
-		__forceinline const T operator [] (const size_t idx) const { assert(idx < mIndex.LinearSize()); return mpData[idx]; }
+		__forceinline T& operator [] (const size_t idx) { Assert(idx < mIndex.LinearSize()); return mpData[idx]; }
+		__forceinline const T operator [] (const size_t idx) const { Assert(idx < mIndex.LinearSize()); return mpData[idx]; }
 		__forceinline const T* Data() const { return mpData; }
 		__forceinline T* ModifiableData() { return mpData; }
 
 		void Free()
 		{
-			FreeAligned(mpData);
+			Memory::Free(mpData);
 		}
 	};
 
 	template<size_t Dimension, class T>
-	void ToStlVector(vector<T>& lhs, const Array<Dimension, T>& rhs)
+	void ToArray(Array<T>& lhs, const DimensionalArray<Dimension, T>& rhs)
 	{
-		lhs.clear();
-		lhs.resize(rhs.LinearSize());
-		memcpy(lhs.data(), rhs.Data(), rhs.LinearSize() * sizeof(T));
+		lhs.Clear();
+		lhs.ResizeForCopy(rhs.LinearSize());
+
+		Memory::Memcpy(lhs.data(), rhs.Data(), rhs.LinearSize() * sizeof(T));
 	}
 
-	typedef Array<1, float> Array1f;
-	typedef Array<2, float> Array2f;
-	typedef Array<3, float> Array3f;
+	typedef DimensionalArray<1, float> Array1f;
+	typedef DimensionalArray<2, float> Array2f;
+	typedef DimensionalArray<3, float> Array3f;
 
-	typedef Array<1, double> Array1d;
-	typedef Array<2, double> Array2d;
-	typedef Array<3, double> Array3d;
+	typedef DimensionalArray<1, double> Array1d;
+	typedef DimensionalArray<2, double> Array2d;
+	typedef DimensionalArray<3, double> Array3d;
 }

@@ -2,7 +2,7 @@
 
 #include <smmintrin.h>
 
-#include "../EDXPrerequisites.h"
+#include "../Core/Types.h"
 #include "../Math/Constants.h"
 
 

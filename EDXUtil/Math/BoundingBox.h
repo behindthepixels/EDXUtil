@@ -105,13 +105,13 @@ namespace EDX
 
 		inline const Vector3& operator [] (int i) const
 		{
-			assert(i == 0 || i == 1);
+			Assert(i == 0 || i == 1);
 			return (&mMin)[i];
 		}
 
 		inline Vector3 operator [] (int i)
 		{
-			assert(i == 0 || i == 1);
+			Assert(i == 0 || i == 1);
 			return (&mMin)[i];
 		}
 

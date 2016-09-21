@@ -1,6 +1,6 @@
 #include "Matrix.h"
 #include "EDXMath.h"
-#include <string.h>
+#include "../Core/Template.h"
 
 namespace EDX
 {
@@ -8,7 +8,7 @@ namespace EDX
 
 	Matrix::Matrix(float mat[4][4])
 	{
-		memcpy(m, mat, 16 *sizeof(float));
+		Memory::Memcpy(m, mat, 16 *sizeof(float));
 	}
 
 
@@ -38,7 +38,7 @@ namespace EDX
 		int indxc[4], indxr[4];
 		int ipiv[4] = { 0, 0, 0, 0 };
 		float minv[4][4];
-		memcpy(minv, m.m, 4 * 4 * sizeof(float));
+		Memory::Memcpy(minv, m.m, 4 * 4 * sizeof(float));
 		for (int i = 0; i < 4; i++)
 		{
 			int irow = -1, icol = -1;
@@ -58,7 +58,7 @@ namespace EDX
 								icol = k;
 							}
 						}
-						assert(ipiv[k] <= 1);
+						Assert(ipiv[k] <= 1);
 					}
 				}
 			}
@@ -66,11 +66,11 @@ namespace EDX
 			if (irow != icol)
 			{
 				for (int k = 0; k < 4; ++k)
-					swap(minv[irow][k], minv[icol][k]);
+					Swap(minv[irow][k], minv[icol][k]);
 			}
 			indxr[i] = irow;
 			indxc[i] = icol;
-			assert(minv[icol][icol] != 0.0f);
+			Assert(minv[icol][icol] != 0.0f);
 
 			float pivinv = 1.f / minv[icol][icol];
 			minv[icol][icol] = 1.f;
@@ -93,7 +93,7 @@ namespace EDX
 			if (indxr[j] != indxc[j])
 			{
 				for (int k = 0; k < 4; k++)
-					swap(minv[k][indxr[j]], minv[k][indxc[j]]);
+					Swap(minv[k][indxr[j]], minv[k][indxc[j]]);
 			}
 		}
 		return Matrix(minv);

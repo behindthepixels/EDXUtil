@@ -47,6 +47,6 @@ namespace EDX
 		if (pMainWindow)
 			delete pMainWindow;
 
-		assert(!_CrtDumpMemoryLeaks());
+		Assertf(!_CrtDumpMemoryLeaks(), "Memory leak detected. See debug output for details");
 	}
 }

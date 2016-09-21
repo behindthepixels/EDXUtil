@@ -68,8 +68,8 @@ namespace EDX
 		__forceinline T Sum() const { return x + y + z; }
 		__forceinline T Product() const { return x * y * z; }
 
-		__forceinline const T& operator [] (const size_t idx) const { assert(idx < 3); return (&x)[idx]; }
-		__forceinline		T& operator [] (const size_t idx)		{ assert(idx < 3); return (&x)[idx]; }
+		__forceinline const T& operator [] (const size_t idx) const { Assert(idx < 3); return (&x)[idx]; }
+		__forceinline		T& operator [] (const size_t idx)		{ Assert(idx < 3); return (&x)[idx]; }
 
 		//----------------------------------------------------------------------------------------------
 		// Unary Operators
@@ -113,9 +113,9 @@ namespace EDX
 
 		__forceinline void NumericValid() const
 		{
-			//assert(!Math::IsNAN(x));
-			//assert(!Math::IsNAN(y));
-			//assert(!Math::IsNAN(z));
+			//Assert(!Math::IsNAN(x));
+			//Assert(!Math::IsNAN(y));
+			//Assert(!Math::IsNAN(z));
 		}
 
 		static const Vec ZERO;

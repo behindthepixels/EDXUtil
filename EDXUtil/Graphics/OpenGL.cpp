@@ -1,6 +1,8 @@
 #include "OpenGL.h"
 #include "../Windows/Bitmap.h"
 #include "../Windows/Debug.h"
+#include "../Containers/Array.h"
+
 namespace EDX
 {
 	namespace OpenGL
@@ -157,18 +159,18 @@ namespace EDX
 			glCompileShader(mHandle);
 
 			glGetShaderiv(mHandle, GL_INFO_LOG_LENGTH, &length);
-			vector<char> buffer;
-			buffer.resize(length);
-			glGetShaderInfoLog(mHandle, length, &length, buffer.data());
+			Array<char> buffer;
+			buffer.Resize(length);
+			glGetShaderInfoLog(mHandle, length, &length, buffer.Data());
 			int compileStatus;
 			glGetShaderiv(mHandle, GL_COMPILE_STATUS, &compileStatus);
 
 			if (length > 0)
-				Debug::WriteLine(buffer.data());
+				Debug::WriteLine(buffer.Data());
 
 			if (compileStatus != GL_TRUE)
 			{
-				throw ShaderCompileException(buffer.data());
+				throw ShaderCompileException(buffer.Data());
 			}
 		}
 
@@ -195,34 +197,34 @@ namespace EDX
 		void Program::Link()
 		{
 			int length, compileStatus;
-			vector<char> buffer;
+			Array<char> buffer;
 
 			glLinkProgram(mHandle);
 
 			glGetProgramiv(mHandle, GL_INFO_LOG_LENGTH, &length);
-			buffer.resize(length);
-			glGetProgramInfoLog(mHandle, length, &length, buffer.data());
+			buffer.Resize(length);
+			glGetProgramInfoLog(mHandle, length, &length, buffer.Data());
 			glGetProgramiv(mHandle, GL_LINK_STATUS, &compileStatus);
 
 			if (length > 0)
-				Debug::WriteLine(buffer.data());
+				Debug::WriteLine(buffer.Data());
 
 			if (compileStatus != GL_TRUE)
 			{
-				throw ShaderCompileException(buffer.data());
+				throw ShaderCompileException(buffer.Data());
 			}
 
 			glValidateProgram(mHandle);
 			glGetProgramiv(mHandle, GL_INFO_LOG_LENGTH, &length);
-			buffer.resize(length);
-			glGetProgramInfoLog(mHandle, length, &length, buffer.data());
+			buffer.Resize(length);
+			glGetProgramInfoLog(mHandle, length, &length, buffer.Data());
 			if (length > 0)
-				Debug::WriteLine(buffer.data());
+				Debug::WriteLine(buffer.Data());
 
 			glGetProgramiv(mHandle, GL_VALIDATE_STATUS, &compileStatus);
 			if (compileStatus != GL_TRUE)
 			{
-				throw ShaderCompileException(buffer.data());
+				throw ShaderCompileException(buffer.Data());
 			}
 		}
 
@@ -309,7 +311,7 @@ namespace EDX
 			auto rs = new Texture2D();
 			rs->Load(ImageFormat::RGBA, ImageFormat::RGBA, ImageDataType::Byte, pRawTex, width, height);
 
-			SafeDeleteArray(pRawTex);
+			Memory::SafeDeleteArray(pRawTex);
 
 			return rs;
 		}

@@ -27,7 +27,7 @@
 
 #include "emmintrin.h"
 
-#include "../EDXPrerequisites.h"
+#include "Types.h"
 #include "../Math/EDXMath.h"
 #include <ctime>
 
@@ -118,7 +118,7 @@ namespace EDX
 			float u2 = Float();
 			if (u1 < 1e-6f)
 				u1 = 1e-6f;
-			return Math::Sqrt(-2.0f * logf(u1)) * Math::Cos(2 * float(Math::EDX_PI) * u2);
+			return Math::Sqrt(-2.0f * Math::Log(u1)) * Math::Cos(2 * float(Math::EDX_PI) * u2);
 		}
 	};
 }

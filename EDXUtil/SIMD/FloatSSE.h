@@ -63,8 +63,8 @@ namespace EDX
 		//----------------------------------------------------------------------------------------------
 		// Array Access
 		//----------------------------------------------------------------------------------------------
-		__forceinline const float& operator [] (const size_t i) const { assert(i < 4); return v[i]; }
-		__forceinline		float& operator [] (const size_t i)		  { assert(i < 4); return v[i]; }
+		__forceinline const float& operator [] (const size_t i) const { Assert(i < 4); return v[i]; }
+		__forceinline		float& operator [] (const size_t i)		  { Assert(i < 4); return v[i]; }
 
 		//----------------------------------------------------------------------------------------------
 		// Unary Operators

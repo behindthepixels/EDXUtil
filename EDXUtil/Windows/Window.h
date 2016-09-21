@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Core/Types.h"
+#include "../Containers/String.h"
 #include "Base.h"
 #include "Event.h"
 
@@ -11,7 +12,7 @@ namespace EDX
 	protected:
 		HWND mhWnd;
 		uint mWidth, mHeight;
-		wstring mstrTitle;
+		String mstrTitle;
 		bool mbActive;
 
 		POINTS mMousePt, mMousePrevPt;
@@ -32,7 +33,7 @@ namespace EDX
 		{
 		}
 
-		virtual bool Create(const wstring& strTitle,
+		virtual bool Create(const String& strTitle,
 			const uint iWidth,
 			const uint iHeight);
 
@@ -57,7 +58,7 @@ namespace EDX
 
 		bool OpenFileDialog(const char* initDir, const char* ext, const char* filter, char outPath[MAX_PATH]) const;
 		void CopyToClipBoard(const char* str, int strLength) const;
-		bool PasteFromClipBoard(string& str) const;
+		bool PasteFromClipBoard(String& str) const;
 
 		virtual bool ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -71,7 +72,7 @@ namespace EDX
 		HGLRC mhRC;
 		HDC mhDC;
 
-		bool Create(const wstring& strTitle,
+		bool Create(const String& strTitle,
 			const uint iWidth,
 			const uint iHeight);
 		virtual void Destroy();

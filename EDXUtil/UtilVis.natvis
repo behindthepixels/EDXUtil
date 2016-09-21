@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <!-- String visualizer -->
+  <Type Name="EDX::String">
+    <DisplayString Condition="Data.mSize == 0">Empty</DisplayString>
+    <DisplayString Condition="Data.mSize &lt; 0">Invalid</DisplayString>
+    <DisplayString Condition="Data.mCapacity &lt; Data.mSize">Invalid</DisplayString>
+    <DisplayString Condition="Data.mCapacity &gt;= Data.mSize">{Data.AllocatorInstance.Data,su}</DisplayString>
+    <StringView Condition="Data.mCapacity &gt;= Data.mSize">Data.AllocatorInstance.Data,su</StringView>
+  </Type>
+
+  <!-- Array<*,TFixedAllocator<*> > visualizer -->
+  <Type Name="EDX::Array&lt;*,TFixedAllocator&lt;*&gt;&gt;">
+    <DisplayString Condition="mSize == 0">Empty</DisplayString>
+    <DisplayString Condition="mSize &lt; 0">Invalid</DisplayString>
+    <DisplayString Condition="mCapacity &lt; mSize">Invalid</DisplayString>
+    <DisplayString Condition="mCapacity &gt;= mSize">Size={mSize}</DisplayString>
+    <Expand>
+      <ArrayItems Condition="mSize &lt;= mCapacity">
+        <Size>mSize</Size>
+        <ValuePointer>($T1*)AllocatorInstance.InlineData</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <!-- Array<*,InlineAllocator<*,*> > visualizer -->
+  <Type Name="EDX::Array&lt;*,InlineAllocator&lt;*,*&gt;&gt;">
+    <DisplayString Condition="mSize == 0">Empty</DisplayString>
+    <DisplayString Condition="mSize &lt; 0">Invalid</DisplayString>
+    <DisplayString Condition="mCapacity &lt; mSize">Invalid</DisplayString>
+    <DisplayString Condition="mCapacity &gt;= mSize">Size={mSize}</DisplayString>
+    <Expand>
+      <ArrayItems Condition="mSize &lt;= mCapacity">
+        <Size>mSize</Size>
+        <ValuePointer Condition="AllocatorInstance.SecondaryData.Data == 0">($T1*)AllocatorInstance.InlineData</ValuePointer>
+        <ValuePointer Condition="AllocatorInstance.SecondaryData.Data != 0">($T1*)AllocatorInstance.SecondaryData.Data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <!-- Array visualizer -->
+  <Type Name="EDX::Array&lt;*,*&gt;">
+    <DisplayString Condition="mSize == 0">Empty</DisplayString>
+    <DisplayString Condition="mSize &lt; 0">Invalid</DisplayString>
+    <DisplayString Condition="mCapacity &lt; mSize">Invalid</DisplayString>
+    <DisplayString Condition="mCapacity &gt;= mSize">Size={mSize}</DisplayString>
+    <Expand>
+      <ArrayItems Condition="mSize &lt;= mCapacity">
+        <Size>mSize</Size>
+        <ValuePointer>($T1*)AllocatorInstance.Data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <!-- SparseArray visualizer -->
+  <Type Name="EDX::SparseArray&lt;*,*&gt;">
+    <DisplayString Condition="(Data.mSize - NumFreeIndices) &lt;= 0">Empty</DisplayString>
+    <DisplayString Condition="Data.mSize &lt;= Data.mCapacity">Size={Data.mSize - NumFreeIndices}</DisplayString>
+    <Expand>
+      <IndexListItems Condition="Data.mSize &gt; 0 &amp;&amp; Data.mSize &lt;= Data.mCapacity">
+        <Size>Data.mSize</Size>
+        <ValueNode Condition="(AllocationFlags.SecondaryData.Data != 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(AllocationFlags.SecondaryData.Data)[$i/32]&gt;&gt;$i &amp; 1) != 0">($T1*)Data.AllocatorInstance.Data + $i</ValueNode>
+        <ValueNode Condition="(AllocationFlags.SecondaryData.Data == 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(AllocationFlags.InlineData        )[$i/32]&gt;&gt;$i &amp; 1) != 0">($T1*)Data.AllocatorInstance.Data + $i</ValueNode>
+        <ValueNode Condition="(AllocationFlags.SecondaryData.Data != 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(AllocationFlags.SecondaryData.Data)[$i/32]&gt;&gt;$i &amp; 1) == 0">"Invalid",sb</ValueNode>
+        <ValueNode Condition="(AllocationFlags.SecondaryData.Data == 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(AllocationFlags.InlineData        )[$i/32]&gt;&gt;$i &amp; 1) == 0">"Invalid",sb</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+
+  <!-- BitArray visualizer -->
+  <Type Name="EDX::BitArray&lt;*&gt;">
+    <DisplayString Condition="NumBits == 0">Empty</DisplayString>
+    <DisplayString Condition="NumBits &lt; 0">Invalid</DisplayString>
+    <DisplayString Condition="NumBits &gt; 0">NumBits={NumBits}, MaxBits={MaxBits}</DisplayString>
+    <Expand>
+      <IndexListItems Condition="NumBits &gt; 0">
+        <Size>NumBits</Size>
+        <ValueNode Condition="(AllocatorInstance.SecondaryData.Data != 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(AllocatorInstance.SecondaryData.Data	)[$i/32]&gt;&gt;$i &amp; 1) != 0">1</ValueNode>
+        <ValueNode Condition="(AllocatorInstance.SecondaryData.Data == 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(AllocatorInstance.InlineData			)[$i/32]&gt;&gt;$i &amp; 1) != 0">1</ValueNode>
+        <ValueNode Condition="(AllocatorInstance.SecondaryData.Data != 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(AllocatorInstance.SecondaryData.Data	)[$i/32]&gt;&gt;$i &amp; 1) == 0">0</ValueNode>
+        <ValueNode Condition="(AllocatorInstance.SecondaryData.Data == 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(AllocatorInstance.InlineData			)[$i/32]&gt;&gt;$i &amp; 1) == 0">0</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+
+  <!-- Pair visualizer -->
+  <Type Name="EDX::Pair&lt;*,*&gt;">
+    <DisplayString>({Key}, {Value})</DisplayString>
+  </Type>
+
+  <!-- SharedPtr visualizer -->
+  <Type Name="EDX::SharedPtr&lt;*,*&gt;">
+    <DisplayString Condition="Object == 0">Null</DisplayString>
+    <DisplayString Condition="Object != 0">Ptr={(void*)Object}, SharedRefs={SharedReferenceCount.ReferenceController->SharedReferenceCount}, WeakRefs={SharedReferenceCount.ReferenceController->WeakReferenceCount}, Object={*Object}</DisplayString>
+    <Expand>
+      <Item Condition="Object != 0" Name="[SharedReferenceCount]">SharedReferenceCount.ReferenceController->SharedReferenceCount</Item>
+      <Item Condition="Object != 0" Name="[WeakReferenceCount]">SharedReferenceCount.ReferenceController->WeakReferenceCount</Item>
+      <Item Condition="Object != 0" Name="[Ptr]">(void*)Object</Item>
+      <ExpandedItem Condition="Object != 0">*Object</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <!-- SharedRef visualizer -->
+  <Type Name="EDX::SharedRef&lt;*,*&gt;">
+    <DisplayString Condition="Object != 0">Ptr={(void*)Object}, SharedRefs={SharedReferenceCount.ReferenceController->SharedReferenceCount}, WeakRefs={SharedReferenceCount.ReferenceController->WeakReferenceCount}, Object={*Object}</DisplayString>
+    <Expand>
+      <Item Condition="Object != 0" Name="[SharedReferenceCount]">SharedReferenceCount.ReferenceController->SharedReferenceCount</Item>
+      <Item Condition="Object != 0" Name="[WeakReferenceCount]">SharedReferenceCount.ReferenceController->WeakReferenceCount</Item>
+      <Item Condition="Object != 0" Name="[Ptr]">(void*)Object</Item>
+      <ExpandedItem Condition="Object != 0">*Object</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <!-- WeakPtr visualizer -->
+  <Type Name="EDX::WeakPtr&lt;*,*&gt;">
+    <DisplayString Condition="Object == 0">Null</DisplayString>
+    <DisplayString Condition="WeakReferenceCount.ReferenceController->SharedReferenceCount == 0">Object has been destroyed</DisplayString>
+    <DisplayString Condition="Object != 0">Ptr={(void*)Object}, SharedRefs={WeakReferenceCount.ReferenceController->SharedReferenceCount}, WeakRefs={WeakReferenceCount.ReferenceController->WeakReferenceCount}, Object={*Object}</DisplayString>
+    <Expand>
+      <Item Condition="Object != 0" Name="[SharedReferenceCount]">WeakReferenceCount.ReferenceController->SharedReferenceCount</Item>
+      <Item Condition="Object != 0" Name="[WeakReferenceCount]">WeakReferenceCount.ReferenceController->WeakReferenceCount</Item>
+      <Item Condition="Object != 0 &amp;&amp; WeakReferenceCount.ReferenceController->SharedReferenceCount > 0" Name="[Ptr]">(void*)Object</Item>
+      <ExpandedItem Condition="Object != 0 &amp;&amp; WeakReferenceCount.ReferenceController->SharedReferenceCount > 0">*Object</ExpandedItem>
+    </Expand>
+  </Type>
+
+
+  <!-- MapBase visualizer -->
+  <Type Name="EDX::MapBase&lt;*,*,*,*&gt;">
+    <DisplayString Condition="Pairs.Elements.Data.mSize - Pairs.Elements.NumFreeIndices &lt;= 0">Empty</DisplayString>
+    <DisplayString Condition="Pairs.Elements.Data.mSize &lt;= Pairs.Elements.Data.mCapacity" >Size={Pairs.Elements.Data.mSize - Pairs.Elements.NumFreeIndices}</DisplayString>
+    <Expand>
+      <IndexListItems Condition="Pairs.Elements.Data.mSize - Pairs.Elements.NumFreeIndices &gt; 0 &amp;&amp; Pairs.Elements.Data.mSize &lt;= Pairs.Elements.Data.mCapacity">
+        <Size>Pairs.Elements.Data.mSize</Size>
+        <ValueNode Condition="(Pairs.Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data != 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(Pairs.Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data)[$i/32]&gt;&gt;$i &amp; 1) != 0">((SetElement&lt;Pair&lt;$T1,$T2&gt; &gt; *)Pairs.Elements.Data.AllocatorInstance.Data)[$i].Value</ValueNode>
+        <ValueNode Condition="(Pairs.Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data == 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(Pairs.Elements.AllocationFlags.AllocatorInstance.InlineData        )[$i/32]&gt;&gt;$i &amp; 1) != 0">((SetElement&lt;Pair&lt;$T1,$T2&gt; &gt; *)Pairs.Elements.Data.AllocatorInstance.Data)[$i].Value</ValueNode>
+        <ValueNode Condition="(Pairs.Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data != 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(Pairs.Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data)[$i/32]&gt;&gt;$i &amp; 1) == 0">"Invalid",sb</ValueNode>
+        <ValueNode Condition="(Pairs.Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data == 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(Pairs.Elements.AllocationFlags.AllocatorInstance.InlineData        )[$i/32]&gt;&gt;$i &amp; 1) == 0">"Invalid",sb</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+
+  <!-- Set visualizer -->
+  <Type Name="EDX::Set&lt;*,*,*&gt;">
+    <DisplayString Condition="Elements.Data.mSize - Elements.NumFreeIndices &lt;= 0">Empty</DisplayString>
+    <DisplayString Condition="Elements.Data.mSize &lt;= Elements.Data.mCapacity">Size={Elements.Data.mSize - Elements.NumFreeIndices}</DisplayString>
+    <Expand>
+      <IndexListItems Condition="Elements.Data.mSize - Elements.NumFreeIndices &gt; 0 &amp;&amp; Elements.Data.mSize &lt;= Elements.Data.mCapacity">
+        <Size>Elements.Data.mSize</Size>
+        <ValueNode Condition="(Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data != 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data)[$i/32]&gt;&gt;$i &amp; 1) != 0">((SetElement &lt;$T1&gt; *)Elements.Data.AllocatorInstance.Data)[$i].Value</ValueNode>
+        <ValueNode Condition="(Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data == 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(Elements.AllocationFlags.AllocatorInstance.InlineData        )[$i/32]&gt;&gt;$i &amp; 1) != 0">((SetElement &lt;$T1&gt; *)Elements.Data.AllocatorInstance.Data)[$i].Value</ValueNode>
+        <ValueNode Condition="(Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data != 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data)[$i/32]&gt;&gt;$i &amp; 1) == 0">"Invalid",sb</ValueNode>
+        <ValueNode Condition="(Elements.AllocationFlags.AllocatorInstance.SecondaryData.Data == 0) &amp;&amp; (reinterpret_cast&lt;uint32*&gt;(Elements.AllocationFlags.AllocatorInstance.InlineData        )[$i/32]&gt;&gt;$i &amp; 1) == 0">"Invalid",sb</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+
+  <!-- Function visualizer -->
+  <Type Name="EDX::Function_Private::DebugHelper&lt;*&gt;">
+    <DisplayString>{*Ptr}</DisplayString>
+    <Expand>
+      <ExpandedItem>*Ptr</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="EDX::FunctionRef&lt;*&gt;">
+    <DisplayString Condition="Ptr">{DebugPtrStorage}</DisplayString>
+    <DisplayString Condition="!Ptr">Unset</DisplayString>
+    <Expand>
+      <ExpandedItem Condition="Ptr">DebugPtrStorage</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="EDX::Function&lt;*&gt;">
+    <DisplayString Condition="Storage.AllocatedSize != 0">{DebugPtrStorage}</DisplayString>
+    <DisplayString Condition="Storage.AllocatedSize == 0">Unset</DisplayString>
+    <Expand>
+      <ExpandedItem Condition="Storage.AllocatedSize != 0">DebugPtrStorage</ExpandedItem>
+    </Expand>
+  </Type>
+
+</AutoVisualizer>

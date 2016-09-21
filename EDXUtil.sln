@@ -11,6 +11,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GUIViewer", "GUIViewer\GUIV
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "UnitTest\UnitTest.vcxproj", "{F2EBC7B3-2752-4D5C-B15A-D3D94FA82B13}"
+	ProjectSection(ProjectDependencies) = postProject
+		{197C330A-0EBC-47DC-8A32-0F05F315F0C1} = {197C330A-0EBC-47DC-8A32-0F05F315F0C1}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

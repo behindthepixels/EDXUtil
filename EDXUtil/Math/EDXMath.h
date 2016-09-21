@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Windows/Base.h"
+#include "../Core/Assertion.h"
 #include "Constants.h"
 
-#include <utility>
+#include <smmintrin.h>
 
 namespace EDX
 {
@@ -42,6 +43,11 @@ namespace EDX
 		inline float Acos(const float val) { return acosf(val); }
 		inline float Atan(const float val) { return atanf(val); }
 		inline float Atan2(const float val1, const float val2) { return atan2f(val1, val2); }
+
+		inline int TruncToInt(float val)
+		{
+			return _mm_cvtt_ss2si(_mm_set_ss(val));
+		}
 
 		inline int FloorToInt(const float val)
 		{
@@ -142,6 +148,25 @@ namespace EDX
 			return 1 << CeilLog2(val);
 		}
 
+		/** Divides two integers and rounds up */
+		template <class T>
+		inline T DivideAndRoundUp(T Dividend, T Divisor)
+		{
+			return (Dividend + Divisor - 1) / Divisor;
+		}
+
+		template <class T>
+		inline T DivideAndRoundDown(T Dividend, T Divisor)
+		{
+			return Dividend / Divisor;
+		}
+
+		template <typename T>
+		inline bool IsPowerOfTwo(T Value)
+		{
+			return ((Value & (Value - 1)) == (T)0);
+		}
+
 		template<uint Dim> class Pow2
 		{
 		public:
@@ -180,7 +205,7 @@ namespace EDX
 		template<class T>
 		inline T MonoCubicLerp(const T& e0, const T& e1, const T& e2, const T& e3, const float fLerp)
 		{
-			assert(abs(e2) < 1e8f);
+			Assert(abs(e2) < 1e8f);
 			T eVal = Math::Lerp(e1, e2, fLerp);
 
 			T emnusCur = fLerp;
@@ -209,7 +234,7 @@ namespace EDX
 			T eA3 = eD1 + eD2 - 2 * eK;
 			T eRet = eA3 * emnusCurCub + eA2 * emnusCurSqr + eA1 * emnusCur + eA0;
 			//eRet = eA0 * emnusCurCub + eA1 * emnusCurSqr + eA2 * emnusCur + eA3;
-			assert(NumericValid(eRet));
+			Assert(NumericValid(eRet));
 
 			return eRet;
 		}

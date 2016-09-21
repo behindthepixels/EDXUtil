@@ -6,7 +6,7 @@ namespace EDX
 
 	LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-	bool Window::Create(const wstring& strTitle,
+	bool Window::Create(const String& strTitle,
 		const uint iWidth,
 		const uint iHeight)
 	{
@@ -20,13 +20,13 @@ namespace EDX
 		DWORD winStyle = WS_OVERLAPPEDWINDOW;
 		DWORD winStyleEX = WS_EX_CLIENTEDGE;
 
-		RECT rect = { 0, 0, mWidth, mHeight };
+		RECT rect = { 0, 0, LONG(mWidth), LONG(mHeight) };
 		AdjustWindowRectEx(&rect, winStyle, NULL, winStyleEX);
 
 		mhWnd = ::CreateWindowEx(
 			winStyleEX,
 			Application::WinClassName,
-			mstrTitle.data(),
+			StringCast<WIDECHAR>(*mstrTitle).Get(),
 			winStyle,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
@@ -191,14 +191,14 @@ namespace EDX
 			CloseClipboard();
 			return;
 		}
-		memcpy(GlobalLock(hg), str, strLength);
+		Memory::Memcpy(GlobalLock(hg), str, strLength);
 		GlobalUnlock(hg);
 		SetClipboardData(CF_TEXT, hg);
 		CloseClipboard();
 		//GlobalFree(hg);
 	}
 
-	bool Window::PasteFromClipBoard(string& str) const
+	bool Window::PasteFromClipBoard(String& str) const
 	{
 		if (!IsClipboardFormatAvailable(CF_TEXT))
 			return false;
@@ -230,7 +230,7 @@ namespace EDX
 		return true;
 	}
 
-	bool GLWindow::Create(const wstring& strTitle,
+	bool GLWindow::Create(const String& strTitle,
 		const uint iWidth,
 		const uint iHeight)
 	{

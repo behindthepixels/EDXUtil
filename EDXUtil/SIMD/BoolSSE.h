@@ -67,8 +67,8 @@ namespace EDX
 		//----------------------------------------------------------------------------------------------
 		// Array Access
 		//----------------------------------------------------------------------------------------------
-		__forceinline bool operator [] (const size_t i) const { assert(i < 4); return (_mm_movemask_ps(m128) >> i) & 1; }
-		__forceinline int32& operator [] (const size_t i) { assert(i < 4); return v[i]; }
+		__forceinline bool operator [] (const size_t i) const { Assert(i < 4); return (_mm_movemask_ps(m128) >> i) & 1; }
+		__forceinline int32& operator [] (const size_t i) { Assert(i < 4); return v[i]; }
 
 		//----------------------------------------------------------------------------------------------
 		// Unary Operators

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Core/Types.h"
+#include "../Containers/String.h"
 #include "../Math/Vector.h"
 #include "../Math/Matrix.h"
 #include "Texture.h"
@@ -105,9 +106,9 @@ namespace EDX
 		class ShaderCompileException : public std::exception
 		{
 		public:
-			string mErrorInfo;
-			ShaderCompileException(const string& error)
-				: std::exception(("GLSL error: " + error).c_str())
+			String mErrorInfo;
+			ShaderCompileException(const String& error)
+				: std::exception(*(EDX_TEXT("GLSL error: ") + error))
 			{
 				mErrorInfo = error;
 			}

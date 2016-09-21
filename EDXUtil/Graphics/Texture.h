@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Core/Types.h"
 #include "../Graphics/Color.h"
 #include "../Math/Vector.h"
-#include "../Memory/BlockedArray.h"
+#include "../Containers/BlockedDimensionalArray.h"
 
 namespace EDX
 {
@@ -87,7 +87,7 @@ namespace EDX
 	template<class T>
 	using ConstantTexture3D = ConstantTexture < 3, T >;
 
-	template<uint Dim, typename T, typename Container = Array<Dim, T>>
+	template<uint Dim, typename T, typename Container = DimensionalArray<Dim, T>>
 	class Mipmap
 	{
 	private:
@@ -106,7 +106,7 @@ namespace EDX
 
 		~Mipmap()
 		{
-			SafeDeleteArray(mpLeveledTexels);
+			Memory::SafeDeleteArray(mpLeveledTexels);
 		}
 
 		void Generate(const Vec<Dim, int>& dims, const T* pRawTex);
@@ -118,7 +118,7 @@ namespace EDX
 
 		const T* GetMemoryPtr(const int level = 0) const
 		{
-			assert(level < mNumLevels);
+			Assert(level < mNumLevels);
 			return mpLeveledTexels[level].Data();
 		}
 		const int GetNumLevels() const
@@ -133,7 +133,7 @@ namespace EDX
 	using Mipmap3D = Mipmap < 3, T >;
 
 	template<typename TRet, typename TMem>
-	class ImageTexture : public Texture2D<TRet>
+	class ImageTexture : public EDX::Texture2D<TRet>
 	{
 	private:
 		int mTexWidth;

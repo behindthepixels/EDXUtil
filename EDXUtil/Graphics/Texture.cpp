@@ -181,7 +181,7 @@ namespace EDX
 		mTexInvWidth = 1.0f / float(mTexWidth);
 		mTexInvHeight = 1.0f / float(mTexHeight);
 
-		SafeDelete(pRawTex);
+		Memory::SafeDelete(pRawTex);
 	}
 
 	template<typename TRet, typename TMem>

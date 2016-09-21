@@ -1,6 +1,6 @@
 #include "ObjMesh.h"
 #include "../Math/Matrix.h"
-#include "../Memory/Memory.h"
+#include "../Core/Memory.h"
 
 namespace EDX
 {
@@ -11,9 +11,9 @@ namespace EDX
 		const bool forceComputeNormal,
 		const bool makeLeftHanded)
 	{
-		vector<Vector3> positionBuf;
-		vector<Vector3> normalBuf;
-		vector<float> texCoordBuf;
+		Array<Vector3> positionBuf;
+		Array<Vector3> normalBuf;
+		Array<float> texCoordBuf;
 		int iSmoothingGroup = forceComputeNormal ? 1 : 0;
 		bool hasSmoothGroup = false;
 		int iCurrentMtl = 0;
@@ -35,16 +35,16 @@ namespace EDX
 		{
 			fscanf_s(pInFile, "%s", strCommand, MAX_PATH);
 
-			if (0 == strcmp(strCommand, "#"))
+			if (0 == CStringUtil::Strcmp(strCommand, "#"))
 			{
 				// Comment
 			}
-			else if (0 == strcmp(strCommand, "v"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "v"))
 			{
 				// Vertex Position
 				float x, y, z;
 				fscanf_s(pInFile, "%f %f %f", &x, &y, &z);
-				positionBuf.push_back(Matrix::TransformPoint(Vector3(x, y, z), mWorld));
+				positionBuf.Add(Matrix::TransformPoint(Vector3(x, y, z), mWorld));
 
 				if (x > maxPt.x)
 					maxPt.x = x;
@@ -59,24 +59,24 @@ namespace EDX
 				if (z < minPt.z)
 					minPt.z = z;
 			}
-			else if (0 == strcmp(strCommand, "vt"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "vt"))
 			{
 				// Vertex TexCoord
 				float u, v;
 				fscanf_s(pInFile, "%f %f", &u, &v);
-				texCoordBuf.push_back(u);
-				texCoordBuf.push_back(1.0f - v);
+				texCoordBuf.Add(u);
+				texCoordBuf.Add(1.0f - v);
 				mTextured = true;
 			}
-			else if (0 == strcmp(strCommand, "vn"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "vn"))
 			{
 				// Vertex Normal
 				float x, y, z;
 				fscanf_s(pInFile, "%f %f %f", &x, &y, &z);
-				normalBuf.push_back(Matrix::TransformNormal(Vector3(x, y, z), mWorldInv));
+				normalBuf.Add(Matrix::TransformNormal(Vector3(x, y, z), mWorldInv));
 				mNormaled = true;
 			}
-			else if (0 == strcmp(strCommand, "f"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "f"))
 			{
 				// Parse face
 				fgets(strCommand, MAX_PATH, pInFile);
@@ -131,16 +131,16 @@ namespace EDX
 						{
 							sscanf_s(strCommand + startIdx, "%d", &posIdx);
 							if (posIdx < 0)
-								posIdx = positionBuf.size() + posIdx + 1;
+								posIdx = positionBuf.Size() + posIdx + 1;
 							Vertex.position = positionBuf[posIdx - 1];
 						}
 						else if (slashCount == 1)
 						{
 							sscanf_s(strCommand + startIdx, "%d/%d", &posIdx, &texIdx);
 							if (posIdx < 0)
-								posIdx = positionBuf.size() + posIdx + 1;
+								posIdx = positionBuf.Size() + posIdx + 1;
 							if (texIdx < 0)
-								texIdx = texCoordBuf.size() / 2 + texIdx + 1;
+								texIdx = texCoordBuf.Size() / 2 + texIdx + 1;
 							Vertex.position = positionBuf[posIdx - 1];
 							Vertex.fU = texCoordBuf[2 * texIdx - 2];
 							Vertex.fV = texCoordBuf[2 * texIdx - 1];
@@ -149,11 +149,11 @@ namespace EDX
 						{
 							sscanf_s(strCommand + startIdx, "%d/%d/%d", &posIdx, &texIdx, &normalIdx);
 							if (posIdx < 0)
-								posIdx = positionBuf.size() + posIdx + 1;
+								posIdx = positionBuf.Size() + posIdx + 1;
 							if (texIdx < 0)
-								texIdx = texCoordBuf.size() / 2 + texIdx + 1;
+								texIdx = texCoordBuf.Size() / 2 + texIdx + 1;
 							if (normalIdx < 0)
-								normalIdx = normalBuf.size() + normalIdx + 1;
+								normalIdx = normalBuf.Size() + normalIdx + 1;
 							Vertex.position = positionBuf[posIdx - 1];
 							Vertex.fU = texCoordBuf[2 * texIdx - 2];
 							Vertex.fV = texCoordBuf[2 * texIdx - 1];
@@ -164,9 +164,9 @@ namespace EDX
 					{
 						sscanf_s(strCommand + startIdx, "%d//%d", &posIdx, &normalIdx);
 						if (posIdx < 0)
-							posIdx = positionBuf.size() + posIdx + 1;
+							posIdx = positionBuf.Size() + posIdx + 1;
 						if (normalIdx < 0)
-							normalIdx = normalBuf.size() + normalIdx + 1;
+							normalIdx = normalBuf.Size() + normalIdx + 1;
 						Vertex.position = positionBuf[posIdx - 1];
 						Vertex.normal = normalBuf[normalIdx - 1];
 					}
@@ -193,14 +193,14 @@ namespace EDX
 					Face.aiIndices[2] = faceIdx[2];
 				}
 
-				mIndices.push_back(Face.aiIndices[0]);
-				mIndices.push_back(Face.aiIndices[1]);
-				mIndices.push_back(Face.aiIndices[2]);
+				mIndices.Add(Face.aiIndices[0]);
+				mIndices.Add(Face.aiIndices[1]);
+				mIndices.Add(Face.aiIndices[2]);
 
 				// Add face
 				Face.iSmoothingGroup = iSmoothingGroup;
-				mFaces.push_back(Face);
-				mMaterialIdx.push_back(iCurrentMtl);
+				mFaces.Add(Face);
+				mMaterialIdx.Add(iCurrentMtl);
 
 				if (vertexCount == 4)
 				{
@@ -219,17 +219,17 @@ namespace EDX
 							quadFace.aiIndices[2] = Face.aiIndices[2];
 						}
 
-						mIndices.push_back(quadFace.aiIndices[0]);
-						mIndices.push_back(quadFace.aiIndices[1]);
-						mIndices.push_back(quadFace.aiIndices[2]);
+						mIndices.Add(quadFace.aiIndices[0]);
+						mIndices.Add(quadFace.aiIndices[1]);
+						mIndices.Add(quadFace.aiIndices[2]);
 					}
 
 					quadFace.iSmoothingGroup = iSmoothingGroup;
-					mFaces.push_back(quadFace);
-					mMaterialIdx.push_back(iCurrentMtl);
+					mFaces.Add(quadFace);
+					mMaterialIdx.Add(iCurrentMtl);
 				}
 			}
-			else if (0 == strcmp(strCommand, "s")) // Handle smoothing group for normal computation
+			else if (0 == CStringUtil::Strcmp(strCommand, "s")) // Handle smoothing group for normal computation
 			{
 				fscanf_s(pInFile, "%s", strCommand, MAX_PATH);
 
@@ -241,31 +241,31 @@ namespace EDX
 				else
 					iSmoothingGroup = 0;
 			}
-			else if (0 == strcmp(strCommand, "mtllib"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "mtllib"))
 			{
 				// Material library
 				fscanf_s(pInFile, "%s", strMaterialFilename, MAX_PATH);
 			}
-			else if (0 == strcmp(strCommand, "usemtl"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "usemtl"))
 			{
 				// Material
 				char strName[MAX_PATH] = { 0 };
 				fscanf_s(pInFile, "%s", strName, MAX_PATH);
 
 				ObjMaterial currMtl = ObjMaterial(strName);
-				auto itMtl = find(mMaterials.begin(), mMaterials.end(), currMtl);
-				if (itMtl != mMaterials.end())
+				auto itMtl = mMaterials.Find(currMtl);
+				if (itMtl != INDEX_NONE)
 				{
-					iCurrentMtl = itMtl - mMaterials.begin();
+					iCurrentMtl = itMtl;
 				}
 				else
 				{
-					iCurrentMtl = mMaterials.size();
-					mMaterials.push_back(currMtl);
+					iCurrentMtl = mMaterials.Size();
+					mMaterials.Add(currMtl);
 				}
 
-				mSubsetStartIdx.push_back(mIndices.size());
-				mSubsetMtlIdx.push_back(iCurrentMtl);
+				mSubsetStartIdx.Add(mIndices.Size());
+				mSubsetMtlIdx.Add(iCurrentMtl);
 				mNumSubsets++;
 			}
 			else
@@ -279,15 +279,15 @@ namespace EDX
 		// Correct subsets index
 		if (mNumSubsets == 0)
 		{
-			mSubsetStartIdx.push_back(0);
+			mSubsetStartIdx.Add(0);
 			mNumSubsets = 1;
-			mSubsetMtlIdx.push_back(0);
+			mSubsetMtlIdx.Add(0);
 		}
 
-		mSubsetStartIdx.push_back(mIndices.size());
+		mSubsetStartIdx.Add(mIndices.Size());
 
-		mVertexCount = mVertices.size();
-		mTriangleCount = mIndices.size() / 3;
+		mVertexCount = mVertices.Size();
+		mTriangleCount = mIndices.Size() / 3;
 
 		// Init bounds
 		mBounds = Matrix::TransformBBox(BoundingBox(minPt, maxPt), mWorld);
@@ -297,32 +297,32 @@ namespace EDX
 			ComputeVertexNormals();
 
 		// Delete cache
-		for (uint i = 0; i < mCache.size(); i++)
+		for (uint i = 0; i < mCache.Size(); i++)
 		{
 			CacheEntry* pEntry = mCache[i];
 			while (pEntry != NULL)
 			{
 				CacheEntry* pNext = pEntry->pNext;
-				SafeDelete(pEntry);
+				Memory::SafeDelete(pEntry);
 				pEntry = pNext;
 			}
 		}
-		mCache.clear();
+		mCache.Clear();
 
 		if (strMaterialFilename[0])
 		{
-			const char* path1 = strrchr(strPath, '/');
-			const char* path2 = strrchr(strPath, '\\');
+			const char* path1 = CStringUtil::Strrchr(strPath, '/');
+			const char* path2 = CStringUtil::Strrchr(strPath, '\\');
 			int idx = (path1 ? path1 : path2) - strPath + 1;
 			char strMtlPath[MAX_PATH] = { 0 };
-			strncpy_s(strMtlPath, MAX_PATH, strPath, idx);
-			strcat_s(strMtlPath, MAX_PATH, strMaterialFilename);
+			CStringUtil::Strncpy(strMtlPath, MAX_PATH, strPath, idx);
+			CStringUtil::Strcat(strMtlPath, MAX_PATH, strMaterialFilename);
 
 			LoadMaterialsFromMtl(strMtlPath);
 		}
 
-		if (mMaterials.empty())
-			mMaterials.push_back(ObjMaterial(""));
+		if (mMaterials.Size() == 0)
+			mMaterials.Add(ObjMaterial(""));
 
 		return true;
 	}
@@ -334,12 +334,12 @@ namespace EDX
 		bool bFound = false;
 		uint iIndex = 0;
 
-		if (mCache.size() > iHash)
+		if (mCache.Size() > iHash)
 		{
 			CacheEntry* pEntry = mCache[iHash];
 			while (pEntry != NULL)
 			{
-				MeshVertex* pCacheVertex = mVertices.data() + pEntry->iIndex;
+				MeshVertex* pCacheVertex = mVertices.Data() + pEntry->iIndex;
 				if (memcmp(pCacheVertex, pVertex, sizeof(MeshVertex)) == 0)
 				{
 					bFound = true;
@@ -352,8 +352,8 @@ namespace EDX
 
 		if (!bFound)
 		{
-			iIndex = mVertices.size();
-			mVertices.push_back(*pVertex);
+			iIndex = mVertices.Size();
+			mVertices.Add(*pVertex);
 
 			CacheEntry* pEntryNew = new CacheEntry();
 			if (pEntryNew == NULL)
@@ -362,8 +362,8 @@ namespace EDX
 			pEntryNew->iIndex = iIndex;
 			pEntryNew->pNext = NULL;
 
-			while (mCache.size() <= iHash)
-				mCache.push_back(NULL);
+			while (mCache.Size() <= iHash)
+				mCache.Add(NULL);
 
 			CacheEntry* pEntryCached = mCache[iHash];
 
@@ -388,16 +388,16 @@ namespace EDX
 		fopen_s(&pInFile, strPath, "rt");
 		assert(pInFile);
 
-		auto itCurrMaterial = mMaterials.end();
+		int itCurrMaterial = INDEX_NONE;
 		while (!feof(pInFile))
 		{
 			fscanf_s(pInFile, "%s", strCommand, MAX_PATH);
 
-			if (0 == strcmp(strCommand, "#"))
+			if (0 == CStringUtil::Strcmp(strCommand, "#"))
 			{
 				// Comment
 			}
-			else if (0 == strcmp(strCommand, "newmtl"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "newmtl"))
 			{
 				// Switching active materials
 				char strName[MAX_PATH] = { 0 };
@@ -405,41 +405,41 @@ namespace EDX
 
 				ObjMaterial tmpMtl = ObjMaterial(strName);
 
-				itCurrMaterial = find(mMaterials.begin(), mMaterials.end(), tmpMtl);
+				itCurrMaterial = mMaterials.Find(tmpMtl);
 			}
 
-			if (itCurrMaterial == mMaterials.end())
+			if (itCurrMaterial == INDEX_NONE)
 				continue;
 
-			else if (0 == strcmp(strCommand, "Kd"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "Kd"))
 			{
 				// Diffuse color
 				float r, g, b;
 				fscanf_s(pInFile, "%f %f %f", &r, &g, &b);
-				itCurrMaterial->color = Color(r, g, b);
+				mMaterials[itCurrMaterial].color = Color(r, g, b);
 			}
-			else if (0 == strcmp(strCommand, "Ks"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "Ks"))
 			{
 				// Diffuse color
 				float r, g, b;
 				fscanf_s(pInFile, "%f %f %f", &r, &g, &b);
-				itCurrMaterial->specColor = Color(r, g, b);
+				mMaterials[itCurrMaterial].specColor = Color(r, g, b);
 			}
-			else if (0 == strcmp(strCommand, "Tf"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "Tf"))
 			{
 				// Diffuse color
 				float r, g, b;
 				fscanf_s(pInFile, "%f %f %f", &r, &g, &b);
-				itCurrMaterial->transColor = Color(r, g, b);
+				mMaterials[itCurrMaterial].transColor = Color(r, g, b);
 			}
-			else if (0 == strcmp(strCommand, "d") || 0 == strcmp(strCommand, "Tr"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "d") || 0 == CStringUtil::Strcmp(strCommand, "Tr"))
 			{
 				// Alpha
-				fscanf_s(pInFile, "%f", &itCurrMaterial->color.a);
+				fscanf_s(pInFile, "%f", &mMaterials[itCurrMaterial].color.a);
 			}
-			else if (0 == strcmp(strCommand, "map_Kd"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "map_Kd"))
 			{
-				if (!itCurrMaterial->strTexturePath[0])
+				if (!mMaterials[itCurrMaterial].strTexturePath[0])
 				{
 					// Texture
 					char strTexName[MAX_PATH] = { 0 };
@@ -448,18 +448,18 @@ namespace EDX
 					if (strTexName[strlen(strTexName) - 1] == '\n')
 						strTexName[strlen(strTexName) - 1] = '\0';
 
-					const char* path1 = strrchr(strPath, '/');
-					const char* path2 = strrchr(strPath, '\\');
+					const char* path1 = CStringUtil::Strrchr(strPath, '/');
+					const char* path2 = CStringUtil::Strrchr(strPath, '\\');
 					int idx = (path1 ? path1 : path2) - strPath + 1;
 
 					char strMtlPath[MAX_PATH] = { 0 };
-					strncpy_s(itCurrMaterial->strTexturePath, MAX_PATH, strPath, idx);
-					strcat_s(itCurrMaterial->strTexturePath, MAX_PATH, strTexName + 1);
+					CStringUtil::Strncpy(mMaterials[itCurrMaterial].strTexturePath, MAX_PATH, strPath, idx);
+					CStringUtil::Strcat(mMaterials[itCurrMaterial].strTexturePath, MAX_PATH, strTexName + 1);
 				}
 			}
-			else if (0 == strcmp(strCommand, "bump"))
+			else if (0 == CStringUtil::Strcmp(strCommand, "bump"))
 			{
-				if (!itCurrMaterial->strBumpPath[0])
+				if (!mMaterials[itCurrMaterial].strBumpPath[0])
 				{
 					// Texture
 					char strTexName[MAX_PATH] = { 0 };
@@ -468,13 +468,13 @@ namespace EDX
 					if (strTexName[strlen(strTexName) - 1] == '\n')
 						strTexName[strlen(strTexName) - 1] = '\0';
 
-					const char* path1 = strrchr(strPath, '/');
-					const char* path2 = strrchr(strPath, '\\');
+					const char* path1 = CStringUtil::Strrchr(strPath, '/');
+					const char* path2 = CStringUtil::Strrchr(strPath, '\\');
 					int idx = (path1 ? path1 : path2) - strPath + 1;
 
 					char strMtlPath[MAX_PATH] = { 0 };
-					strncpy_s(itCurrMaterial->strBumpPath, MAX_PATH, strPath, idx);
-					strcat_s(itCurrMaterial->strBumpPath, MAX_PATH, strTexName + 1);
+					CStringUtil::Strncpy(mMaterials[itCurrMaterial].strBumpPath, MAX_PATH, strPath, idx);
+					CStringUtil::Strcat(mMaterials[itCurrMaterial].strBumpPath, MAX_PATH, strTexName + 1);
 				}
 			}
 			else
@@ -490,9 +490,9 @@ namespace EDX
 	void ObjMesh::ComputeVertexNormals()
 	{
 		// First compute per face normals
-		vector<Vector3> vFaceNormals;
-		vFaceNormals.resize(mFaces.size());
-		for (auto i = 0; i < mFaces.size(); i++)
+		Array<Vector3> vFaceNormals;
+		vFaceNormals.Resize(mFaces.Size());
+		for (auto i = 0; i < mFaces.Size(); i++)
 		{
 			const Vector3& pt1 = GetVertexAt(mFaces[i].aiIndices[0]).position;
 			const Vector3& pt2 = GetVertexAt(mFaces[i].aiIndices[1]).position;
@@ -510,23 +510,23 @@ namespace EDX
 		struct VertexFace
 		{
 			int iCount;
-			vector<int> List;
+			Array<int> List;
 			VertexFace()
 				: iCount(0) {}
 		};
-		vector<VertexFace> VertexFaceList;
-		VertexFaceList.resize(mVertices.size());
-		for (auto i = 0; i < mFaces.size(); i++)
+		Array<VertexFace> VertexFaceList;
+		VertexFaceList.Resize(mVertices.Size());
+		for (auto i = 0; i < mFaces.Size(); i++)
 		{
 			for (auto j = 0; j < 3; j++)
 			{
 				VertexFaceList[mFaces[i].aiIndices[j]].iCount++;
-				VertexFaceList[mFaces[i].aiIndices[j]].List.push_back(i);
+				VertexFaceList[mFaces[i].aiIndices[j]].List.Add(i);
 			}
 		}
 
 		// Compute per vertex normals with smoothing group
-		for (auto i = 0; i < mFaces.size(); i++)
+		for (auto i = 0; i < mFaces.Size(); i++)
 		{
 			const MeshFace& face = mFaces[i];
 			for (auto j = 0; j < 3; j++)
@@ -568,7 +568,7 @@ namespace EDX
 			}
 		}
 
-		mVertexCount = mVertices.size();
+		mVertexCount = mVertices.Size();
 		mNormaled = true;
 	}
 
@@ -581,46 +581,46 @@ namespace EDX
 
 		Vector3 pt = Matrix::TransformPoint(Vector3(-length_2, 0.0f, length_2), mWorld);
 		mBounds = Math::Union(mBounds, pt);
-		mVertices.push_back(MeshVertex(pt,
+		mVertices.Add(MeshVertex(pt,
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			0.0f, 0.0f));
 
 		pt = Matrix::TransformPoint(Vector3(-length_2, 0.0f, -length_2), mWorld);
 		mBounds = Math::Union(mBounds, pt);
-		mVertices.push_back(MeshVertex(pt,
+		mVertices.Add(MeshVertex(pt,
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			0.0f, 1.0f));
 
 		pt = Matrix::TransformPoint(Vector3(length_2, 0.0f, -length_2), mWorld);
 		mBounds = Math::Union(mBounds, pt);
-		mVertices.push_back(MeshVertex(pt,
+		mVertices.Add(MeshVertex(pt,
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			1.0f, 1.0f));
 
 		pt = Matrix::TransformPoint(Vector3(length_2, 0.0f, length_2), mWorld);
 		mBounds = Math::Union(mBounds, pt);
-		mVertices.push_back(MeshVertex(pt,
+		mVertices.Add(MeshVertex(pt,
 			Math::Normalize(Matrix::TransformNormal(Vector3(Vector3::UNIT_Y), mWorldInv)),
 			1.0f, 0.0f));
 
-		mIndices.push_back(0);
-		mIndices.push_back(2);
-		mIndices.push_back(1);
-		mIndices.push_back(2);
-		mIndices.push_back(0);
-		mIndices.push_back(3);
+		mIndices.Add(0);
+		mIndices.Add(2);
+		mIndices.Add(1);
+		mIndices.Add(2);
+		mIndices.Add(0);
+		mIndices.Add(3);
 
-		mTriangleCount = mIndices.size() / 3;
-		mVertexCount = mVertices.size();
-		mMaterialIdx.assign(mTriangleCount, 0);
+		mTriangleCount = mIndices.Size() / 3;
+		mVertexCount = mVertices.Size();
+		mMaterialIdx.Init(mTriangleCount, 0);
 		mNormaled = mTextured = true;
 
-		mMaterials.push_back(ObjMaterial());
+		mMaterials.Add(ObjMaterial());
 
 		mNumSubsets = 1;
-		mSubsetMtlIdx.push_back(0);
-		mSubsetStartIdx.push_back(0);
-		mSubsetStartIdx.push_back(mIndices.size());
+		mSubsetMtlIdx.Add(0);
+		mSubsetStartIdx.Add(0);
+		mSubsetStartIdx.Add(mIndices.Size());
 	}
 
 	void ObjMesh::LoadSphere(const Vector3& pos, const Vector3& scl, const Vector3& rot, const float fRadius, const int slices, const int stacks)
@@ -641,7 +641,7 @@ namespace EDX
 
 				Vector3 pt = Matrix::TransformPoint(fRadius * vDir, mWorld);
 				mBounds = Math::Union(mBounds, pt);
-				mVertices.push_back(MeshVertex(
+				mVertices.Add(MeshVertex(
 					pt,
 					Matrix::TransformNormal(vDir, mWorldInv),
 					fPhi / float(Math::EDX_TWO_PI), fTheta / float(Math::EDX_PI)));
@@ -656,34 +656,34 @@ namespace EDX
 		{
 			for (int j = 0; j < slices; j++)
 			{
-				mIndices.push_back(i * (slices + 1) + j);
-				mIndices.push_back(i * (slices + 1) + j + 1);
-				mIndices.push_back((i + 1) * (slices + 1) + j);
+				mIndices.Add(i * (slices + 1) + j);
+				mIndices.Add(i * (slices + 1) + j + 1);
+				mIndices.Add((i + 1) * (slices + 1) + j);
 
-				mIndices.push_back(i * (slices + 1) + j + 1);
-				mIndices.push_back((i + 1) * (slices + 1) + j + 1);
-				mIndices.push_back((i + 1) * (slices + 1) + j);
+				mIndices.Add(i * (slices + 1) + j + 1);
+				mIndices.Add((i + 1) * (slices + 1) + j + 1);
+				mIndices.Add((i + 1) * (slices + 1) + j);
 			}
 		}
 
-		mTriangleCount = mIndices.size() / 3;
-		mVertexCount = mVertices.size();
-		mMaterialIdx.assign(mTriangleCount, 0);
+		mTriangleCount = mIndices.Size() / 3;
+		mVertexCount = mVertices.Size();
+		mMaterialIdx.Init(mTriangleCount, 0);
 		mNormaled = mTextured = true;
 
-		mMaterials.push_back(ObjMaterial());
+		mMaterials.Add(ObjMaterial());
 
 		mNumSubsets = 1;
-		mSubsetMtlIdx.push_back(0);
-		mSubsetStartIdx.push_back(0);
-		mSubsetStartIdx.push_back(mIndices.size());
+		mSubsetMtlIdx.Add(0);
+		mSubsetStartIdx.Add(0);
+		mSubsetStartIdx.Add(mIndices.Size());
 	}
 
 	void ObjMesh::Release()
 	{
-		mVertices.clear();
-		mIndices.clear();
-		mFaces.clear();
-		mCache.clear();
+		mVertices.Clear();
+		mIndices.Clear();
+		mFaces.Clear();
+		mCache.Clear();
 	}
 }

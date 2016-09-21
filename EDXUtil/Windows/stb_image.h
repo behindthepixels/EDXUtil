@@ -12,7 +12,7 @@
    #define STB_IMAGE_IMPLEMENTATION
    #include "stb_image.h"
 
-   You can #define STBI_ASSERT(x) before the #include to avoid using assert.h.
+   You can #define STBI_ASSERT(x) before the #include to avoid using Assert.h.
    And #define STBI_MALLOC, STBI_REALLOC, and STBI_FREE to avoid using malloc,realloc,free
 
 
@@ -143,7 +143,7 @@
 
 
    Latest revision history:
-      2.02  (2015-01-19) fix incorrect assert, fix warning
+      2.02  (2015-01-19) fix incorrect Assert, fix warning
       2.01  (2015-01-17) fix various warnings
       2.00b (2014-12-25) fix STBI_MALLOC in progressive JPEG
       2.00  (2014-12-25) optimize JPEG, including x86 SSE2 & ARM NEON SIMD
@@ -152,7 +152,7 @@
                          STBI_MALLOC,STBI_REALLOC,STBI_FREE
                          STBI_NO_*, STBI_ONLY_*
                          GIF bugfix
-      1.48  (2014-12-14) fix incorrectly-named assert()
+      1.48  (2014-12-14) fix incorrectly-named Assert()
       1.47  (2014-12-14) 1/2/4-bit PNG support (both grayscale and paletted)
                          optimize PNG
                          fix bug in interlaced PNG with user-specified channel count
@@ -376,6 +376,8 @@ License:
 // and only if iPhone convert-to-rgb processing is on).
 //
 
+#pragma warning(push)
+#pragma warning(disable: 4312)
 
 #ifndef STBI_NO_STDIO
 #include <stdio.h>
@@ -562,8 +564,8 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
 #endif
 
 #ifndef STBI_ASSERT
-#include <assert.h>
-#define STBI_ASSERT(x) assert(x)
+#include <Assert.h>
+#define STBI_ASSERT(x) Assert(x)
 #endif
 
 
@@ -6189,9 +6191,11 @@ STBIDEF int stbi_info_from_callbacks(stbi_io_callbacks const *c, void *user, int
 
 #endif // STB_IMAGE_IMPLEMENTATION
 
+#pragma warning(pop)
+
 /*
    revision history:
-      2.02  (2015-01-19) fix incorrect assert, fix warning
+      2.02  (2015-01-19) fix incorrect Assert, fix warning
       2.01  (2015-01-17) fix various warnings; suppress SIMD on gcc 32-bit without -msse2
       2.00b (2014-12-25) fix STBI_MALLOC in progressive JPEG
       2.00  (2014-12-25) optimize JPG, including x86 SSE2 & NEON SIMD (ryg)
@@ -6200,7 +6204,7 @@ STBIDEF int stbi_info_from_callbacks(stbi_io_callbacks const *c, void *user, int
                          STBI_MALLOC,STBI_REALLOC,STBI_FREE
                          GIF bugfix -- seemingly never worked
                          STBI_NO_*, STBI_ONLY_*
-      1.48  (2014-12-14) fix incorrectly-named assert()
+      1.48  (2014-12-14) fix incorrectly-named Assert()
       1.47  (2014-12-14) 1/2/4-bit PNG support, both direct and paletted (Omar Cornut & stb)
                          optimize PNG (ryg)
                          fix bug in interlaced PNG with user-specified channel count (stb)
@@ -6215,7 +6219,7 @@ STBIDEF int stbi_info_from_callbacks(stbi_io_callbacks const *c, void *user, int
       1.42  (2014-07-09)
               don't define _CRT_SECURE_NO_WARNINGS (affects user code)
               fixes to stbi__cleanup_jpeg path
-              added STBI_ASSERT to avoid requiring assert.h
+              added STBI_ASSERT to avoid requiring Assert.h
       1.41  (2014-06-25)
               fix search&replace from 1.36 that messed up comments/error messages
       1.40  (2014-06-22)

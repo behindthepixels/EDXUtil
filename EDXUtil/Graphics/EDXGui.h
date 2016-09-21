@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
+#include "../Containers/Array.h"
+#include "../Containers/Algorithm.h"
 #include "../Windows/Event.h"
 #include "Color.h"
-#include "../Memory/Array.h"
-#include "../Memory/RefPtr.h"
+#include "../Containers/DimensionalArray.h"
 
 #include "OpenGL.h"
 
@@ -145,8 +145,8 @@ namespace EDX
 			int CursorPos;
 			int CursorIdx;
 			int SelectIdx;
-			string BufferedString;
-			vector<int> StrWidthPrefixSum;
+			String BufferedString;
+			Array<int> StrWidthPrefixSum;
 
 			// Scroller states
 			int ScrollerInitY;
@@ -155,7 +155,7 @@ namespace EDX
 			bool ScrollerActive;
 
 			// Console states
-			string ConsoleTextBuffer;
+			String ConsoleTextBuffer;
 			float ConsoleScroller;
 		};
 
@@ -189,7 +189,7 @@ namespace EDX
 			static bool CheckBox(const char* str, bool& checked);
 			static bool RadioButton(const char* str, int activeVal, int& currentVal);
 			static void ComboBox(const char* lable, const ComboBoxItem* pItems, int numItems, int& selected);
-			static bool InputText(string& str, const int width = 100, const bool autoSelectAll = false, const bool autoClearOnEnter = false);
+			static bool InputText(String& str, const int width = 100, const bool autoSelectAll = false, const bool autoClearOnEnter = false);
 			static bool InputDigit(int& digit, const char* notation);
 			static void Scroller(int limitLen, int actualLen, float& lin);
 			static void BeginScrollableArea(int areaHeight, int& contentHeight, float& scroller);

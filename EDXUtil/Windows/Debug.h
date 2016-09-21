@@ -1,26 +1,69 @@
 #pragma once
 
 #include "Base.h"
+#include "../Core/Types.h"
 
 namespace EDX
 {
 	class Debug
 	{
 	public:
-		static void Write(const char* pTexts)
+
+		static bool IsDebuggerPresent()
 		{
-			if (IsDebuggerPresent() != 0)
+			return ::IsDebuggerPresent() != 0;
+		}
+
+		__forceinline static void DebugBreak()
+		{
+			if (IsDebuggerPresent())
 			{
-				OutputDebugStringA(pTexts);
+				__debugbreak();
 			}
 		}
-		static void WriteLine(const char* pTexts)
+
+		static void AssertFailedMessage(const char* Msg, const char* File, int Line, const TCHAR* Format = EDX_TEXT(""), ...);
+
+		template<typename CharType>
+		static void WriteLine(const CharType* pTexts)
 		{
-			if (IsDebuggerPresent() != 0)
+		}
+
+		template<>
+		static void WriteLine(const ANSICHAR* pTexts)
+		{
+			if (IsDebuggerPresent())
 			{
 				OutputDebugStringA(pTexts);
 				OutputDebugStringA("\n");
 			}
+		}
+
+		template<>
+		static void WriteLine(const WIDECHAR* pTexts)
+		{
+			if (IsDebuggerPresent())
+			{
+				OutputDebugStringW(pTexts);
+				OutputDebugStringW(L"\n");
+			}
+		}
+
+		template<typename CharType>
+		static void DebugMessageBox(const CharType* pTexts, const CharType* pCaption)
+		{
+		}
+
+		template<>
+		static void DebugMessageBox(const ANSICHAR* pTexts, const ANSICHAR* pCaption)
+		{
+			::MessageBoxA(nullptr, pTexts, pCaption, MB_OK);
+		}
+
+		template<>
+		static void DebugMessageBox(const WIDECHAR* pTexts, const WIDECHAR* pCaption)
+		{
+			::MessageBoxW(nullptr, pTexts, pCaption, MB_OK);
 		}
 	};
 }

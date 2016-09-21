@@ -64,8 +64,8 @@ namespace EDX
 			return Vec<3, T>(x * invW, y * invW, z * invW);
 		}
 
-		__forceinline const T& operator [] (const size_t idx) const { assert(idx < 4); return (&x)[idx]; }
-		__forceinline		 T& operator [] (const size_t idx)		 { assert(idx < 4); return (&x)[idx]; }
+		__forceinline const T& operator [] (const size_t idx) const { Assert(idx < 4); return (&x)[idx]; }
+		__forceinline		 T& operator [] (const size_t idx)		 { Assert(idx < 4); return (&x)[idx]; }
 
 		//----------------------------------------------------------------------------------------------
 		// Unary Operators

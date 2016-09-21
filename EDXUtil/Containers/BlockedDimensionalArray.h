@@ -1,14 +1,14 @@
 #pragma once
 
-#include "../EDXPrerequisites.h"
-#include "Array.h"
+#include "../Core/Types.h"
+#include "DimensionalArray.h"
 #include "Memory.h"
 #include "../Math/Vector.h"
 
 namespace EDX
 {
 	template<size_t Dimension, class T, int LogBlockSize = 2>
-	class BlockedArray
+	class BlockedDimensionalArray
 	{
 	private:
 		static const int BLOCK_SIZE = 1 << LogBlockSize;
@@ -22,26 +22,27 @@ namespace EDX
 		ArrayIndex<Dimension> mIntraBlockIndex;
 
 	public:
-		BlockedArray()
+		BlockedDimensionalArray()
 			: mpData(NULL)
 		{
 		}
-		virtual ~BlockedArray()
+		virtual ~BlockedDimensionalArray()
 		{
 			Free();
 		}
 
-		BlockedArray& operator = (const BlockedArray& rhs)
+		BlockedDimensionalArray& operator = (const BlockedDimensionalArray& rhs)
 		{
 			if (Size() != rhs.Size())
 			{
 				Free();
 				Init(rhs.Size());
 			}
-			memcpy(mpData, rhs.mpData, mRoundedSize * sizeof(T));
+
+			Memory::Memcpy(mpData, rhs.mpData, mRoundedSize * sizeof(T));
 			return *this;
 		}
-		BlockedArray& operator = (BlockedArray&& rhs)
+		BlockedDimensionalArray& operator = (BlockedDimensionalArray&& rhs)
 		{
 			if (Size() != rhs.Size())
 			{
@@ -59,9 +60,9 @@ namespace EDX
 			Vec<Dimension, uint> roundUpSize = RoundUp(size);
 			mRoundedSize = roundUpSize.Product();
 
-			FreeAligned(mpData);
-			mpData = AllocAligned<T>(mRoundedSize);
-			assert(mpData);
+			Memory::Free(mpData);
+			mpData = Memory::AlignedAlloc<T>(mRoundedSize);
+			Assert(mpData);
 
 			if (bClear)
 				Clear();
@@ -74,7 +75,7 @@ namespace EDX
 
 		__forceinline void Clear()
 		{
-			SafeClear(mpData, mRoundedSize);
+			Memory::SafeClear(mpData, mRoundedSize);
 		}
 
 		void SetData(const T* pData)
@@ -92,7 +93,7 @@ namespace EDX
 			size_t intraBlockLinearIdx = mIntraBlockIndex.LinearIndex(blockOffset);
 			size_t ret = (blockLinearIdx << mLogBlockElemCount) + intraBlockLinearIdx;
 
-			assert(ret < mRoundedSize);
+			Assert(ret < mRoundedSize);
 			return ret;
 		}
 
@@ -119,14 +120,14 @@ namespace EDX
 
 		__forceinline T& operator [] (const Vec<Dimension, uint>& idx) { return mpData[LinearIndex(idx)]; }
 		__forceinline const T operator [] (const Vec<Dimension, uint>& idx) const { return mpData[LinearIndex(idx)]; }
-		__forceinline T& operator [] (const size_t idx) { assert(idx < mRoundedSize); return mpData[idx]; }
-		__forceinline const T operator [] (const size_t idx) const { assert(idx <mRoundedSize); return mpData[idx]; }
+		__forceinline T& operator [] (const size_t idx) { Assert(idx < mRoundedSize); return mpData[idx]; }
+		__forceinline const T operator [] (const size_t idx) const { Assert(idx <mRoundedSize); return mpData[idx]; }
 		__forceinline const T* Data() const { return mpData; }
 		__forceinline T* ModifiableData() { return mpData; }
 
 		void Free()
 		{
-			FreeAligned(mpData);
+			Memory::Free(mpData);
 		}
 
 	private:
