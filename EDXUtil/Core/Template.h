@@ -169,9 +169,9 @@ namespace EDX
 	Expose_FormatSpecifier(int16, "%d")
 	Expose_FormatSpecifier(int32, "%d")
 	Expose_FormatSpecifier(int64, "%lld")
-	Expose_FormatSpecifier(float, "%f")
-	Expose_FormatSpecifier(double, "%f")
-	Expose_FormatSpecifier(long double, "%f")
+	Expose_FormatSpecifier(float, "%.2f")
+	Expose_FormatSpecifier(double, "%.2f")
+	Expose_FormatSpecifier(long double, "%.2f")
 
 
 

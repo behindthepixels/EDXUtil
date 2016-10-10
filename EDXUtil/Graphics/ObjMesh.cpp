@@ -612,7 +612,7 @@ namespace EDX
 
 		mTriangleCount = mIndices.Size() / 3;
 		mVertexCount = mVertices.Size();
-		mMaterialIdx.Init(mTriangleCount, 0);
+		mMaterialIdx.Init(0, mTriangleCount);
 		mNormaled = mTextured = true;
 
 		mMaterials.Add(ObjMaterial());
@@ -668,7 +668,7 @@ namespace EDX
 
 		mTriangleCount = mIndices.Size() / 3;
 		mVertexCount = mVertices.Size();
-		mMaterialIdx.Init(mTriangleCount, 0);
+		mMaterialIdx.Init(0, mTriangleCount);
 		mNormaled = mTextured = true;
 
 		mMaterials.Add(ObjMaterial());

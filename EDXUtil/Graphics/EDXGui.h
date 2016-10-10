@@ -233,7 +233,9 @@ namespace EDX
 				bool modified = false;
 
 				// Print slider text
-				Text("%s: %.2f", str, (float)*pVal);
+				String textArgs = EDX_TEXT("%s: ");
+				textArgs += FormatSpecifier<T>::GetFormatSpecifier();
+				Text(*textArgs, str, *pVal);
 				States->CurrentPosY -= 9;
 
 				const int ButtonSize = 12;
