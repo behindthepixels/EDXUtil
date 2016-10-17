@@ -3,6 +3,7 @@
 #include "../Windows/Base.h"
 #include "../Windows/Event.h"
 #include "../Math/Matrix.h"
+#include "../Windows/Timer.h"
 
 namespace EDX
 {
@@ -45,7 +46,10 @@ namespace EDX
 		Matrix mWorldToRaster;
 
 		// User input
-		Vector3 mDirKB;
+		Vector3 mMovementVelocity;
+		Vector3 mMovementImpulse;
+		Vector2 mRotateVelocity;
+		Timer mTimer;
 
 	public:
 		Camera();

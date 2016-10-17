@@ -25,8 +25,8 @@ namespace EDX
 		mNearClip = fNear;
 		mFarClip = fFar;
 
-		mMoveScaler = 0.25f;
-		mRotateScaler = 0.03f;
+		mMoveScaler = 2.5f;
+		mRotateScaler = 0.0025f;
 
 		mFOV_2 = mFOV / 2.0f;
 
@@ -70,32 +70,81 @@ namespace EDX
 
 	void Camera::Transform()
 	{
-		Matrix mCamRotate = Matrix::YawPitchRow(Math::ToDegrees(mYaw), Math::ToDegrees(mPitch), 0.0f);
-
-		Vector3 vWorldUp, vWorldAhead;
-		Vector3 vLocalUp = Vector3(0.0f, 1.0f, 0.0f), vLocalAhead = Vector3(0.0f, 0.0f, 1.0f);
-
-		vWorldUp = Matrix::TransformVector(vLocalUp, mCamRotate);
-		vWorldAhead = Matrix::TransformVector(vLocalAhead, mCamRotate);
-
-		Vector3 vVelocity = Vector3::ZERO;
-		if (Math::Length(mDirKB) > 0.0f)
+		auto KeyPressed = [](const int key)
 		{
-			vVelocity = Math::Normalize(mDirKB) * mMoveScaler;
-			mDirKB = Vector3::ZERO;
+			return GetActiveWindow() == GetForegroundWindow() &&
+				((GetAsyncKeyState(key) & 0x8000) != 0);
+		};
+
+		if (KeyPressed('W'))
+			mMovementImpulse.z += 1.0f;
+		if (KeyPressed('S'))
+			mMovementImpulse.z -= 1.0f;
+		if (KeyPressed('A'))
+			mMovementImpulse.x -= 1.0f;
+		if (KeyPressed('D'))
+			mMovementImpulse.x += 1.0f;
+		if (KeyPressed('Q'))
+			mMovementImpulse.y -= 1.0f;
+		if (KeyPressed('E'))
+			mMovementImpulse.y += 1.0f;
+
+		const float fDeltaTime = mTimer.GetElapsedTime();
+		if (Math::Length(mMovementVelocity) > 0.0f || Math::Length(mMovementImpulse) > 0.0f || Math::Length(mRotateVelocity) > 0.0f)
+		{
+			mYaw += mRotateVelocity.x;
+			mPitch += mRotateVelocity.y;
+			mRotateVelocity = Vector2::ZERO;
+
+			mPitch = Math::Max(mPitch, -float(Math::EDX_PI_2));
+			mPitch = Math::Min(mPitch, float(Math::EDX_PI_2));
+
+			Matrix mCamRotate = Matrix::YawPitchRow(Math::ToDegrees(mYaw), Math::ToDegrees(mPitch), 0.0f);
+
+			Vector3 vWorldUp, vWorldAhead;
+			Vector3 vLocalUp = Vector3(0.0f, 1.0f, 0.0f), vLocalAhead = Vector3(0.0f, 0.0f, 1.0f);
+
+			vWorldUp = Matrix::TransformVector(vLocalUp, mCamRotate);
+			vWorldAhead = Matrix::TransformVector(vLocalAhead, mCamRotate);
+
+			Vector3 vAcceleration = Vector3::ZERO;
+
+			// Update velocities
+			if (Math::Length(mMovementImpulse) > 0.0f)
+			{
+				float fMoveScaler = mMoveScaler;
+				if (KeyPressed(VK_SHIFT))
+					fMoveScaler *= 10.0f;
+				else if (KeyPressed(VK_CONTROL))
+					fMoveScaler *= 0.1f;
+
+				vAcceleration = fDeltaTime * Math::Normalize(mMovementImpulse) * fMoveScaler;
+				mMovementImpulse = Vector3::ZERO;
+
+				mMovementVelocity += vAcceleration;
+			}
+
+			Vector3 vWorldPosDelta = Matrix::TransformVector(mMovementVelocity, mCamRotate);
+
+			mPos += vWorldPosDelta;
+			mTarget = mPos + vWorldAhead;
+			mDir = Math::Normalize(mTarget - mPos);
+			mUp = vWorldUp;
+
+			mView = Matrix::LookAt(mPos, mTarget, mUp);
+			mViewInv = Matrix::Inverse(mView);
+			mRasterToWorld = Matrix::Mul(mViewInv, mRasterToCamera);
+			mWorldToRaster = Matrix::Inverse(mRasterToWorld);
 		}
 
-		Vector3 vWorldPosDelta = Matrix::TransformVector(vVelocity, mCamRotate);
+		// Apply velocity damping
+		{
+			const float fMovementVelocityDampingAmount = 10.0f;
+			const float fDampingFactor = Math::Clamp(fMovementVelocityDampingAmount * fDeltaTime, 0.0f, 0.75f);
 
-		mPos += vWorldPosDelta;
-		mTarget = mPos + vWorldAhead;
-		mDir = Math::Normalize(mTarget - mPos);
-		mUp = vWorldUp;
-
-		mView = Matrix::LookAt(mPos, mTarget, mUp);
-		mViewInv = Matrix::Inverse(mView);
-		mRasterToWorld = Matrix::Mul(mViewInv, mRasterToCamera);
-		mWorldToRaster = Matrix::Inverse(mRasterToWorld);
+			// Decelerate
+			mMovementVelocity += -mMovementVelocity * fDampingFactor;
+		}
 	}
 
 	void Camera::HandleMouseMsg(const MouseEventArgs& args)
@@ -109,43 +158,36 @@ namespace EDX
 				vMouseDelta.x = float(args.motionX);
 				vMouseDelta.y = float(args.motionY);
 
-				Vector2 vRotateVel = vMouseDelta * mRotateScaler;
-				mYaw += vRotateVel.x;
-				mPitch += vRotateVel.y;
+				mRotateVelocity = mRotateScaler * vMouseDelta;
 
-				mPitch = Math::Max(mPitch, -float(Math::EDX_PI_2));
-				mPitch = Math::Min(mPitch, float(Math::EDX_PI_2));
+				Transform();
 			}
 			break;
 		}
-
-		Transform();
 	}
 
 	void Camera::HandleKeyboardMsg(const KeyboardEventArgs& args)
 	{
-		switch (args.key)
-		{
-		case 'W':
-			mDirKB.z += 1.0f;
-			break;
-		case 'S':
-			mDirKB.z -= 1.0f;
-			break;
-		case 'A':
-			mDirKB.x -= 1.0f;
-			break;
-		case 'D':
-			mDirKB.x += 1.0f;
-			break;
-		case 'Q':
-			mDirKB.y -= 1.0f;
-			break;
-		case 'E':
-			mDirKB.y += 1.0f;
-			break;
-		}
-
-		Transform();
+		//switch (args.key)
+		//{
+		//case 'W':
+		//	mDirKB.z += 1.0f;
+		//	break;
+		//case 'S':
+		//	mDirKB.z -= 1.0f;
+		//	break;
+		//case 'A':
+		//	mDirKB.x -= 1.0f;
+		//	break;
+		//case 'D':
+		//	mDirKB.x += 1.0f;
+		//	break;
+		//case 'Q':
+		//	mDirKB.y -= 1.0f;
+		//	break;
+		//case 'E':
+		//	mDirKB.y += 1.0f;
+		//	break;
+		//}
 	}
 }
