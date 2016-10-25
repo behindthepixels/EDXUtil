@@ -18,10 +18,29 @@ namespace EDX
 		static const wchar_t* WinClassName;
 
 	public:
-		static void Init(HINSTANCE inst) { InstHandle = inst; GetCurrentDirectoryA(MAX_PATH, BaseDirectory); }
-		static HINSTANCE GetInstanceHandle() { return InstHandle; }
-		static Window* GetMainWindow() { return pMainWindow; }
-		static const char* GetBaseDirectory() { return BaseDirectory; }
+		static void Init(HINSTANCE inst)
+		{
+			InstHandle = inst;
+			GetCurrentDirectoryA(MAX_PATH, BaseDirectory);
+		}
+		static HINSTANCE GetInstanceHandle()
+		{
+			return InstHandle;
+		}
+		static Window* GetMainWindow()
+		{
+			return pMainWindow;
+		}
+		static const char* GetBaseDirectory()
+		{
+			return BaseDirectory;
+		}
+		static bool IsThisApplicationForeground()
+		{
+			uint32 ForegroundProcess;
+			::GetWindowThreadProcessId(::GetForegroundWindow(), (::DWORD*)&ForegroundProcess);
+			return (ForegroundProcess == ::GetCurrentProcessId());
+		}
 
 		static int Run(Window* pWindow);
 		static void Dispose();

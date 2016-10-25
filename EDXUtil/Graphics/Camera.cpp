@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "../Windows/Application.h"
 #include "../Windows/Event.h"
 
 namespace EDX
@@ -72,22 +73,24 @@ namespace EDX
 	{
 		auto KeyPressed = [](const int key)
 		{
-			return GetActiveWindow() == GetForegroundWindow() &&
-				((GetAsyncKeyState(key) & 0x8000) != 0);
+			return (GetAsyncKeyState(key) & 0x8000) != 0;
 		};
 
-		if (KeyPressed('W'))
-			mMovementImpulse.z += 1.0f;
-		if (KeyPressed('S'))
-			mMovementImpulse.z -= 1.0f;
-		if (KeyPressed('A'))
-			mMovementImpulse.x -= 1.0f;
-		if (KeyPressed('D'))
-			mMovementImpulse.x += 1.0f;
-		if (KeyPressed('Q'))
-			mMovementImpulse.y -= 1.0f;
-		if (KeyPressed('E'))
-			mMovementImpulse.y += 1.0f;
+		if (Application::IsThisApplicationForeground())
+		{
+			if (KeyPressed('W'))
+				mMovementImpulse.z += 1.0f;
+			if (KeyPressed('S'))
+				mMovementImpulse.z -= 1.0f;
+			if (KeyPressed('A'))
+				mMovementImpulse.x -= 1.0f;
+			if (KeyPressed('D'))
+				mMovementImpulse.x += 1.0f;
+			if (KeyPressed('Q'))
+				mMovementImpulse.y -= 1.0f;
+			if (KeyPressed('E'))
+				mMovementImpulse.y += 1.0f;
+		}
 
 		const float fDeltaTime = mTimer.GetElapsedTime();
 		if (Math::Length(mMovementVelocity) > 0.0f || Math::Length(mMovementImpulse) > 0.0f || Math::Length(mRotateVelocity) > 0.0f)
