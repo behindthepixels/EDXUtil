@@ -26,7 +26,7 @@ namespace EDX
 		mNearClip = fNear;
 		mFarClip = fFar;
 
-		mMoveScaler = 2.5f;
+		mMoveScaler = 1.0f;
 		mRotateScaler = 0.0025f;
 
 		mFOV_2 = mFOV / 2.0f;

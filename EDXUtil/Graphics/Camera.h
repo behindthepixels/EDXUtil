@@ -83,5 +83,8 @@ namespace EDX
 		inline Vector3 RasterToCamera(const Vector3 ptRas) const { return Matrix::TransformPoint(ptRas, mRasterToCamera); }
 		inline Vector3 CameraToRaster(const Vector3 ptCam) const { return Matrix::TransformPoint(ptCam, mCameraToRaster); }
 		inline bool CheckRaster(const Vector3& ptRas) const { return ptRas.x < float(mFilmResX) && ptRas.x >= 0.0f && ptRas.y < float(mFilmResY) && ptRas.y >= 0.0f; }
+
+		int GetFilmSizeX() const { return mFilmResX; }
+		int GetFilmSizeY() const { return mFilmResY; }
 	};
 }

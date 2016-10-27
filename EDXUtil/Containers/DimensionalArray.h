@@ -104,6 +104,13 @@ namespace EDX
 			: mpData(NULL)
 		{
 		}
+
+		DimensionalArray(const Vec<Dimension, uint>& size, bool bClear = true)
+			: mpData(NULL)
+		{
+			this->Init(size, bClear);
+		}
+
 		virtual ~DimensionalArray()
 		{
 			Free();
