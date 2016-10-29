@@ -101,12 +101,12 @@ namespace EDX
 
 	public:
 		DimensionalArray()
-			: mpData(NULL)
+			: mpData(nullptr)
 		{
 		}
 
 		DimensionalArray(const Vec<Dimension, uint>& size, bool bClear = true)
-			: mpData(NULL)
+			: mpData(nullptr)
 		{
 			this->Init(size, bClear);
 		}
@@ -130,7 +130,7 @@ namespace EDX
 
 		void Init(const Vec<Dimension, uint>& size, bool bClear = true)
 		{
-			Memory::Free(mpData);
+			Memory::SafeFree(mpData);
 			mIndex.Init(size);
 
 			mpData = Memory::AlignedAlloc<T>(mIndex.LinearSize());
@@ -211,7 +211,7 @@ namespace EDX
 
 		void Free()
 		{
-			Memory::Free(mpData);
+			Memory::SafeFree(mpData);
 		}
 	};
 

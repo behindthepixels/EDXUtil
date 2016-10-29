@@ -28,6 +28,13 @@ namespace EDX
 			NumericValid();
 		}
 
+		__forceinline Vec& operator = (const Vec& vOther)
+		{
+			x = vOther.x; y = vOther.y; z = vOther.z;
+			NumericValid();
+			return *this;
+		}
+
 		__forceinline Vec(const T& tVal)
 			: x(tVal), y(tVal), z(tVal)
 		{

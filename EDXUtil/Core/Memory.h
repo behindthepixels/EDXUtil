@@ -265,6 +265,16 @@ namespace EDX
 			_aligned_free(Ptr);
 		}
 
+		template<class T>
+		static void SafeFree(T*& Ptr)
+		{
+			if (Ptr != nullptr)
+			{
+				_aligned_free((void*)Ptr);
+				Ptr = nullptr;
+			}
+		}
+
 		static size_t GetAllocSize(void* Ptr)
 		{
 			if (!Ptr)

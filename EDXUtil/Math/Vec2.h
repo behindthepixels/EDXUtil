@@ -27,6 +27,12 @@ namespace EDX
 		__forceinline Vec(const Vec& vCopyFrom)
 			: x(vCopyFrom.x), y(vCopyFrom.y) {}
 
+		__forceinline Vec& operator = (const Vec& vOther)
+		{
+			x = vOther.x; y = vOther.y;
+			return *this;
+		}
+
 		__forceinline Vec(const T& tVal)
 			: x(tVal), y(tVal) {}
 

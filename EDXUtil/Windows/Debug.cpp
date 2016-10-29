@@ -8,15 +8,15 @@ namespace EDX
 		TCHAR DescriptionString[4096];
 		GET_VARARGS(DescriptionString, ARRAY_COUNT(DescriptionString), ARRAY_COUNT(DescriptionString) - 1, Format, Format);
 
-		TCHAR ErrorString[MAX_SPRINTF];
-		CString::Sprintf(ErrorString, EDX_TEXT("Assertion failed: %s"), StringCast<TCHAR>(static_cast<const ANSICHAR*>(Msg)).Get());
-
-		DebugMessageBox(DescriptionString, ErrorString);
-
 		TCHAR DebugString[MAX_SPRINTF];
-		CString::Sprintf(DebugString, EDX_TEXT("Assertion %s failed at %s line %i."), StringCast<TCHAR>(static_cast<const ANSICHAR*>(Msg)).Get(), StringCast<TCHAR>(static_cast<const ANSICHAR*>(File)).Get(), Line);
+		CString::Sprintf(DebugString, EDX_TEXT("Assertion \"%s\" failed at %s line %i\n%s"),
+			StringCast<TCHAR>(static_cast<const ANSICHAR*>(Msg)).Get(),
+			StringCast<TCHAR>(static_cast<const ANSICHAR*>(File)).Get(),
+			Line,
+			StringCast<TCHAR>(static_cast<const ANSICHAR*>(DescriptionString)).Get());
+
+		DebugMessageBox(DebugString, EDX_TEXT("Assertion Failed"));
 
 		WriteLine(DebugString);
-		WriteLine(DescriptionString);
 	}
 }
