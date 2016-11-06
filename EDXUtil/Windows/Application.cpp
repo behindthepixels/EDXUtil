@@ -30,8 +30,7 @@ namespace EDX
 				else
 					break;
 			}
-			
-			if (pWindow->IsActive())
+			else if (pWindow->IsActive())
 			{
 				pMainWindow->InvokeMainLoop();
 			}
