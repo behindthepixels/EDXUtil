@@ -10,6 +10,7 @@ namespace EDX
 	{
 		mTexDims = dims;
 		mNumLevels = Math::CeilLog2(Math::Max(mTexDims));
+		mNumLevels = Math::Max(mNumLevels, 1);
 
 		mpLeveledTexels = new Container[mNumLevels];
 		mpLeveledTexels[0].Init(mTexDims);

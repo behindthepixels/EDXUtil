@@ -44,6 +44,15 @@ namespace EDX
 		};
 
 		template <typename T>
+		struct LessEQ
+		{
+			__forceinline bool operator()(const T& Lhs, const T& Rhs) const
+			{
+				return Lhs <= Rhs;
+			}
+		};
+
+		template <typename T>
 		__forceinline void Reverse(T* Array, int32 ArraySize)
 		{
 			for (int32 i = 0, i2 = ArraySize - 1; i < ArraySize / 2 /*rounding down*/; ++i, --i2)
