@@ -251,9 +251,18 @@ namespace EDX
 		*
 		* @Return Pointer to Array of TCHAR if Num, otherwise the empty string
 		*/
-		__forceinline const TCHAR* operator*() const
+		__forceinline const TCHAR* GetCString() const
 		{
 			return Data.Size() ? Data.Data() : EDX_TEXT("");
+		}
+		/**
+		* Get pointer to the string
+		*
+		* @Return Pointer to Array of TCHAR if Num, otherwise the empty string
+		*/
+		__forceinline const TCHAR* operator*() const
+		{
+			return GetCString();
 		}
 
 		/**
