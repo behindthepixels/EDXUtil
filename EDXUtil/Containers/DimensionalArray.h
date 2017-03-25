@@ -202,12 +202,32 @@ namespace EDX
 			return mIndex.Stride(iDim);
 		}
 
-		__forceinline T& operator [] (const Vec<Dimension, uint>& idx) { return mpData[LinearIndex(idx)]; }
-		__forceinline const T operator [] (const Vec<Dimension, uint>& idx) const { return mpData[LinearIndex(idx)]; }
-		__forceinline T& operator [] (const size_t idx) { Assert(idx < mIndex.LinearSize()); return mpData[idx]; }
-		__forceinline const T operator [] (const size_t idx) const { Assert(idx < mIndex.LinearSize()); return mpData[idx]; }
-		__forceinline const T* Data() const { return mpData; }
-		__forceinline T* ModifiableData() { return mpData; }
+		__forceinline T& operator [] (const Vec<Dimension, uint>& idx)
+		{
+			return mpData[LinearIndex(idx)];
+		}
+		__forceinline const T operator [] (const Vec<Dimension, uint>& idx) const
+		{
+			return mpData[LinearIndex(idx)];
+		}
+		__forceinline T& operator [] (const size_t idx)
+		{
+			Assert(idx < mIndex.LinearSize());
+			return mpData[idx];
+		}
+		__forceinline const T operator [] (const size_t idx) const
+		{
+			Assert(idx < mIndex.LinearSize());
+			return mpData[idx];
+		}
+		__forceinline const T* Data() const
+		{
+			return mpData;
+		}
+		__forceinline T* ModifiableData()
+		{
+			return mpData;
+		}
 
 		void Free()
 		{
