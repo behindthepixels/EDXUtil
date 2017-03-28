@@ -1573,6 +1573,27 @@ namespace EDX
 	template<> struct IsZeroConstructType<String> { enum { Value = true }; };
 	Expose_TNameOf(String)
 
+		template <>
+	struct IsContiguousContainer<String>
+	{
+		enum { Value = true };
+	};
+
+	inline TCHAR* GetData(String& String)
+	{
+		return String.GetCharArray().Data();
+	}
+
+	inline const TCHAR* GetData(const String& String)
+	{
+		return String.GetCharArray().Data();
+	}
+
+	inline size_t GetSize(const String& String)
+	{
+		return String.GetCharArray().Size();
+	}
+
 		/** Case insensitive string hash function. */
 	__forceinline uint32 GetTypeHash(const String& S)
 	{

@@ -6,6 +6,7 @@
 #include "../Core/TypeHash.h"
 #include "../Core/Sorting.h"
 #include "../Core/Misc.h"
+#include <initializer_list>
 
 namespace EDX
 {
@@ -251,6 +252,13 @@ namespace EDX
 		}
 
 	public:
+		/** Initializer list constructor. */
+		Set(std::initializer_list<ElementType> InitList)
+			: HashSize(0)
+		{
+			Append(InitList);
+		}
+
 		/** Move constructor. */
 		Set(Set&& Other)
 			: HashSize(0)
@@ -300,6 +308,14 @@ namespace EDX
 		{
 			Reset();
 			Append(Other);
+			return *this;
+		}
+
+		/** Initializer list assignment operator */
+		Set& operator=(std::initializer_list<ElementType> InitList)
+		{
+			Reset();
+			Append(InitList);
 			return *this;
 		}
 
@@ -536,6 +552,15 @@ namespace EDX
 				Add(Move(Element));
 			}
 			OtherSet.Reset();
+		}
+
+		void Append(std::initializer_list<ElementType> InitList)
+		{
+			Reserve(Elements.Size() + (int32)InitList.size());
+			for (const ElementType& Element : InitList)
+			{
+				Add(Element);
+			}
 		}
 
 		/**
