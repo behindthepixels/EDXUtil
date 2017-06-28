@@ -6,8 +6,8 @@
     <DisplayString Condition="Data.mSize == 0">Empty</DisplayString>
     <DisplayString Condition="Data.mSize &lt; 0">Invalid</DisplayString>
     <DisplayString Condition="Data.mCapacity &lt; Data.mSize">Invalid</DisplayString>
-    <DisplayString Condition="Data.mCapacity &gt;= Data.mSize">{Data.AllocatorInstance.Data,su}</DisplayString>
-    <StringView Condition="Data.mCapacity &gt;= Data.mSize">Data.AllocatorInstance.Data,su</StringView>
+    <DisplayString Condition="Data.mCapacity &gt;= Data.mSize">{Data.AllocatorInstance.Data,s}</DisplayString>
+    <StringView Condition="Data.mCapacity &gt;= Data.mSize">Data.AllocatorInstance.Data,s</StringView>
   </Type>
 
   <!-- Array<*,TFixedAllocator<*> > visualizer -->

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <initializer_list>
+
 #include "AllocationPolicies.h"
 #include "../Core/Template.h"
 #include "../Core/Memory.h"
@@ -292,6 +294,17 @@ namespace EDX
 		{}
 
 		/**
+		* Initializer list constructor
+		*/
+		Array(std::initializer_list<InElementType> InitList)
+		{
+			// This is not strictly legal, as std::initializer_list's iterators are not guaranteed to be pointers, but
+			// this appears to be the case on all of our implementations.  Also, if it's not true on a new implementation,
+			// it will fail to compile rather than behave badly.
+			CopyToEmpty(InitList.begin(), (int32)InitList.size(), 0, 0);
+		}
+
+		/**
 		* Copy constructor with changed allocator. Use the common routine to perform the copy.
 		*
 		* @param Other The source array to copy.
@@ -322,6 +335,22 @@ namespace EDX
 		__forceinline Array(const Array& Other, int32 ExtraSlack)
 		{
 			CopyToEmpty(Other, 0, ExtraSlack);
+		}
+
+		/**
+		* Initializer list assignment operator. First deletes all currently contained elements
+		* and then copies from initializer list.
+		*
+		* @param InitList The initializer_list to copy from.
+		*/
+		__forceinline Array& operator=(std::initializer_list<InElementType> InitList)
+		{
+			DestructItems(Data(), mSize);
+			// This is not strictly legal, as std::initializer_list's iterators are not guaranteed to be pointers, but
+			// this appears to be the case on all of our implementations.  Also, if it's not true on a new implementation,
+			// it will fail to compile rather than behave badly.
+			CopyToEmpty(InitList.begin(), (int32)InitList.size(), mCapacity, 0);
+			return *this;
 		}
 
 		/**
@@ -1120,11 +1149,11 @@ namespace EDX
 		//			// Serialize the number of elements, block allocate the right amount of memory and deserialize
 		//			// the data as a giant memory blob in a single call to Serialize. Please see the function header
 		//			// for detailed documentation on limitations and implications.
-		//			int32 NewArrayNum;
-		//			Ar << NewArrayNum;
-		//			Clear(NewArrayNum);
-		//			AddUninitialized(NewArrayNum);
-		//			Ar.Serialize(Data(), NewArrayNum * SerializedElementSize);
+		//			int32 NewmSize;
+		//			Ar << NewmSize;
+		//			Clear(NewmSize);
+		//			AddUninitialized(NewmSize);
+		//			Ar.Serialize(Data(), NewmSize * SerializedElementSize);
 		//		}
 		//		else if (Ar.IsSaving())
 		//		{
@@ -1209,6 +1238,25 @@ namespace EDX
 		{
 			InsertUninitialized(Index, Count);
 			Memory::Memzero((uint8*)AllocatorInstance.GetAllocation() + Index * sizeof(ElementType), Count * sizeof(ElementType));
+		}
+
+		/**
+		* Inserts given elements into the array at given location.
+		*
+		* @param Items Array of elements to insert.
+		* @param InIndex Tells where to insert the new elements.
+		* @returns Location at which the item was inserted.
+		*/
+		int32 Insert(std::initializer_list<ElementType> InitList, const int32 InIndex)
+		{
+			InsertUninitialized(InIndex, (int32)InitList.size());
+
+			int32 Index = InIndex;
+			for (const ElementType& Element : InitList)
+			{
+				new (Data() + Index++) ElementType(Element);
+			}
+			return InIndex;
 		}
 
 		/**
@@ -1542,6 +1590,21 @@ namespace EDX
 			int32 Pos = AddUninitialized(Count);
 			ConstructItems<ElementType>(Data() + Pos, Ptr, Count);
 		}
+
+		/**
+		* Adds an initializer list of elements to the end of the TArray.
+		*
+		* @param InitList The initializer list of elements to add.
+		* @see Add, Insert
+		*/
+		FORCEINLINE void Append(std::initializer_list<ElementType> InitList)
+		{
+			int32 Count = (int32)InitList.size();
+
+			int32 Pos = AddUninitialized(Count);
+			ConstructItems<ElementType>(Data() + Pos, InitList.begin(), Count);
+		}
+
 
 		/**
 		* Appends the specified array to this array.
@@ -2060,10 +2123,10 @@ namespace EDX
 		}
 		__declspec(noinline) void ResizeShrink()
 		{
-			const int32 NewArrayMax = AllocatorInstance.CalculateSlackShrink(mSize, mCapacity, sizeof(ElementType));
-			if (NewArrayMax != mCapacity)
+			const int32 NewmCapacity = AllocatorInstance.CalculateSlackShrink(mSize, mCapacity, sizeof(ElementType));
+			if (NewmCapacity != mCapacity)
 			{
-				mCapacity = NewArrayMax;
+				mCapacity = NewmCapacity;
 				Assert(mCapacity >= mSize);
 				AllocatorInstance.ResizeAllocation(mSize, mCapacity, sizeof(ElementType));
 			}
@@ -2113,6 +2176,22 @@ namespace EDX
 			{
 				ResizeForCopy(mSize + ExtraSlack, PrevMax);
 				ConstructItems<ElementType>(Data(), Source.Data(), mSize);
+			}
+			else
+			{
+				mCapacity = 0;
+			}
+		}
+
+		template <typename OtherElementType>
+		void CopyToEmpty(const OtherElementType* OtherData, int32 OtherNum, int32 PrevMax, int32 ExtraSlack)
+		{
+			Assert(ExtraSlack >= 0);
+			mSize = OtherNum;
+			if (OtherNum || ExtraSlack || PrevMax)
+			{
+				ResizeForCopy(OtherNum + ExtraSlack, PrevMax);
+				ConstructItems<ElementType>(Data(), OtherData, OtherNum);
 			}
 			else
 			{
@@ -2493,6 +2572,12 @@ namespace EDX
 		enum { MoveWillEmptyContainer = AllocatorTraits<Allocator>::SupportsMove };
 	};
 
+
+	template <typename T, typename Allocator>
+	struct IsContiguousContainer<Array<T, Allocator>>
+	{
+		enum { Value = true };
+	};
 
 	/**
 	* Traits class which determines whether or not a type is a Array.

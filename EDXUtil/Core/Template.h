@@ -6,6 +6,74 @@
 
 namespace EDX
 {
+	/**
+	* Does a boolean AND of the ::Value static members of each type, but short-circuits if any Type::Value == false.
+	*/
+	template <typename... Types>
+	struct And;
+
+	template <bool LHSValue, typename... RHS>
+	struct AndValue
+	{
+		enum { Value = And<RHS...>::Value };
+	};
+
+	template <typename... RHS>
+	struct AndValue<false, RHS...>
+	{
+		enum { Value = false };
+	};
+
+	template <typename LHS, typename... RHS>
+	struct And<LHS, RHS...> : AndValue<LHS::Value, RHS...>
+	{
+	};
+
+	template <>
+	struct And<>
+	{
+		enum { Value = true };
+	};
+
+	/**
+	* Does a boolean OR of the ::Value static members of each type, but short-circuits if any Type::Value == true.
+	*/
+	template <typename... Types>
+	struct Or;
+
+	template <bool LHSValue, typename... RHS>
+	struct OrValue
+	{
+		enum { Value = Or<RHS...>::Value };
+	};
+
+	template <typename... RHS>
+	struct OrValue<true, RHS...>
+	{
+		enum { Value = true };
+	};
+
+	template <typename LHS, typename... RHS>
+	struct Or<LHS, RHS...> : OrValue<LHS::Value, RHS...>
+	{
+	};
+
+	template <>
+	struct Or<>
+	{
+		enum { Value = false };
+	};
+
+	/**
+	* Does a boolean NOT of the ::Value static members of the type.
+	*/
+	template <typename Type>
+	struct Not
+	{
+		enum { Value = !Type::Value };
+	};
+
+
 	/** Tests whether two typenames refer to the same type. */
 	template<typename A, typename B>
 	struct AreTypesEqual;
@@ -133,6 +201,41 @@ namespace EDX
 	template<typename T> struct IsCharType { enum { Value = false }; };
 	template<>           struct IsCharType<ANSICHAR> { enum { Value = true }; };
 	template<>           struct IsCharType<WIDECHAR> { enum { Value = true }; };
+
+
+	/**
+	* Traits class which tests if a type is a contiguous container.
+	* Requires:
+	*    [ &Container[0], &Container[0] + Num ) is a valid range
+	*/
+	template <typename T>
+	struct IsContiguousContainer
+	{
+		enum { Value = false };
+	};
+
+	template <typename T> struct IsContiguousContainer<             T& > : IsContiguousContainer<T> {};
+	template <typename T> struct IsContiguousContainer<             T&&> : IsContiguousContainer<T> {};
+	template <typename T> struct IsContiguousContainer<const          T> : IsContiguousContainer<T> {};
+	template <typename T> struct IsContiguousContainer<      volatile T> : IsContiguousContainer<T> {};
+	template <typename T> struct IsContiguousContainer<const volatile T> : IsContiguousContainer<T> {};
+
+	/**
+	* Specialization for C arrays (always contiguous)
+	*/
+	template <typename T, size_t N> struct IsContiguousContainer<               T[N]> { enum { Value = true }; };
+	template <typename T, size_t N> struct IsContiguousContainer<const          T[N]> { enum { Value = true }; };
+	template <typename T, size_t N> struct IsContiguousContainer<      volatile T[N]> { enum { Value = true }; };
+	template <typename T, size_t N> struct IsContiguousContainer<const volatile T[N]> { enum { Value = true }; };
+
+	/**
+	* Specialization for initializer lists (also always contiguous)
+	*/
+	template <typename T>
+	struct IsContiguousContainer<std::initializer_list<T>>
+	{
+		enum { Value = true };
+	};
 
 	/**
 	* FormatSpecifier, only applies to numeric types
@@ -913,10 +1016,53 @@ namespace EDX
 	* @param Index  The index to check.
 	* @return true if the index is valid, false otherwise.
 	*/
-	template <typename T, SIZE_T N>
+	template <typename T, size_t N>
 	static __forceinline bool IsValidArrayIndex(const T(&Array)[N], SIZE_T Index)
 	{
 		return Index < N;
+	}
+
+
+	/**
+	* Generically gets the data pointer of a contiguous container
+	*/
+	template<typename T, typename = typename EnableIf<IsContiguousContainer<T>::Value>::Type>
+	auto GetData(T&& Container) -> decltype(Container.GetData())
+	{
+		return Container.GetData();
+	}
+
+	template <typename T, size_t N>
+	constexpr T* GetData(T(&Container)[N])
+	{
+		return Container;
+	}
+
+	template <typename T>
+	constexpr T* GetData(std::initializer_list<T> List)
+	{
+		return List.begin();
+	}
+
+	/**
+	* Generically gets the number of items in a contiguous container
+	*/
+	template<typename T, typename = typename EnableIf<IsContiguousContainer<T>::Value>::Type>
+	size_t GetNum(T&& Container)
+	{
+		return (size_t)Container.Num();
+	}
+
+	template <typename T, size_t N>
+	constexpr size_t GetSize(T(&Container)[N])
+	{
+		return N;
+	}
+
+	template <typename T>
+	constexpr size_t GetSize(std::initializer_list<T> List)
+	{
+		return List.size();
 	}
 
 	/*----------------------------------------------------------------------------
@@ -1164,22 +1310,35 @@ namespace EDX
 	}
 
 	/**
-	* Swap two values.
+	* A traits class which specifies whether a Swap of a given type should swap the bits or use a traditional value-based swap.
 	*/
 	template <typename T>
-	__forceinline typename EnableIf<!TypeTraits<T>::NeedsMoveConstructor>::Type Swap(T& A, T& B)
+	struct UseBitwiseSwap
 	{
-		Memory::Memswap(&A, &B, sizeof(T));
+		// We don't use bitwise swapping for 'register' types because this will force them into memory and be slower.
+		enum { Value = !OrValue<__is_enum(T), IsPointerType<T>, IsArithmeticType<T>>::Value };
+	};
+
+
+	/**
+	* Swap two values.  Assumes the types are trivially relocatable.
+	*/
+	template <typename T>
+	inline typename EnableIf<UseBitwiseSwap<T>::Value>::Type Swap(T& A, T& B)
+	{
+		TypeCompatibleBytes<T> Temp;
+		Memory::Memcpy(&Temp, &A, sizeof(T));
+		Memory::Memcpy(&A, &B, sizeof(T));
+		Memory::Memcpy(&B, &Temp, sizeof(T));
 	}
 
 	template <typename T>
-	__forceinline typename EnableIf<TypeTraits<T>::NeedsMoveConstructor>::Type Swap(T& A, T& B)
+	inline typename EnableIf<!UseBitwiseSwap<T>::Value>::Type Swap(T& A, T& B)
 	{
 		T Temp = Move(A);
 		A = Move(B);
 		B = Move(Temp);
 	}
-
 	template <typename T>
 	inline void Exchange(T& A, T& B)
 	{
@@ -1323,46 +1482,6 @@ namespace EDX
 	struct IntegralConstant
 	{
 		static const T Value = Val;
-	};
-
-	/**
-	* Does LHS::Value && RHS::Value, but short-circuits if LHS::Value == false.
-	*/
-	template <bool LHSValue, typename RHS>
-	struct AndValue
-	{
-		enum { Value = RHS::Value };
-	};
-
-	template <typename RHS>
-	struct AndValue<false, RHS>
-	{
-		enum { Value = false };
-	};
-
-	template <typename LHS, typename RHS>
-	struct And : AndValue<LHS::Value, RHS>
-	{
-	};
-
-	/**
-	* Does LHS::Value || RHS::Value, but short-circuits if LHS::Value == true.
-	*/
-	template <bool LHSValue, typename RHS>
-	struct OrValue
-	{
-		enum { Value = RHS::Value };
-	};
-
-	template <typename RHS>
-	struct OrValue<true, RHS>
-	{
-		enum { Value = true };
-	};
-
-	template <typename LHS, typename RHS>
-	struct Or : OrValue<LHS::Value, RHS>
-	{
 	};
 
 	/**
