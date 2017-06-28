@@ -1309,31 +1309,8 @@ namespace EDX
 		return (T&&)Obj;
 	}
 
-	/**
-	* A traits class which specifies whether a Swap of a given type should swap the bits or use a traditional value-based swap.
-	*/
 	template <typename T>
-	struct UseBitwiseSwap
-	{
-		// We don't use bitwise swapping for 'register' types because this will force them into memory and be slower.
-		enum { Value = !OrValue<__is_enum(T), IsPointerType<T>, IsArithmeticType<T>>::Value };
-	};
-
-
-	/**
-	* Swap two values.  Assumes the types are trivially relocatable.
-	*/
-	template <typename T>
-	inline typename EnableIf<UseBitwiseSwap<T>::Value>::Type Swap(T& A, T& B)
-	{
-		TypeCompatibleBytes<T> Temp;
-		Memory::Memcpy(&Temp, &A, sizeof(T));
-		Memory::Memcpy(&A, &B, sizeof(T));
-		Memory::Memcpy(&B, &Temp, sizeof(T));
-	}
-
-	template <typename T>
-	inline typename EnableIf<!UseBitwiseSwap<T>::Value>::Type Swap(T& A, T& B)
+	inline void Swap(T& A, T& B)
 	{
 		T Temp = Move(A);
 		A = Move(B);
