@@ -225,9 +225,9 @@ namespace EDX
 		* Removes all elements from the map, potentially leaving space allocated for an expected number of elements about to be added.
 		* @param ExpectedNumElements - The number of elements about to be added to the set.
 		*/
-		__forceinline void Empty(int32 ExpectedNumElements = 0)
+		__forceinline void Clear(int32 ExpectedNumElements = 0)
 		{
-			Pairs.Empty(ExpectedNumElements);
+			Pairs.Clear(ExpectedNumElements);
 		}
 
 		/** Efficiently empties out the map but preserves all allocations and capacities */
@@ -499,7 +499,7 @@ namespace EDX
 		*/
 		template<typename Allocator> void GenerateKeyArray(Array<KeyType, Allocator>& OutArray) const
 		{
-			OutArray.Empty(Pairs.Size());
+			OutArray.Clear(Pairs.Size());
 			for (typename PairSetType::ConstIterator PairIt(Pairs); PairIt; ++PairIt)
 			{
 				new(OutArray) KeyType(PairIt->Key);
@@ -511,7 +511,7 @@ namespace EDX
 		*/
 		template<typename Allocator> void GenerateValueArray(Array<ValueType, Allocator>& OutArray) const
 		{
-			OutArray.Empty(Pairs.Size());
+			OutArray.Clear(Pairs.Size());
 			for (typename PairSetType::ConstIterator PairIt(Pairs); PairIt; ++PairIt)
 			{
 				new(OutArray) ValueType(PairIt->Value);

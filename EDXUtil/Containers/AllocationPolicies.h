@@ -673,6 +673,106 @@ namespace EDX
 		enum { SupportsMove = AllocatorTraits<SecondaryAllocator>::SupportsMove };
 	};
 
+	/**
+	* The fixed allocation policy allocates up to a specified number of elements in the same allocation as the container.
+	* It's like the inline allocator, except it doesn't provide secondary storage when the inline storage has been filled.
+	*/
+	template <uint32 NumInlineElements>
+	class FixedAllocator
+	{
+	public:
+
+		enum { NeedsElementType = true };
+		enum { RequireRangeCheck = true };
+
+		template<typename ElementType>
+		class ForElementType
+		{
+		public:
+
+			/** Default constructor. */
+			ForElementType()
+			{
+			}
+
+			/**
+			* Moves the state of another allocator into this one.
+			* Assumes that the allocator is currently empty, i.e. memory may be allocated but any existing elements have already been destructed (if necessary).
+			* @param Other - The allocator to move the state from.  This allocator should be left in a valid empty state.
+			*/
+			__forceinline void MoveToEmpty(ForElementType& Other)
+			{
+				Assert(this != &Other);
+
+				// Relocate objects from other inline storage
+				RelocateConstructItems<ElementType>((void*)InlineData, Other.GetInlineElements(), NumInlineElements);
+			}
+
+			// FContainerAllocatorInterface
+			__forceinline ElementType* GetAllocation() const
+			{
+				return GetInlineElements();
+			}
+
+			void ResizeAllocation(int32 PreviousNumElements, int32 NumElements, SIZE_T NumBytesPerElement)
+			{
+				// Ensure the requested allocation will fit in the inline data area.
+				Assert(NumElements <= NumInlineElements);
+			}
+
+			__forceinline int32 CalculateSlackReserve(int32 NumElements, SIZE_T NumBytesPerElement) const
+			{
+				// Ensure the requested allocation will fit in the inline data area.
+				Assert(NumElements <= NumInlineElements);
+				return NumInlineElements;
+			}
+			__forceinline int32 CalculateSlackShrink(int32 NumElements, int32 NumAllocatedElements, int32 NumBytesPerElement) const
+			{
+				// Ensure the requested allocation will fit in the inline data area.
+				Assert(NumAllocatedElements <= NumInlineElements);
+				return NumInlineElements;
+			}
+			__forceinline int32 CalculateSlackGrow(int32 NumElements, int32 NumAllocatedElements, int32 NumBytesPerElement) const
+			{
+				// Ensure the requested allocation will fit in the inline data area.
+				Assert(NumElements <= NumInlineElements);
+				return NumInlineElements;
+			}
+
+			SIZE_T GetAllocatedSize(int32 NumAllocatedElements, SIZE_T NumBytesPerElement) const
+			{
+				return 0;
+			}
+
+			bool HasAllocation()
+			{
+				return false;
+			}
+
+
+		private:
+			ForElementType(const ForElementType&);
+			ForElementType& operator=(const ForElementType&);
+
+			/** The data is stored in this array if less than NumInlineElements is needed. */
+			TypeCompatibleBytes<ElementType> InlineData[NumInlineElements];
+
+			/** @return the base of the aligned inline element data */
+			ElementType* GetInlineElements() const
+			{
+				return (ElementType*)InlineData;
+			}
+		};
+
+		typedef void ForAnyElementType;
+	};
+
+	template <uint32 NumInlineElements>
+	struct AllocatorTraits<FixedAllocator<NumInlineElements>> : AllocatorTraitsBase<FixedAllocator<NumInlineElements>>
+	{
+		enum { SupportsMove = true };
+	};
+
 	// We want these to be correctly typed as int32, but we don't want them to have linkage, so we make them macros
 #define NumBitsPerDWORD ((int32)32)
 #define NumBitsPerDWORDLogTwo ((int32)5)

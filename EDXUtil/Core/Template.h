@@ -1309,36 +1309,45 @@ namespace EDX
 		return (T&&)Obj;
 	}
 
-	/**
-	* A traits class which specifies whether a Swap of a given type should swap the bits or use a traditional value-based swap.
-	*/
-	template <typename T>
-	struct UseBitwiseSwap
-	{
-		// We don't use bitwise swapping for 'register' types because this will force them into memory and be slower.
-		enum { Value = !OrValue<__is_enum(T), IsPointerType<T>, IsArithmeticType<T>>::Value };
-	};
+	///**
+	//* A traits class which specifies whether a Swap of a given type should swap the bits or use a traditional value-based swap.
+	//*/
+	//template <typename T>
+	//struct UseBitwiseSwap
+	//{
+	//	// We don't use bitwise swapping for 'register' types because this will force them into memory and be slower.
+	//	enum { Value = !OrValue<__is_enum(T), IsPointerType<T>, IsArithmeticType<T>>::Value };
+	//};
 
 
-	/**
-	* Swap two values.  Assumes the types are trivially relocatable.
-	*/
-	template <typename T>
-	inline typename EnableIf<UseBitwiseSwap<T>::Value>::Type Swap(T& A, T& B)
-	{
-		TypeCompatibleBytes<T> Temp;
-		Memory::Memcpy(&Temp, &A, sizeof(T));
-		Memory::Memcpy(&A, &B, sizeof(T));
-		Memory::Memcpy(&B, &Temp, sizeof(T));
-	}
+	///**
+	//* Swap two values.  Assumes the types are trivially relocatable.
+	//*/
+	//template <typename T>
+	//inline typename EnableIf<UseBitwiseSwap<T>::Value>::Type Swap(T& A, T& B)
+	//{
+	//	TypeCompatibleBytes<T> Temp;
+	//	Memory::Memcpy(&Temp, &A, sizeof(T));
+	//	Memory::Memcpy(&A, &B, sizeof(T));
+	//	Memory::Memcpy(&B, &Temp, sizeof(T));
+	//}
+
+	//template <typename T>
+	//inline typename EnableIf<!UseBitwiseSwap<T>::Value>::Type Swap(T& A, T& B)
+	//{
+	//	T Temp = Move(A);
+	//	A = Move(B);
+	//	B = Move(Temp);
+	//}
 
 	template <typename T>
-	inline typename EnableIf<!UseBitwiseSwap<T>::Value>::Type Swap(T& A, T& B)
+	inline void Swap(T& A, T& B)
 	{
 		T Temp = Move(A);
 		A = Move(B);
 		B = Move(Temp);
 	}
+
 	template <typename T>
 	inline void Exchange(T& A, T& B)
 	{
@@ -1761,5 +1770,90 @@ namespace EDX
 
 		// Relocate B into the 'hole' left by the destruction of A, leaving a hole in B instead.
 		RelocateConstructItems<T>(&A, &B, 1);
+	}
+
+
+	// NestedInitializerList
+
+	template <class T, SIZE_T I>
+	struct NestedInitializerListImpl
+	{
+		using Type = std::initializer_list<typename NestedInitializerListImpl<T, I - 1>::Type>;
+	};
+
+	template <class T>
+	struct NestedInitializerListImpl<T, 0>
+	{
+		using Type = T;
+	};
+
+	template <class T, SIZE_T I>
+	using NestedInitializerList = typename NestedInitializerListImpl<T, I>::Type;
+
+	// InitListNestedCopy implementation
+
+	template <class T, class S>
+	inline void InitListNestedCopy(T&& iter, const S& s)
+	{
+		*iter++ = s;
+	}
+
+	template <class T, class S>
+	inline void InitListNestedCopy(T&& iter, std::initializer_list<S> s)
+	{
+		for (auto it = s.begin(); it != s.end(); ++it)
+		{
+			InitListNestedCopy(Forward<T>(iter), *it);
+		}
+	}
+
+
+	// InitializerListDimension implementation
+	template <class U>
+	struct InitializerListDimension
+	{
+		static constexpr SIZE_T Value = 0;
+	};
+
+	template <class T>
+	struct InitializerListDimension<std::initializer_list<T>>
+	{
+		static constexpr SIZE_T Value = 1 + InitializerListDimension<T>::Value;
+	};
+
+
+	// InitializerListShape implementation
+
+	template <SIZE_T I>
+	struct InitializerListShapeImpl
+	{
+		template <class T>
+		static constexpr SIZE_T Value(T t)
+		{
+			return t.size() == 0 ? 0 : InitializerListShapeImpl<I - 1>::Value(*t.begin());
+		}
+	};
+
+	template <>
+	struct InitializerListShapeImpl<0>
+	{
+		template <class T>
+		static constexpr SIZE_T Value(T t)
+		{
+			return t.size();
+		}
+	};
+
+	template <class Ret, class T, SIZE_T... I>
+	constexpr Ret InitializerListShape(T t, std::index_sequence<I...>)
+	{
+		using SizeType = typename Ret::ElementType;
+		return { SizeType(InitializerListShapeImpl<I>::Value(t))... };
+	}
+
+	template <class Ret, class T>
+	constexpr Ret DeriveShapeFromNestedInitList(T t)
+	{
+		return InitializerListShape<Ret, decltype(t)>(t, std::make_index_sequence<InitializerListDimension<decltype(t)>::Value>());
 	}
 }

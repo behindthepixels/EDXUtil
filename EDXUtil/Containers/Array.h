@@ -3,6 +3,7 @@
 #include <initializer_list>
 
 #include "AllocationPolicies.h"
+#include "../Core/Stream.h"
 #include "../Core/Template.h"
 #include "../Core/Memory.h"
 
@@ -638,7 +639,7 @@ namespace EDX
 		*/
 		__forceinline bool Empty() const
 		{
-			return mSize > 0;
+			return mSize == 0;
 		}
 
 		/**
@@ -1055,49 +1056,38 @@ namespace EDX
 			return !(*this == OtherArray);
 		}
 
-		///**
-		//* Serialization operator.
-		//*
-		//* @param Ar Archive to serialize the array with.
-		//* @param A Array to serialize.
-		//* @returns Passing the given archive.
-		//*/
-		//friend FArchive& operator<<(FArchive& Ar, Array& A)
-		//{
-		//	A.CountBytes(Ar);
-		//	if (sizeof(ElementType) == 1)
-		//	{
-		//		// Serialize simple bytes which require no construction or destruction.
-		//		Ar << A.mSize;
-		//		check(A.mSize >= 0);
-		//		if ((A.mSize || A.mCapacity) && Ar.IsLoading())
-		//		{
-		//			A.ResizeForCopy(A.mSize, A.mCapacity);
-		//		}
-		//		Ar.Serialize(A.Data(), A.Size());
-		//	}
-		//	else if (Ar.IsLoading())
-		//	{
-		//		// Load array.
-		//		int32 NewNum;
-		//		Ar << NewNum;
-		//		A.Clear(NewNum);
-		//		for (int32 i = 0; i < NewNum; i++)
-		//		{
-		//			Ar << *::new(A)ElementType;
-		//		}
-		//	}
-		//	else
-		//	{
-		//		// Save array.
-		//		Ar << A.mSize;
-		//		for (int32 i = 0; i < A.mSize; i++)
-		//		{
-		//			Ar << A[i];
-		//		}
-		//	}
-		//	return Ar;
-		//}
+		/**
+		* Serialization operator.
+		*
+		* @param stream Stream to serialize the array with.
+		* @param A Array to serialize.
+		* @returns Passing the given archive.
+		*/
+		friend Stream& operator << (Stream& stream, Array& A)
+		{
+			// Save array.
+			stream << A.mSize;
+			for (int32 i = 0; i < A.mSize; i++)
+			{
+				stream << A[i];
+			}
+
+			return stream;
+		}
+
+		friend Stream& operator >> (Stream& stream, Array& A)
+		{
+			// Load array.
+			int32 NewNum;
+			stream >> NewNum;
+			A.Clear(NewNum);
+			for (int32 i = 0; i < NewNum; i++)
+			{
+				stream >> *::new(A)ElementType;
+			}
+
+			return stream;
+		}
 
 		///**
 		//* Bulk serialize array as a single memory blob when loading. Uses regular serialization code for saving
@@ -1348,6 +1338,16 @@ namespace EDX
 			InsertUninitialized(Index, 1);
 			new(Data() + Index) ElementType(Item);
 			return Index;
+		}
+
+		void Assign(const ElementType* Elements, const int32 Count)
+		{
+			if (Count > mCapacity)
+			{
+				Resize(Count);
+			}
+
+			ConstructItems<ElementType>(Data(), Elements, Count);
 		}
 
 		/**
@@ -2588,6 +2588,10 @@ namespace EDX
 	template <typename InElementType, typename Allocator> struct IsTArray<const          Array<InElementType, Allocator>> { enum { Value = true }; };
 	template <typename InElementType, typename Allocator> struct IsTArray<      volatile Array<InElementType, Allocator>> { enum { Value = true }; };
 	template <typename InElementType, typename Allocator> struct IsTArray<const volatile Array<InElementType, Allocator>> { enum { Value = true }; };
+
+	// Static array
+	template<typename T, int Size>
+	using StaticArray = Array<T, FixedAllocator<Size>>;
 }
 
 //

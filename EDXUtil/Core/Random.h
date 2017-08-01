@@ -112,13 +112,15 @@ namespace EDX
 #endif
 		}
 
-		inline float GaussFloat()
+		inline float GaussFloat(const float mean = 0.0f, const float std = 1.0f)
 		{
 			float u1 = Float();
 			float u2 = Float();
 			if (u1 < 1e-6f)
 				u1 = 1e-6f;
-			return Math::Sqrt(-2.0f * Math::Log(u1)) * Math::Cos(2 * float(Math::EDX_PI) * u2);
+			float val = Math::Sqrt(-2.0f * Math::Log(u1)) * Math::Cos(2 * float(Math::EDX_PI) * u2);
+
+			return val * std + mean;
 		}
 	};
 }

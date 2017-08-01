@@ -1093,15 +1093,15 @@ namespace EDX
 		public:
 			/** Initialization constructor. */
 			__forceinline BaseKeyIterator(SetType& InSet, KeyInitType InKey)
-				: Set(InSet)
+				: mSet(InSet)
 				, Key(InKey)
 				, Id()
 			{
 				// The set's hash needs to be initialized to find the elements with the specified key.
-				Set.ConditionalRehash(Set.Elements.Size());
-				if (Set.HashSize)
+				mSet.ConditionalRehash(mSet.Elements.Size());
+				if (mSet.HashSize)
 				{
-					NextId = Set.GetTypedHash(KeyFuncs::GetKeyHash(Key));
+					NextId = mSet.GetTypedHash(KeyFuncs::GetKeyHash(Key));
 					++(*this);
 				}
 			}
@@ -1113,10 +1113,10 @@ namespace EDX
 
 				while (Id.IsValidId())
 				{
-					NextId = Set.GetInternalElement(Id).HashNextId;
+					NextId = mSet.GetInternalElement(Id).HashNextId;
 					Assert(Id != NextId);
 
-					if (KeyFuncs::Matches(KeyFuncs::GetSetKey(Set[Id]), Key))
+					if (KeyFuncs::Matches(KeyFuncs::GetSetKey(mSet[Id]), Key))
 					{
 						break;
 					}
@@ -1140,15 +1140,15 @@ namespace EDX
 			// Accessors.
 			__forceinline ItElementType* operator->() const
 			{
-				return &Set[Id];
+				return &mSet[Id];
 			}
 			__forceinline ItElementType& operator*() const
 			{
-				return Set[Id];
+				return mSet[Id];
 			}
 
 		protected:
-			SetType& Set;
+			SetType& mSet;
 			typename TypeTraits<typename KeyFuncs::KeyType>::ConstPointerType Key;
 			SetElementId Id;
 			SetElementId NextId;
@@ -1181,24 +1181,24 @@ namespace EDX
 		public:
 			__forceinline Iterator(Set& InSet, const typename BaseIterator<false>::ElementItType& InElementId)
 				: BaseIterator<false>(InElementId)
-				, Set(InSet)
+				, mSet(InSet)
 			{
 			}
 
 			__forceinline Iterator(Set& InSet)
 				: BaseIterator<false>(begin(InSet.Elements))
-				, Set(InSet)
+				, mSet(InSet)
 			{
 			}
 
 			/** Removes the current element from the set. */
 			__forceinline void RemoveCurrent()
 			{
-				Set.Remove(BaseIterator<false>::GetId());
+				mSet.Remove(BaseIterator<false>::GetId());
 			}
 
 		private:
-			Set& Set;
+			Set& mSet;
 		};
 
 		/** Used to iterate over the elements of a const Set. */
@@ -1216,17 +1216,17 @@ namespace EDX
 		public:
 			__forceinline KeyIterator(Set& InSet, KeyInitType InKey)
 				: BaseKeyIterator<false>(InSet, InKey)
-				, Set(InSet)
+				, mSet(InSet)
 			{}
 
 			/** Removes the current element from the set. */
 			__forceinline void RemoveCurrent()
 			{
-				Set.Remove(BaseKeyIterator<false>::Id);
+				mSet.Remove(BaseKeyIterator<false>::Id);
 				BaseKeyIterator<false>::Id = SetElementId();
 			}
 		private:
-			Set& Set;
+			Set& mSet;
 		};
 
 		/** Creates an iterator for the contents of this set */
@@ -1246,10 +1246,10 @@ namespace EDX
 		* DO NOT USE DIRECTLY
 		* STL-like iterators to enable range-based for loop support.
 		*/
-		__forceinline friend Iterator      begin(Set& Set) { return Iterator(Set, begin(Set.Elements)); }
-		__forceinline friend ConstIterator begin(const Set& Set) { return ConstIterator(begin(Set.Elements)); }
-		__forceinline friend Iterator      end(Set& Set) { return Iterator(Set, end(Set.Elements)); }
-		__forceinline friend ConstIterator end(const Set& Set) { return ConstIterator(end(Set.Elements)); }
+		__forceinline friend Iterator      begin(Set& Set) { return Iterator(Set, begin(mSet.Elements)); }
+		__forceinline friend ConstIterator begin(const Set& Set) { return ConstIterator(begin(mSet.Elements)); }
+		__forceinline friend Iterator      end(Set& Set) { return Iterator(Set, end(mSet.Elements)); }
+		__forceinline friend ConstIterator end(const Set& Set) { return ConstIterator(end(mSet.Elements)); }
 	};
 
 	template<typename ElementType, typename KeyFuncs, typename Allocator>

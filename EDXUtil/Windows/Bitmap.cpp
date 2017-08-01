@@ -135,6 +135,12 @@ namespace EDX
 	}
 
 	template<>
+	float* Bitmap::ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel)
+	{
+		return (float*)stbi_loadf(strFile, pWidth, pHeight, pChannel, 4);
+	}
+
+	template<>
 	Color* Bitmap::ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel)
 	{
 		return (Color*)stbi_loadf(strFile, pWidth, pHeight, pChannel, 4);
@@ -147,9 +153,15 @@ namespace EDX
 	}
 
 	template<>
-	float* Bitmap::ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel)
+	float* Bitmap::ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel, int requiredChannel)
 	{
-		return (float*)stbi_loadf(strFile, pWidth, pHeight, pChannel, 1);
+		return (float*)stbi_loadf(strFile, pWidth, pHeight, pChannel, requiredChannel);
+	}
+
+	template<>
+	uint8* Bitmap::ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel, int requiredChannel)
+	{
+		return (uint8*)stbi_load(strFile, pWidth, pHeight, pChannel, requiredChannel);
 	}
 }
 

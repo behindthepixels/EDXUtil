@@ -5,6 +5,7 @@
 #include "../Core/Crc.h"
 #include "../Core/CString.h"
 #include "../Core/Template.h"
+#include "../Core/Stream.h"
 #include "../Math/EDXMath.h"
 
 namespace EDX
@@ -1277,12 +1278,13 @@ namespace EDX
 		/**
 		* Serializes the string.
 		*
-		* @param Ar Reference to the serialization archive.
+		* @param Ar Reference to the serialization stream.
 		* @param S Reference to the string being serialized.
 		*
-		* @return Reference to the Archive after serialization.
+		* @return Reference to the Stream after serialization.
 		*/
-		//friend CORE_API FArchive& operator<<(FArchive& Ar, String& S);
+		friend Stream& operator<<(Stream& stream, String& S);
+		friend Stream& operator>>(Stream& stream, String& S);
 
 
 		/**

@@ -287,11 +287,87 @@ namespace EDX
 		{
 			__forceinline T operator()(const T& A, const T& B) { return A + B; }
 		};
+
 		template<>
 		struct Plus<void>
 		{
 			template<typename U, typename V>
 			__forceinline auto operator()(U&& A, V&& B) -> decltype(A + B) { return A + B; }
+		};
+
+		// Substract<T> specifically takes const T& and returns T.
+		// Substract<> (empty angle brackets) is late-binding, taking whatever is passed and returning the correct result type for (A-B)
+		template<typename T = void>
+		struct Substract
+		{
+			__forceinline T operator()(const T& A, const T& B) { return A - B; }
+		};
+
+		template<>
+		struct Substract<void>
+		{
+			template<typename U, typename V>
+			__forceinline auto operator()(U&& A, V&& B) -> decltype(A - B) { return A - B; }
+		};
+
+		// Multiply<T> specifically takes const T& and returns T.
+		// Multiply<> (empty angle brackets) is late-binding, taking whatever is passed and returning the correct result type for (A+B)
+		template<typename T = void>
+		struct Multiply
+		{
+			__forceinline T operator()(const T& A, const T& B) { return A * B; }
+		};
+
+		template<>
+		struct Multiply<void>
+		{
+			template<typename U, typename V>
+			__forceinline auto operator()(U&& A, V&& B) -> decltype(A * B) { return A * B; }
+		};
+
+		// Divide<T> specifically takes const T& and returns T.
+		// Divide<> (empty angle brackets) is late-binding, taking whatever is passed and returning the correct result type for (A+B)
+		template<typename T = void>
+		struct Divide
+		{
+			__forceinline T operator()(const T& A, const T& B) { return A / B; }
+		};
+
+		template<>
+		struct Divide<void>
+		{
+			template<typename U, typename V>
+			__forceinline auto operator()(U&& A, V&& B) -> decltype(A / B) { return A / B; }
+		};
+
+		// Pow<T> specifically takes const T& and returns T.
+		// Pow<> (empty angle brackets) is late-binding, taking whatever is passed and returning the correct result type for (A+B)
+		template<typename T = void>
+		struct Pow
+		{
+			__forceinline T operator()(const T& A, const T& B) { return Math::Pow(A, B); }
+		};
+
+		template<>
+		struct Pow<void>
+		{
+			template<typename U, typename V>
+			__forceinline auto operator()(U&& A, V&& B) -> decltype(A * B) { return Math::Pow(A, B); }
+		};
+
+		// Exp<T> specifically takes const T& and returns T.
+		// Exp<> (empty angle brackets) is late-binding, taking whatever is passed and returning the correct result type for (A+B)
+		template<typename T = void>
+		struct Exp
+		{
+			__forceinline T operator()(const T& A, const T& B) { return Math::Pow(A, B); }
+		};
+
+		template<>
+		struct Exp<void>
+		{
+			template<typename U, typename V>
+			__forceinline auto operator()(U&& A, V&& B) -> decltype(A * B) { return Math::Pow(A, B); }
 		};
 
 		/**

@@ -210,6 +210,15 @@
     <ClInclude Include="Windows\Threading.h">
       <Filter>Source Files\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Stream.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\SparseMatrix.h">
+      <Filter>Source Files\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\FileStream.h">
+      <Filter>Source Files\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Windows\Window.cpp">
@@ -258,6 +267,12 @@
       <Filter>Source Files\Windows</Filter>
     </ClCompile>
     <ClCompile Include="Windows\Threading.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Stream.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\FileStream.cpp">
       <Filter>Source Files\Windows</Filter>
     </ClCompile>
   </ItemGroup>

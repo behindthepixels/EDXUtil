@@ -42,6 +42,7 @@
     <ClInclude Include="Core\Random.h" />
     <ClInclude Include="Core\SmartPointer.h" />
     <ClInclude Include="Core\Sorting.h" />
+    <ClInclude Include="Core\Stream.h" />
     <ClInclude Include="Core\Template.h" />
     <ClInclude Include="Core\TypeHash.h" />
     <ClInclude Include="Core\Types.h" />
@@ -59,6 +60,7 @@
     <ClInclude Include="Math\FFT.h" />
     <ClInclude Include="Math\Matrix.h" />
     <ClInclude Include="Math\Ray.h" />
+    <ClInclude Include="Math\SparseMatrix.h" />
     <ClInclude Include="Math\Vec2.h" />
     <ClInclude Include="Math\Vec3.h" />
     <ClInclude Include="Math\Vec4.h" />
@@ -74,6 +76,7 @@
     <ClInclude Include="Windows\Bitmap.h" />
     <ClInclude Include="Windows\Debug.h" />
     <ClInclude Include="Windows\Event.h" />
+    <ClInclude Include="Windows\FileStream.h" />
     <ClInclude Include="Windows\stb_image.h" />
     <ClInclude Include="Windows\Threading.h" />
     <ClInclude Include="Windows\Timer.h" />
@@ -83,6 +86,7 @@
     <ClCompile Include="Containers\String.cpp" />
     <ClCompile Include="Core\Crc.cpp" />
     <ClCompile Include="Core\CString.cpp" />
+    <ClCompile Include="Core\Stream.cpp" />
     <ClCompile Include="Graphics\Camera.cpp" />
     <ClCompile Include="Graphics\Color.cpp" />
     <ClCompile Include="Graphics\EDXGui.cpp" />
@@ -94,6 +98,7 @@
     <ClCompile Include="Windows\Application.cpp" />
     <ClCompile Include="Windows\Bitmap.cpp" />
     <ClCompile Include="Windows\Debug.cpp" />
+    <ClCompile Include="Windows\FileStream.cpp" />
     <ClCompile Include="Windows\Threading.cpp" />
     <ClCompile Include="Windows\Window.cpp" />
   </ItemGroup>

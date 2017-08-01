@@ -295,25 +295,25 @@ namespace EDX
 	//* Serializes a string as ANSI char array.
 	//*
 	//* @param	String			String to serialize
-	//* @param	Ar				Archive to serialize with
+	//* @param	stream				Archive to serialize with
 	//* @param	MinCharacters	Minimum number of characters to serialize.
 	//*/
-	//void String::SerializeAsANSICharArray(FArchive& Ar, int32 MinCharacters) const
+	//void String::SerializeAsANSICharArray(FArchive& stream, int32 MinCharacters) const
 	//{
 	//	int32	Length = Math::Max(Len(), MinCharacters);
-	//	Ar << Length;
+	//	stream << Length;
 
 	//	for (int32 CharIndex = 0; CharIndex<Len(); CharIndex++)
 	//	{
 	//		ANSICHAR AnsiChar = CharCast<ANSICHAR>((*this)[CharIndex]);
-	//		Ar << AnsiChar;
+	//		stream << AnsiChar;
 	//	}
 
 	//	// Zero pad till minimum number of characters are written.
 	//	for (int32 i = Len(); i<Length; i++)
 	//	{
 	//		ANSICHAR NullChar = 0;
-	//		Ar << NullChar;
+	//		stream << NullChar;
 	//	}
 	//}
 
@@ -1017,115 +1017,97 @@ namespace EDX
 		return ResultString;
 	}
 
-//	FArchive& operator<<(FArchive& Ar, String& A)
-//	{
-//		// > 0 for ANSICHAR, < 0 for UCS2CHAR serialization
-//
-//		if (Ar.IsLoading())
-//		{
-//			int32 SaveNum;
-//			Ar << SaveNum;
-//
-//			bool LoadUCS2Char = SaveNum < 0;
-//			if (LoadUCS2Char)
-//			{
-//				SaveNum = -SaveNum;
-//			}
-//
-//			// If SaveNum is still less than 0, they must have passed in MIN_INT. Archive is corrupted.
-//			if (SaveNum < 0)
-//			{
-//				Ar.ArIsError = 1;
-//				Ar.ArIsCriticalError = 1;
-//				UE_LOG(LogNetSerialization, Error, EDX_TEXT("Archive is corrupted"));
-//				return Ar;
-//			}
-//
-//			auto MaxSerializeSize = Ar.GetMaxSerializeSize();
-//			// Protect against network packets allocating too much memory
-//			if ((MaxSerializeSize > 0) && (SaveNum > MaxSerializeSize))
-//			{
-//				Ar.ArIsError = 1;
-//				Ar.ArIsCriticalError = 1;
-//				UE_LOG(LogNetSerialization, Error, EDX_TEXT("String is too large"));
-//				return Ar;
-//			}
-//
-//			// Resize the array only if it passes the above tests to prevent rogue packets from crashing
-//			A.Data.Clear(SaveNum);
-//			A.Data.AddUninitialized(SaveNum);
-//
-//			if (SaveNum)
-//			{
-//				if (LoadUCS2Char)
-//				{
-//					// read in the unicode string and byteswap it, etc
-//					auto Passthru = StringMemoryPassthru<UCS2CHAR>(A.Data.Data(), SaveNum, SaveNum);
-//					Ar.Serialize(Passthru.Get(), SaveNum * sizeof(UCS2CHAR));
-//					// Ensure the string has a null terminator
-//					Passthru.Get()[SaveNum - 1] = '\0';
-//					Passthru.Apply();
-//
-//					INTEL_ORDER_TCHARARRAY(A.Data.Data())
-//
-//						// Since Microsoft's vsnwprintf implementation raises an invalid parameter warning
-//						// with a character of 0xffff, scan for it and terminate the string there.
-//						// 0xffff isn't an actual Unicode character anyway.
-//						int Index = 0;
-//					if (A.FindChar(0xffff, Index))
-//					{
-//						A[Index] = '\0';
-//						A.TrimToNullTerminator();
-//					}
-//				}
-//				else
-//				{
-//					auto Passthru = StringMemoryPassthru<ANSICHAR>(A.Data.Data(), SaveNum, SaveNum);
-//					Ar.Serialize(Passthru.Get(), SaveNum * sizeof(ANSICHAR));
-//					// Ensure the string has a null terminator
-//					Passthru.Get()[SaveNum - 1] = '\0';
-//					Passthru.Apply();
-//				}
-//
-//				// Throw away empty string.
-//				if (SaveNum == 1)
-//				{
-//					A.Data.Clear();
-//				}
-//			}
-//		}
-//		else
-//		{
-//			bool  SaveUCS2Char = Ar.IsForcingUnicode() || !CString::IsPureAnsi(*A);
-//			int32 Num = A.Data.Size();
-//			int32 SaveNum = SaveUCS2Char ? -Num : Num;
-//
-//			Ar << SaveNum;
-//
-//			A.Data.CountBytes(Ar);
-//
-//			if (SaveNum)
-//			{
-//				if (SaveUCS2Char)
-//				{
-//					// TODO - This is creating a temporary in order to byte-swap.  Need to think about how to make this not necessary.
-//#if !PLATFORM_LITTLE_ENDIAN
-//					String  ATemp = A;
-//					String& A = ATemp;
-//					INTEL_ORDER_TCHARARRAY(A.Data.Data());
-//#endif
-//
-//					Ar.Serialize((void*)StringCast<UCS2CHAR>(A.Data.Data(), Num).Get(), sizeof(UCS2CHAR)* Num);
-//				}
-//				else
-//				{
-//					Ar.Serialize((void*)StringCast<ANSICHAR>(A.Data.Data(), Num).Get(), sizeof(ANSICHAR)* Num);
-//				}
-//			}
-//		}
-//
-//		return Ar;
-//	}
+	Stream& operator >> (Stream& stream, String& A)
+	{
+		int32 SaveNum;
+		stream >> SaveNum;
+
+		bool LoadUCS2Char = SaveNum < 0;
+		if (LoadUCS2Char)
+		{
+			SaveNum = -SaveNum;
+		}
+
+		// If SaveNum is still less than 0, they must have passed in MIN_INT. Archive is corrupted.
+		if (SaveNum < 0)
+		{
+			AssertNoEntry();
+		}
+
+		//auto MaxSerializeSize = stream.GetMaxSerializeSize();
+		//// Protect against network packets allocating too much memory
+		//if ((MaxSerializeSize > 0) && (SaveNum > MaxSerializeSize))
+		//{
+		//	stream.ArIsError = 1;
+		//	stream.ArIsCriticalError = 1;
+		//	UE_LOG(LogNetSerialization, Error, EDX_TEXT("String is too large"));
+		//	return stream;
+		//}
+
+		// Resize the array only if it passes the above tests to prevent rogue packets from crashing
+		A.Data.Clear(SaveNum);
+		A.Data.AddUninitialized(SaveNum);
+
+		if (SaveNum)
+		{
+			if (LoadUCS2Char)
+			{
+				// read in the unicode string and byteswap it, etc
+				stream.Read(A.Data.Data(), SaveNum * sizeof(WIDECHAR));
+				// Ensure the string has a null terminator
+				A[SaveNum - 1] = '\0';
+
+
+				// Since Microsoft's vsnwprintf implementation raises an invalid parameter warning
+				// with a character of 0xffff, scan for it and terminate the string there.
+				// 0xffff isn't an actual Unicode character anyway.
+				int Index = 0;
+				if (A.FindChar(TCHAR(0xffff), Index))
+				{
+					A[Index] = '\0';
+					A.TrimToNullTerminator();
+				}
+			}
+			else
+			{
+				stream.Read(A.Data.Data(), SaveNum * sizeof(ANSICHAR));
+				// Ensure the string has a null terminator
+				A[SaveNum - 1] = '\0';
+			}
+
+			// Throw away empty string.
+			if (SaveNum == 1)
+			{
+				A.Data.Clear();
+			}
+		}
+
+		return stream;
+	}
+
+	Stream& operator<<(Stream& stream, String& A)
+	{
+		// > 0 for ANSICHAR, < 0 for UCS2CHAR serialization
+		bool  SaveUCS2Char = !CString::IsPureAnsi(*A);
+		int32 Num = A.Data.Size();
+		int32 SaveNum = SaveUCS2Char ? -Num : Num;
+
+		stream << SaveNum;
+
+		if (SaveNum)
+		{
+			if (SaveUCS2Char)
+			{
+				stream.Write((void*)StringCast<WIDECHAR>(A.Data.Data(), Num).Get(), sizeof(WIDECHAR)* Num);
+			}
+			else
+			{
+				stream.Write((void*)StringCast<ANSICHAR>(A.Data.Data(), Num).Get(), sizeof(ANSICHAR)* Num);
+			}
+		}
+
+		return stream;
+	}
 
 	int32 FindMatchingClosingParenthesis(const String& TargetString, const int32 StartSearch)
 	{

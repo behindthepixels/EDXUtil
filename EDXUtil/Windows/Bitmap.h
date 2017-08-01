@@ -18,5 +18,7 @@ namespace EDX
 
 		template<typename T>
 		static T* ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel);
+		template<typename T>
+		static T* ReadFromFile(const char* strFile, int* pWidth, int* pHeight, int* pChannel, int requiredChannel);
 	};
 }
