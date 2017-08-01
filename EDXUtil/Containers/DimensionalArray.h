@@ -5,6 +5,8 @@
 #include "../Containers/Array.h"
 #include "../Math/Vector.h"
 
+#include <vector>
+
 namespace EDX
 {
 	template<size_t Dimension>
@@ -240,6 +242,15 @@ namespace EDX
 	{
 		lhs.Clear();
 		lhs.ResizeForCopy(rhs.LinearSize());
+
+		Memory::Memcpy(lhs.Data(), rhs.Data(), rhs.LinearSize() * sizeof(T));
+	}
+
+	template<size_t Dimension, class T>
+	void ToStlVector(std::vector<T>& lhs, const DimensionalArray<Dimension, T>& rhs)
+	{
+		lhs.clear();
+		lhs.resize(rhs.LinearSize());
 
 		Memory::Memcpy(lhs.data(), rhs.Data(), rhs.LinearSize() * sizeof(T));
 	}
