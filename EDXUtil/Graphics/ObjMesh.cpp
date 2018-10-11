@@ -452,8 +452,13 @@ namespace EDX
 					const char* path2 = CStringUtil::Strrchr(strPath, '\\');
 					int idx = (path1 ? path1 : path2) - strPath + 1;
 
+					const char* path3 = CStringUtil::Strrchr(mMaterials[itCurrMaterial].strName, '/');
+					const char* path4 = CStringUtil::Strrchr(mMaterials[itCurrMaterial].strName, '\\');
+					int idx2 = (path3 ? path3 : path4) - mMaterials[itCurrMaterial].strName + 1;
+
 					char strMtlPath[MAX_PATH] = { 0 };
 					CStringUtil::Strncpy(mMaterials[itCurrMaterial].strTexturePath, MAX_PATH, strPath, idx);
+					CStringAnsi::Strncat(mMaterials[itCurrMaterial].strTexturePath, mMaterials[itCurrMaterial].strName + 1, CStringUtil::Strlen(mMaterials[itCurrMaterial].strTexturePath) + idx2);
 					CStringUtil::Strcat(mMaterials[itCurrMaterial].strTexturePath, MAX_PATH, strTexName + 1);
 				}
 			}

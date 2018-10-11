@@ -64,20 +64,16 @@ namespace EDX
 			__declspec(align(16)) __m128i multiplier;
 			__declspec(align(16)) __m128i adder;
 			__declspec(align(16)) __m128i mod_mask;
-			__declspec(align(16)) __m128i sra_mask;
 			__declspec(align(16)) static const unsigned int mult[4] =
 			{ 214013, 17405, 214013, 69069 };
 			__declspec(align(16)) static const unsigned int gadd[4] =
 			{ 2531011, 10395331, 13737667, 1 };
 			__declspec(align(16)) static const unsigned int mask[4] =
 			{ 0xFFFFFFFF, 0, 0xFFFFFFFF, 0 };
-			__declspec(align(16)) static const unsigned int masklo[4] =
-			{ 0x00007FFF, 0x00007FFF, 0x00007FFF, 0x00007FFF };
 
 			adder = _mm_load_si128((__m128i*) gadd);
 			multiplier = _mm_load_si128((__m128i*) mult);
 			mod_mask = _mm_load_si128((__m128i*) mask);
-			sra_mask = _mm_load_si128((__m128i*) masklo);
 			cur_seed_split = _mm_shuffle_epi32(*mpCurSeed, _MM_SHUFFLE(2, 3, 0, 1));
 
 			*mpCurSeed = _mm_mul_epu32(*mpCurSeed, multiplier);
@@ -90,6 +86,10 @@ namespace EDX
 			*mpCurSeed = _mm_add_epi32(*mpCurSeed, adder);
 
 #ifdef COMPATABILITY 
+			__declspec(align(16)) __m128i sra_mask;
+			__declspec(align(16)) static const unsigned int masklo[4] =
+			{ 0x00007FFF, 0x00007FFF, 0x00007FFF, 0x00007FFF };
+			sra_mask = _mm_load_si128((__m128i*) masklo);
 			__declspec(align(16)) __m128i sseresult;
 			// Add the lines below if you wish to reduce your results to 16-bit vals... 
 			sseresult = _mm_srai_epi32(*mpCurSeed, 16);

@@ -427,7 +427,7 @@ namespace EDX
 					// First pass with simple bubble-sort.
 					do
 					{
-						int32 GroupEnd = FPlatformMath::Min(SubgroupStart + MinMergeSubgroupSize, Num);
+						int32 GroupEnd = Math::Min(SubgroupStart + MinMergeSubgroupSize, Num);
 						do
 						{
 							for (int32 It = SubgroupStart; It < GroupEnd - 1; ++It)
@@ -464,7 +464,7 @@ namespace EDX
 					TMergePolicy::Merge(
 						First + SubgroupStart,
 						SubgroupSize,
-						FPlatformMath::Min(SubgroupSize << 1, Num - SubgroupStart),
+						Math::Min(SubgroupSize << 1, Num - SubgroupStart),
 						Predicate);
 					SubgroupStart += SubgroupSize << 1;
 				} while (SubgroupStart < Num);

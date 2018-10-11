@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Core/Types.h"
+#include "../Core/Template.h"
 #include "../Math/EDXMath.h"
 #include "../Core/Assertion.h"
 
@@ -328,4 +329,250 @@ namespace EDX
 			}
 		}
 	};
+
+	namespace MemoryOps_Private
+	{
+		template <typename DestinationElementType, typename SourceElementType>
+		struct CanBitwiseRelocate
+		{
+			enum
+			{
+				Value =
+				(
+					IsBitwiseConstructible<DestinationElementType, SourceElementType>::Value &&
+					!TypeTraits<SourceElementType>::NeedsDestructor
+					) ||
+				AreTypesEqual<DestinationElementType, SourceElementType>::Value
+			};
+		};
+	}
+
+	/**
+	* Default constructs a range of items in memory.
+	*
+	* @param	Elements	The address of the first memory location to construct at.
+	* @param	Count		The number of elements to destruct.
+	*/
+	template <typename ElementType>
+	__forceinline typename EnableIf<!IsZeroConstructType<ElementType>::Value>::Type DefaultConstructItems(void* Address, int32 Count)
+	{
+		ElementType* Element = (ElementType*)Address;
+		while (Count)
+		{
+			new (Element) ElementType;
+			++Element;
+			--Count;
+		}
+	}
+
+
+	template <typename ElementType>
+	__forceinline typename EnableIf<IsZeroConstructType<ElementType>::Value>::Type DefaultConstructItems(void* Elements, int32 Count)
+	{
+		Memory::Memset(Elements, 0, sizeof(ElementType) * Count);
+	}
+
+
+	/**
+	* Destructs a range of items in memory.
+	*
+	* @param	Elements	A pointer to the first item to destruct.
+	* @param	Count		The number of elements to destruct.
+	*/
+	template <typename ElementType>
+	__forceinline typename EnableIf<TypeTraits<ElementType>::NeedsDestructor>::Type DestructItems(ElementType* Element, int32 Count)
+	{
+		while (Count)
+		{
+			// We need a typedef here because VC won't compile the destructor call below if ElementType itself has a member called ElementType
+			typedef ElementType DestructItemsElementTypeTypedef;
+
+			Element->DestructItemsElementTypeTypedef::~DestructItemsElementTypeTypedef();
+			++Element;
+			--Count;
+		}
+	}
+
+
+	template <typename ElementType>
+	__forceinline typename EnableIf<!TypeTraits<ElementType>::NeedsDestructor>::Type DestructItems(ElementType* Elements, int32 Count)
+	{
+	}
+
+
+	/**
+	* Constructs a range of items into memory from a set of arguments.  The arguments come from an another array.
+	*
+	* @param	Dest		The memory location to start copying into.
+	* @param	Source		A pointer to the first argument to pass to the constructor.
+	* @param	Count		The number of elements to copy.
+	*/
+	template <typename DestinationElementType, typename SourceElementType>
+	__forceinline typename EnableIf<!IsBitwiseConstructible<DestinationElementType, SourceElementType>::Value>::Type ConstructItems(void* Dest, const SourceElementType* Source, int32 Count)
+	{
+		while (Count)
+		{
+			new (Dest) DestinationElementType(*Source);
+			++(DestinationElementType*&)Dest;
+			++Source;
+			--Count;
+		}
+	}
+
+
+	template <typename DestinationElementType, typename SourceElementType>
+	__forceinline typename EnableIf<IsBitwiseConstructible<DestinationElementType, SourceElementType>::Value>::Type ConstructItems(void* Dest, const SourceElementType* Source, int32 Count)
+	{
+		Memory::Memcpy(Dest, Source, sizeof(SourceElementType) * Count);
+	}
+
+	/**
+	* Copy assigns a range of items.
+	*
+	* @param	Dest		The memory location to start assigning to.
+	* @param	Source		A pointer to the first item to assign.
+	* @param	Count		The number of elements to assign.
+	*/
+	template <typename ElementType>
+	__forceinline typename EnableIf<TypeTraits<ElementType>::NeedsCopyAssignment>::Type CopyAssignItems(ElementType* Dest, const ElementType* Source, int32 Count)
+	{
+		while (Count)
+		{
+			*Dest = *Source;
+			++Dest;
+			++Source;
+			--Count;
+		}
+	}
+
+
+	template <typename ElementType>
+	__forceinline typename EnableIf<!TypeTraits<ElementType>::NeedsCopyAssignment>::Type CopyAssignItems(ElementType* Dest, const ElementType* Source, int32 Count)
+	{
+		Memory::Memcpy(Dest, Source, sizeof(ElementType) * Count);
+	}
+
+
+	/**
+	* Relocates a range of items to a new memory location as a new type. This is a so-called 'destructive move' for which
+	* there is no single operation in C++ but which can be implemented very efficiently in general.
+	*
+	* @param	Dest		The memory location to relocate to.
+	* @param	Source		A pointer to the first item to relocate.
+	* @param	Count		The number of elements to relocate.
+	*/
+	template <typename DestinationElementType, typename SourceElementType>
+	__forceinline typename EnableIf<!MemoryOps_Private::CanBitwiseRelocate<DestinationElementType, SourceElementType>::Value>::Type RelocateConstructItems(void* Dest, const SourceElementType* Source, int32 Count)
+	{
+		while (Count)
+		{
+			// We need a typedef here because VC won't compile the destructor call below if SourceElementType itself has a member called SourceElementType
+			typedef SourceElementType RelocateConstructItemsElementTypeTypedef;
+
+			new (Dest) DestinationElementType(*Source);
+			++(DestinationElementType*&)Dest;
+			(Source++)->RelocateConstructItemsElementTypeTypedef::~RelocateConstructItemsElementTypeTypedef();
+			--Count;
+		}
+	}
+
+	template <typename DestinationElementType, typename SourceElementType>
+	__forceinline typename EnableIf<MemoryOps_Private::CanBitwiseRelocate<DestinationElementType, SourceElementType>::Value>::Type RelocateConstructItems(void* Dest, const SourceElementType* Source, int32 Count)
+	{
+		/* All existing containers seem to assume trivial relocatability (i.e. memcpy'able) of their members,
+		* so we're going to assume that this is safe here.  However, it's not generally possible to assume this
+		* in general as objects which contain pointers/references to themselves are not safe to be trivially
+		* relocated.
+		*
+		* However, it is not yet possible to automatically infer this at compile time, so we can't enable
+		* different (i.e. safer) implementations anyway. */
+
+		Memory::Memmove(Dest, Source, sizeof(SourceElementType) * Count);
+	}
+
+
+	/**
+	* Move constructs a range of items into memory.
+	*
+	* @param	Dest		The memory location to start moving into.
+	* @param	Source		A pointer to the first item to move from.
+	* @param	Count		The number of elements to move.
+	*/
+	template <typename ElementType>
+	__forceinline typename EnableIf<TypeTraits<ElementType>::NeedsMoveConstructor>::Type MoveConstructItems(void* Dest, const ElementType* Source, int32 Count)
+	{
+		while (Count)
+		{
+			new (Dest) ElementType((ElementType&&)*Source);
+			++(ElementType*&)Dest;
+			++Source;
+			--Count;
+		}
+	}
+
+	template <typename ElementType>
+	__forceinline typename EnableIf<!TypeTraits<ElementType>::NeedsMoveConstructor>::Type MoveConstructItems(void* Dest, const ElementType* Source, int32 Count)
+	{
+		Memory::Memmove(Dest, Source, sizeof(ElementType) * Count);
+	}
+
+	/**
+	* Move assigns a range of items.
+	*
+	* @param	Dest		The memory location to start move assigning to.
+	* @param	Source		A pointer to the first item to move assign.
+	* @param	Count		The number of elements to move assign.
+	*/
+	template <typename ElementType>
+	__forceinline typename EnableIf<TypeTraits<ElementType>::NeedsMoveAssignment>::Type MoveAssignItems(ElementType* Dest, const ElementType* Source, int32 Count)
+	{
+		while (Count)
+		{
+			*Dest = (ElementType&&)*Source;
+			++Dest;
+			++Source;
+			--Count;
+		}
+	}
+
+	template <typename ElementType>
+	__forceinline typename EnableIf<!TypeTraits<ElementType>::NeedsMoveAssignment>::Type MoveAssignItems(ElementType* Dest, const ElementType* Source, int32 Count)
+	{
+		Memory::Memmove(Dest, Source, sizeof(ElementType) * Count);
+	}
+
+	template <typename ElementType>
+	__forceinline typename EnableIf<TypeTraits<ElementType>::IsBytewiseComparable, bool>::Type CompareItems(const ElementType* A, const ElementType* B, int32 Count)
+	{
+		return !Memory::Memcmp(A, B, sizeof(ElementType) * Count);
+	}
+
+
+	template <typename ElementType>
+	__forceinline typename EnableIf<!TypeTraits<ElementType>::IsBytewiseComparable, bool>::Type CompareItems(const ElementType* A, const ElementType* B, int32 Count)
+	{
+		while (Count)
+		{
+			if (!(*A == *B))
+			{
+				return false;
+			}
+
+			++A;
+			++B;
+			--Count;
+		}
+
+		return true;
+	}
+
+	template<typename T>
+	__forceinline void MoveByRelocate(T& A, T& B)
+	{
+		// Destruct the previous value of A.
+		A.~T();
+
+		// Relocate B into the 'hole' left by the destruction of A, leaving a hole in B instead.
+		RelocateConstructItems<T>(&A, &B, 1);
+	}
 }

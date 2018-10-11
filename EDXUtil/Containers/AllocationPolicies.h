@@ -867,7 +867,7 @@ namespace EDX
 		/** Computes the number of hash buckets to use for a given number of elements. */
 		static __forceinline uint32 GetNumberOfHashBuckets(uint32 NumHashedElements)
 		{
-			const uint32 NumDesiredHashBuckets = Math::RoundUpToPowerOfTwo(NumHashedElements / AverageNumberOfElementsPerHashBucket);
+			const uint32 NumDesiredHashBuckets = Math::RoundUpPowOfTwo(NumHashedElements / AverageNumberOfElementsPerHashBucket);
 			if (NumDesiredHashBuckets < NumInlineHashBuckets)
 			{
 				return NumInlineHashBuckets;

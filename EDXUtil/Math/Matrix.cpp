@@ -1,6 +1,7 @@
 #include "Matrix.h"
 #include "EDXMath.h"
 #include "../Core/Template.h"
+#include "../Core/Memory.h"
 
 namespace EDX
 {

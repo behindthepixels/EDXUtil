@@ -79,7 +79,13 @@ namespace EDX
 
 	inline uint32 GetTypeHash(const uint64 A)
 	{
-		return (uint32)A + ((uint32)(A >> 32) * 23);
+		uint64 Key = A;
+		Key = (~Key)+(Key << 18);
+		Key = Key ^ (Key >> 31);
+		Key = Key * 21;
+		Key = Key ^ (Key >> 11);
+		Key = Key + (Key << 6);
+		return uint32(Key) ^ uint32(Key >> 22);
 	}
 
 	inline uint32 GetTypeHash(const int64 A)

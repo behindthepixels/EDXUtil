@@ -6,6 +6,7 @@
 #include "../Core/Stream.h"
 #include "../Core/Template.h"
 #include "../Core/Memory.h"
+#include "../Core/Sorting.h"
 
 #define DEBUG_HEAP 0
 
@@ -934,11 +935,11 @@ namespace EDX
 		template <typename KeyType>
 		ElementType* FindByKey(const KeyType& Key)
 		{
-			for (ElementType* __restrict Data = Data(), *__restrict DataEnd = Data + mSize; Data != DataEnd; ++Data)
+			for (ElementType* __restrict pData = Data(), *__restrict pDataEnd = pData + mSize; pData != pDataEnd; ++pData)
 			{
-				if (*Data == Key)
+				if (*pData == Key)
 				{
-					return Data;
+					return pData;
 				}
 			}
 
@@ -1970,41 +1971,6 @@ namespace EDX
 			}
 		}
 
-		/**
-		* Searches for the first entry of the specified type, will only work with
-		* Array<UObject*>. Optionally return the item's index, and can specify
-		* the start index.
-		*
-		* @param Item (Optional output) If it's not null, then it will point to
-		*             the found element. Untouched if element hasn't been found.
-		* @param ItemIndex (Optional output) If it's not null, then it will be set
-		*             to the position of found element in the array. Untouched if
-		*             element hasn't been found.
-		* @param StartIndex (Optional) Index in array at which the function should
-		*             start to look for element.
-		* @returns True if element was found. False otherwise.
-		*/
-		template<typename SearchType>
-		bool FindItemByClass(SearchType **Item = nullptr, int32 *ItemIndex = nullptr, int32 StartIndex = 0) const
-		{
-			UClass* SearchClass = SearchType::StaticClass();
-			for (int32 Idx = StartIndex; Idx < mSize; Idx++)
-			{
-				if ((*this)[Idx] != nullptr && (*this)[Idx]->IsA(SearchClass))
-				{
-					if (Item != nullptr)
-					{
-						*Item = (SearchType*)((*this)[Idx]);
-					}
-					if (ItemIndex != nullptr)
-					{
-						*ItemIndex = Idx;
-					}
-					return true;
-				}
-			}
-			return false;
-		}
 
 		// Iterators
 		typedef IndexedContainerIterator<      Array, ElementType, int32> Iterator;
@@ -2063,7 +2029,7 @@ namespace EDX
 		*/
 		void Sort()
 		{
-			::Sort(Data(), Size());
+			EDX::Sort(Data(), Size());
 		}
 
 		/**
@@ -2074,7 +2040,7 @@ namespace EDX
 		template <class PREDICATE_CLASS>
 		void Sort(const PREDICATE_CLASS& Predicate)
 		{
-			::Sort(Data(), Size(), Predicate);
+			EDX::Sort(Data(), Size(), Predicate);
 		}
 
 		/**
@@ -2084,7 +2050,7 @@ namespace EDX
 		*/
 		void StableSort()
 		{
-			::StableSort(Data(), Size());
+			EDX::StableSort(Data(), Size());
 		}
 
 		/**
@@ -2097,7 +2063,7 @@ namespace EDX
 		template <class PREDICATE_CLASS>
 		void StableSort(const PREDICATE_CLASS& Predicate)
 		{
-			::StableSort(Data(), Size(), Predicate);
+			EDX::StableSort(Data(), Size(), Predicate);
 		}
 
 #if defined(_MSC_VER) && !defined(__clang__)	// Relies on MSVC-specific lazy template instantiation to support arrays of incomplete types

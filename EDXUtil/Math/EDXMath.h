@@ -29,6 +29,7 @@ namespace EDX
 		inline float Pow(const float val, float fPow) { return powf(val, fPow); }
 		template <class T> inline T Abs(T tVal) { return tVal >= 0 ? tVal : -tVal; }
 		inline float Sqrt(const float val) { return sqrtf(val); }
+		inline float Cbrt(const float val) { return cbrtf(val); }
 		inline float Square(const float val) { return val * val; }
 		inline float Exp(const float val) { return expf(val); }
 		inline float Exp(const double val) { return exp(val); }
