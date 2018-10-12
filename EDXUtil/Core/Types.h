@@ -28,6 +28,12 @@
 	#define EDX_TEXT(x) x
 #endif
 
+#ifdef __CUDACC__
+	#define EDX_INLINE __forceinline __device__ __host__
+#else
+	#define EDX_INLINE __forceinline
+#endif
+
 
 namespace EDX
 {

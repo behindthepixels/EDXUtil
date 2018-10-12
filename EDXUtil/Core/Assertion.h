@@ -5,8 +5,7 @@
 
 namespace EDX
 {
-
-#ifndef _DEBUG
+#if !defined(_DEBUG) || defined(__CUDACC__) 
 
 	#define Assert(expr)
 	#define Assertf(expr, format, ...)

@@ -11,63 +11,63 @@ namespace EDX
 	namespace Math
 	{
 		template <typename T>
-		inline bool IsNaN(const T& num) { return _isnan(num); }
+		EDX_INLINE bool IsNaN(const T& num) { return _isnan(num); }
 		template <typename T>
-		inline bool IsInfinite(const T& num) { return !_finite(num); }
+		EDX_INLINE bool IsInfinite(const T& num) { return !_finite(num); }
 		template <typename T>
-		inline bool NumericValid(const T& num) { return !_isnan(num) && _finite(num); }
+		EDX_INLINE bool NumericValid(const T& num) { return !_isnan(num) && _finite(num); }
 
 		template <class T1, class T2, class T3>
-		inline T1 Clamp(const T1& tVal, const T2& tMin, const T3& max)
+		EDX_INLINE T1 Clamp(const T1& tVal, const T2& tMin, const T3& max)
 		{
 			if (tVal < tMin) return tMin;
 			if (tVal > max) return max;
 			return tVal;
 		}
-		inline float Sign(const float val) { return val >= 0.0f ? 1.0f : -1.0f; }
-		inline float Saturate(const float val) { return Clamp(val, 0.0f, 1.0f); }
-		inline float Pow(const float val, float fPow) { return powf(val, fPow); }
-		template <class T> inline T Abs(T tVal) { return tVal >= 0 ? tVal : -tVal; }
-		inline float Sqrt(const float val) { return sqrtf(val); }
-		inline float Cbrt(const float val) { return cbrtf(val); }
-		inline float Square(const float val) { return val * val; }
-		inline float Exp(const float val) { return expf(val); }
-		inline float Exp(const double val) { return exp(val); }
-		inline float Log(const float val) { return logf(val); }
-		inline float ToRadians(float fDeg) { return (fDeg / 180.0f) * float(Math::EDX_PI); }
-		inline float ToDegrees(float fRad) { return (fRad / float(Math::EDX_PI)) * 180.0f; }
-		inline float Sin(const float val) { return sinf(val); }
-		inline float Cos(const float val) { return cosf(val); }
-		inline void SinCos(const float val, float& fSin, float& fCos) { fSin = sinf(val); fCos = cosf(val); }
-		inline float Tan(const float val) { return tanf(val); }
-		inline float Asin(const float val) { return asinf(val); }
-		inline float Acos(const float val) { return acosf(val); }
-		inline float Atan(const float val) { return atanf(val); }
-		inline float Atan2(const float val1, const float val2) { return atan2f(val1, val2); }
+		EDX_INLINE float Sign(const float val) { return val >= 0.0f ? 1.0f : -1.0f; }
+		EDX_INLINE float Saturate(const float val) { return Clamp(val, 0.0f, 1.0f); }
+		EDX_INLINE float Pow(const float val, float fPow) { return powf(val, fPow); }
+		template <class T> EDX_INLINE T Abs(T tVal) { return tVal >= 0 ? tVal : -tVal; }
+		EDX_INLINE float Sqrt(const float val) { return sqrtf(val); }
+		EDX_INLINE float Cbrt(const float val) { return cbrtf(val); }
+		EDX_INLINE float Square(const float val) { return val * val; }
+		EDX_INLINE float Exp(const float val) { return expf(val); }
+		EDX_INLINE float Exp(const double val) { return exp(val); }
+		EDX_INLINE float Log(const float val) { return logf(val); }
+		EDX_INLINE float ToRadians(float fDeg) { return (fDeg / 180.0f) * 3.14159265358979323846f; }
+		EDX_INLINE float ToDegrees(float fRad) { return (fRad / 3.14159265358979323846f) * 180.0f; }
+		EDX_INLINE float Sin(const float val) { return sinf(val); }
+		EDX_INLINE float Cos(const float val) { return cosf(val); }
+		EDX_INLINE void SinCos(const float val, float& fSin, float& fCos) { fSin = sinf(val); fCos = cosf(val); }
+		EDX_INLINE float Tan(const float val) { return tanf(val); }
+		EDX_INLINE float Asin(const float val) { return asinf(val); }
+		EDX_INLINE float Acos(const float val) { return acosf(val); }
+		EDX_INLINE float Atan(const float val) { return atanf(val); }
+		EDX_INLINE float Atan2(const float val1, const float val2) { return atan2f(val1, val2); }
 
-		inline int TruncToInt(float val)
+		EDX_INLINE int TruncToInt(float val)
 		{
 			return _mm_cvtt_ss2si(_mm_set_ss(val));
 		}
 
-		inline int FloorToInt(const float val)
+		EDX_INLINE int FloorToInt(const float val)
 		{
 			// Note: the x2 is to workaround the rounding-to-nearest-even-number issue when the fraction is .5
 			return _mm_cvt_ss2si(_mm_set_ss(val + val - 0.5f)) >> 1;
 		}
-		inline int CeilToInt(const float val)
+		EDX_INLINE int CeilToInt(const float val)
 		{
 			// Note: the x2 is to workaround the rounding-to-nearest-even-number issue when the fraction is .5
 			return -(_mm_cvt_ss2si(_mm_set_ss(-0.5f - (val + val))) >> 1);
 		}
-		inline int RoundToInt(const float val)
+		EDX_INLINE int RoundToInt(const float val)
 		{
 			// Note: the x2 is to workaround the rounding-to-nearest-even-number issue when the fraction is .5
 			return _mm_cvt_ss2si(_mm_set_ss(val + val + 0.5f)) >> 1;
 		}
 
 		template <class T1, class T2>
-		inline float LinStep(const T1& tVal, const T2& min, const T2& max)
+		EDX_INLINE float LinStep(const T1& tVal, const T2& min, const T2& max)
 		{
 			if (min == max)
 			{
@@ -75,35 +75,35 @@ namespace EDX
 			}
 			return Saturate((tVal - min) / float(max - min));
 		}
-		template<class T1, class T2> inline auto Lerp(const T1& min, const T2& max, const float val) -> decltype(min + max) { return min * (1 - val) + max * val; }
-		template<class T1, class T2> inline auto Max(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 > e2 ? e1 : e2; }
-		template<class T1, class T2> inline auto AbsMax(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return Abs(e1) > Abs(e2) ? e1 : e2; }
-		template<class T1, class T2> inline auto Min(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 < e2 ? e1 : e2; }
-		template<class T1, class T2> inline auto AbsMin(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return Abs(e1) < Abs(e2) ? e1 : e2; }
+		template<class T1, class T2> EDX_INLINE auto Lerp(const T1& min, const T2& max, const float val) -> decltype(min + max) { return min * (1 - val) + max * val; }
+		template<class T1, class T2> EDX_INLINE auto Max(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 > e2 ? e1 : e2; }
+		template<class T1, class T2> EDX_INLINE auto AbsMax(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return Abs(e1) > Abs(e2) ? e1 : e2; }
+		template<class T1, class T2> EDX_INLINE auto Min(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return e1 < e2 ? e1 : e2; }
+		template<class T1, class T2> EDX_INLINE auto AbsMin(const T1& e1, const T2& e2) -> decltype(e1 + e2)  { return Abs(e1) < Abs(e2) ? e1 : e2; }
 
 		template<class T1, class T2, class T3, class T4>
-		inline auto BiLerp(const T1& e00, const T2& e01, const T3& e10, const T4& e11, const float val1, const float val2) -> decltype(e00 + e01 + e10 + e11)
+		EDX_INLINE auto BiLerp(const T1& e00, const T2& e01, const T3& e10, const T4& e11, const float val1, const float val2) -> decltype(e00 + e01 + e10 + e11)
 		{
 			return Lerp(Lerp(e00, e01, val1), Lerp(e10, e11, val1), val2);
 		}
 		template<class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8>
-		inline auto TriLerp(const T1& e000, const T2& e001, const T3& e010, const T4& e011, const T5& e100, const T6& e101, const T7& e110, const T8& e111, const float val1, const float val2, const float val3) -> decltype(e000 + e001 + e010 + e011 + e100 + e101 + e110 + e111)
+		EDX_INLINE auto TriLerp(const T1& e000, const T2& e001, const T3& e010, const T4& e011, const T5& e100, const T6& e101, const T7& e110, const T8& e111, const float val1, const float val2, const float val3) -> decltype(e000 + e001 + e010 + e011 + e100 + e101 + e110 + e111)
 		{
 			return Lerp(BiLerp(e000, e001, e010, e011, val1, val2), BiLerp(e100, e101, e110, e111, val1, val2), val3);
 		}
 
-		inline bool IsPowOfTwo(const int val)
+		EDX_INLINE bool IsPowOfTwo(const int val)
 		{
 			return (val & (val - 1)) == 0;
 		}
 
-		inline int RoundUpTo(const uint val, const uint round)
+		EDX_INLINE int RoundUpTo(const uint val, const uint round)
 		{
 			uint iRet = val + round - (val % round);
 			return iRet;
 		}
 
-		inline uint FloorLog2(uint value)
+		EDX_INLINE uint FloorLog2(uint value)
 		{
 			// Use BSR to return the log2 of the integer
 			unsigned long log2;
@@ -115,7 +115,7 @@ namespace EDX
 			return 0;
 		}
 
-		inline uint CountLeadingZeros(uint val)
+		EDX_INLINE uint CountLeadingZeros(uint val)
 		{
 			// Use BSR to return the log2 of the integer
 			unsigned long log2;
@@ -127,7 +127,7 @@ namespace EDX
 			return 32;
 		}
 
-		inline uint CountTrailingZeros(uint value)
+		EDX_INLINE uint CountTrailingZeros(uint value)
 		{
 			if (value == 0)
 			{
@@ -138,32 +138,32 @@ namespace EDX
 			return bitIndex;
 		}
 
-		inline uint CeilLog2(uint val)
+		EDX_INLINE uint CeilLog2(uint val)
 		{
 			int bitMask = ((int)(CountLeadingZeros(val) << 26)) >> 31;
 			return (32 - CountLeadingZeros(val - 1)) & (~bitMask);
 		}
 
-		inline uint RoundUpPowOfTwo(uint val)
+		EDX_INLINE uint RoundUpPowOfTwo(uint val)
 		{
 			return 1 << CeilLog2(val);
 		}
 
 		/** Divides two integers and rounds up */
 		template <class T>
-		inline T DivideAndRoundUp(T Dividend, T Divisor)
+		EDX_INLINE T DivideAndRoundUp(T Dividend, T Divisor)
 		{
 			return (Dividend + Divisor - 1) / Divisor;
 		}
 
 		template <class T>
-		inline T DivideAndRoundDown(T Dividend, T Divisor)
+		EDX_INLINE T DivideAndRoundDown(T Dividend, T Divisor)
 		{
 			return Dividend / Divisor;
 		}
 
 		template <typename T>
-		inline bool IsPowerOfTwo(T Value)
+		EDX_INLINE bool IsPowerOfTwo(T Value)
 		{
 			return ((Value & (Value - 1)) == (T)0);
 		}
@@ -204,7 +204,7 @@ namespace EDX
 		}
 
 		template<class T>
-		inline T MonoCubicLerp(const T& e0, const T& e1, const T& e2, const T& e3, const float fLerp)
+		EDX_INLINE T MonoCubicLerp(const T& e0, const T& e1, const T& e2, const T& e3, const float fLerp)
 		{
 			Assert(abs(e2) < 1e8f);
 			T eVal = Math::Lerp(e1, e2, fLerp);
@@ -240,7 +240,7 @@ namespace EDX
 			return eRet;
 		}
 
-		inline float ErfInv(float x)
+		EDX_INLINE float ErfInv(float x)
 		{
 			float w, p;
 			x = Math::Clamp(x, -0.99999f, 0.99999f);
@@ -274,7 +274,7 @@ namespace EDX
 			return p * x;
 		}
 
-		inline float Erf(float x)
+		EDX_INLINE float Erf(float x)
 		{
 			// constants
 			float a1 = 0.254829592f;

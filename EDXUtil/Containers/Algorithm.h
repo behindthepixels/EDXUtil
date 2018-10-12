@@ -37,7 +37,7 @@ namespace EDX
 		template <typename T>
 		struct Less
 		{
-			__forceinline bool operator()(const T& Lhs, const T& Rhs) const
+			EDX_INLINE bool operator()(const T& Lhs, const T& Rhs) const
 			{
 				return Lhs < Rhs;
 			}
@@ -46,7 +46,7 @@ namespace EDX
 		template <typename T>
 		struct LessEQ
 		{
-			__forceinline bool operator()(const T& Lhs, const T& Rhs) const
+			EDX_INLINE bool operator()(const T& Lhs, const T& Rhs) const
 			{
 				return Lhs <= Rhs;
 			}
@@ -285,14 +285,14 @@ namespace EDX
 		template<typename T = void>
 		struct Plus
 		{
-			__forceinline T operator()(const T& A, const T& B) { return A + B; }
+			EDX_INLINE T operator()(const T& A, const T& B) { return A + B; }
 		};
 
 		template<>
 		struct Plus<void>
 		{
 			template<typename U, typename V>
-			__forceinline auto operator()(U&& A, V&& B) -> decltype(A + B) { return A + B; }
+			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A + B) { return A + B; }
 		};
 
 		// Substract<T> specifically takes const T& and returns T.
@@ -300,14 +300,14 @@ namespace EDX
 		template<typename T = void>
 		struct Substract
 		{
-			__forceinline T operator()(const T& A, const T& B) { return A - B; }
+			EDX_INLINE T operator()(const T& A, const T& B) { return A - B; }
 		};
 
 		template<>
 		struct Substract<void>
 		{
 			template<typename U, typename V>
-			__forceinline auto operator()(U&& A, V&& B) -> decltype(A - B) { return A - B; }
+			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A - B) { return A - B; }
 		};
 
 		// Multiply<T> specifically takes const T& and returns T.
@@ -315,14 +315,14 @@ namespace EDX
 		template<typename T = void>
 		struct Multiply
 		{
-			__forceinline T operator()(const T& A, const T& B) { return A * B; }
+			EDX_INLINE T operator()(const T& A, const T& B) { return A * B; }
 		};
 
 		template<>
 		struct Multiply<void>
 		{
 			template<typename U, typename V>
-			__forceinline auto operator()(U&& A, V&& B) -> decltype(A * B) { return A * B; }
+			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A * B) { return A * B; }
 		};
 
 		// Divide<T> specifically takes const T& and returns T.
@@ -330,14 +330,14 @@ namespace EDX
 		template<typename T = void>
 		struct Divide
 		{
-			__forceinline T operator()(const T& A, const T& B) { return A / B; }
+			EDX_INLINE T operator()(const T& A, const T& B) { return A / B; }
 		};
 
 		template<>
 		struct Divide<void>
 		{
 			template<typename U, typename V>
-			__forceinline auto operator()(U&& A, V&& B) -> decltype(A / B) { return A / B; }
+			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A / B) { return A / B; }
 		};
 
 		// Pow<T> specifically takes const T& and returns T.
@@ -345,14 +345,14 @@ namespace EDX
 		template<typename T = void>
 		struct Pow
 		{
-			__forceinline T operator()(const T& A, const T& B) { return Math::Pow(A, B); }
+			EDX_INLINE T operator()(const T& A, const T& B) { return Math::Pow(A, B); }
 		};
 
 		template<>
 		struct Pow<void>
 		{
 			template<typename U, typename V>
-			__forceinline auto operator()(U&& A, V&& B) -> decltype(A * B) { return Math::Pow(A, B); }
+			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A * B) { return Math::Pow(A, B); }
 		};
 
 		// Exp<T> specifically takes const T& and returns T.
@@ -360,14 +360,14 @@ namespace EDX
 		template<typename T = void>
 		struct Exp
 		{
-			__forceinline T operator()(const T& A, const T& B) { return Math::Pow(A, B); }
+			EDX_INLINE T operator()(const T& A, const T& B) { return Math::Pow(A, B); }
 		};
 
 		template<>
 		struct Exp<void>
 		{
 			template<typename U, typename V>
-			__forceinline auto operator()(U&& A, V&& B) -> decltype(A * B) { return Math::Pow(A, B); }
+			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A * B) { return Math::Pow(A, B); }
 		};
 
 		/**

@@ -124,10 +124,10 @@ namespace EDX
 
 	template<class T> const Vec<4, T> Vec<4, T>::ZERO(Math::EDX_ZERO);
 	template<class T> const Vec<4, T> Vec<4, T>::UNIT_SCALE(Math::EDX_ONE);
-	template<class T> const Vec<4, T> Vec<4, T>::UNIT_X(Math::EDX_ONE, Math::EDX_ZERO, Math::EDX_ZERO, EDX_ZERO);
-	template<class T> const Vec<4, T> Vec<4, T>::UNIT_Y(Math::EDX_ZERO, Math::EDX_ONE, Math::EDX_ZERO, EDX_ZERO);
-	template<class T> const Vec<4, T> Vec<4, T>::UNIT_Z(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ONE, EDX_ZERO);
-	template<class T> const Vec<4, T> Vec<4, T>::UNIT_W(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ZERO, EDX_ONE);
+	template<class T> const Vec<4, T> Vec<4, T>::UNIT_X(Math::EDX_ONE, Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ZERO);
+	template<class T> const Vec<4, T> Vec<4, T>::UNIT_Y(Math::EDX_ZERO, Math::EDX_ONE, Math::EDX_ZERO, Math::EDX_ZERO);
+	template<class T> const Vec<4, T> Vec<4, T>::UNIT_Z(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ONE, Math::EDX_ZERO);
+	template<class T> const Vec<4, T> Vec<4, T>::UNIT_W(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ONE);
 	template<class T> const Vec<4, T> Vec<4, T>::UNIT[4] =
 	{
 		Vec<4, T>(Math::EDX_ONE, Math::EDX_ZERO, Math::EDX_ZERO, EDX_ZERO),
