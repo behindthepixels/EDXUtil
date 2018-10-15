@@ -115,7 +115,7 @@ namespace EDX
 			return 0;
 		}
 
-		EDX_INLINE uint CountLeadingZeros(uint val)
+		__forceinline uint CountLeadingZeros(uint val)
 		{
 			// Use BSR to return the log2 of the integer
 			unsigned long log2;
@@ -127,7 +127,7 @@ namespace EDX
 			return 32;
 		}
 
-		EDX_INLINE uint CountTrailingZeros(uint value)
+		__forceinline uint CountTrailingZeros(uint value)
 		{
 			if (value == 0)
 			{
@@ -138,7 +138,7 @@ namespace EDX
 			return bitIndex;
 		}
 
-		EDX_INLINE uint CeilLog2(uint val)
+		__forceinline uint CeilLog2(uint val)
 		{
 			int bitMask = ((int)(CountLeadingZeros(val) << 26)) >> 31;
 			return (32 - CountLeadingZeros(val - 1)) & (~bitMask);
@@ -146,7 +146,13 @@ namespace EDX
 
 		EDX_INLINE uint RoundUpPowOfTwo(uint val)
 		{
-			return 1 << CeilLog2(val);
+			--val;
+			val |= val >> 1;
+			val |= val >> 2;
+			val |= val >> 4;
+			val |= val >> 8;
+			val |= val >> 16;
+			return val + 1;
 		}
 
 		/** Divides two integers and rounds up */

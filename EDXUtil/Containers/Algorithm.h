@@ -340,6 +340,36 @@ namespace EDX
 			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A / B) { return A / B; }
 		};
 
+		// Min<T> specifically takes const T& and returns T.
+		// Min<> (empty angle brackets) is late-binding, taking whatever is passed and returning the correct result type for (A+B)
+		template<typename T = void>
+		struct Min
+		{
+			EDX_INLINE T operator()(const T& A, const T& B) { return A < B ? A : B; }
+		};
+
+		template<>
+		struct Min<void>
+		{
+			template<typename U, typename V>
+			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A + B) { return A < B ? A : B; }
+		};
+		
+		// Max<T> specifically takes const T& and returns T.
+		// Max<> (empty angle brackets) is late-binding, taking whatever is passed and returning the correct result type for (A+B)
+		template<typename T = void>
+		struct Max
+		{
+			EDX_INLINE T operator()(const T& A, const T& B) { return A > B ? A : B; }
+		};
+
+		template<>
+		struct Max<void>
+		{
+			template<typename U, typename V>
+			EDX_INLINE auto operator()(U&& A, V&& B) -> decltype(A + B) { return A > B ? A : B; }
+		};
+
 		// Pow<T> specifically takes const T& and returns T.
 		// Pow<> (empty angle brackets) is late-binding, taking whatever is passed and returning the correct result type for (A+B)
 		template<typename T = void>
