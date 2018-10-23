@@ -833,7 +833,7 @@ namespace EDX
 
 		__forceinline SharedRef& operator=(SharedRef&& InSharedRef)
 		{
-			FMemory::Memswap(this, &InSharedRef, sizeof(SharedRef));
+			Memory::Memswap(this, &InSharedRef, sizeof(SharedRef));
 			return *this;
 		}
 
@@ -976,7 +976,7 @@ namespace EDX
 		*/
 		friend uint32 GetTypeHash(const SharedRef< ObjectType, Mode >& InSharedRef)
 		{
-			return ::PointerHash(InSharedRef.Object);
+			return EDX::PointerHash(InSharedRef.Object);
 		}
 
 		// We declare ourselves as a friend (templated using OtherType) so we can access members as needed
@@ -1350,7 +1350,7 @@ namespace EDX
 		*/
 		friend uint32 GetTypeHash(const SharedPtr< ObjectType, Mode >& InSharedPtr)
 		{
-			return ::PointerHash(InSharedPtr.Object);
+			return EDX::PointerHash(InSharedPtr.Object);
 		}
 
 		// We declare ourselves as a friend (templated using OtherType) so we can access members as needed
@@ -1580,7 +1580,7 @@ namespace EDX
 		*/
 		friend uint32 GetTypeHash(const WeakPtr< ObjectType, Mode >& InWeakPtr)
 		{
-			return ::PointerHash(InWeakPtr.Object);
+			return EDX::PointerHash(InWeakPtr.Object);
 		}
 
 		// We declare ourselves as a friend (templated using OtherType) so we can access members as needed

@@ -889,7 +889,7 @@ namespace EDX
 		}
 
 		/** @return a Array of the elements */
-		Array<ElementType> Array() const
+		Array<ElementType> GetArray() const
 		{
 			Array<ElementType> Result;
 			Result.Reserve(Size());
@@ -1246,10 +1246,10 @@ namespace EDX
 		* DO NOT USE DIRECTLY
 		* STL-like iterators to enable range-based for loop support.
 		*/
-		__forceinline friend Iterator      begin(Set& Set) { return Iterator(Set, begin(mSet.Elements)); }
-		__forceinline friend ConstIterator begin(const Set& Set) { return ConstIterator(begin(mSet.Elements)); }
-		__forceinline friend Iterator      end(Set& Set) { return Iterator(Set, end(mSet.Elements)); }
-		__forceinline friend ConstIterator end(const Set& Set) { return ConstIterator(end(mSet.Elements)); }
+		__forceinline friend Iterator      begin(Set& set) { return Iterator(set, begin(set.Elements)); }
+		__forceinline friend ConstIterator begin(const Set& set) { return ConstIterator(begin(set.Elements)); }
+		__forceinline friend Iterator      end(Set& set) { return Iterator(set, end(set.Elements)); }
+		__forceinline friend ConstIterator end(const Set& set) { return ConstIterator(end(set.Elements)); }
 	};
 
 	template<typename ElementType, typename KeyFuncs, typename Allocator>

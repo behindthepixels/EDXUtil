@@ -355,41 +355,41 @@ namespace EDX
 			uint32 StartMask = 0xFFFFFFFFu << (Index % 32);
 			uint32 EndMask = 0xFFFFFFFFu >> (32 - (Index + Num) % 32) % 32;
 
-			uint32* Data = Data() + StartIndex;
+			uint32* pData = Data() + StartIndex;
 			if (Value)
 			{
 				if (Count == 1)
 				{
-					*Data |= StartMask & EndMask;
+					*pData |= StartMask & EndMask;
 				}
 				else
 				{
-					*Data++ |= StartMask;
+					*pData++ |= StartMask;
 					Count -= 2;
 					while (Count != 0)
 					{
-						*Data++ = ~0;
+						*pData++ = ~0;
 						--Count;
 					}
-					*Data |= EndMask;
+					*pData |= EndMask;
 				}
 			}
 			else
 			{
 				if (Count == 1)
 				{
-					*Data &= ~(StartMask & EndMask);
+					*pData &= ~(StartMask & EndMask);
 				}
 				else
 				{
-					*Data++ &= ~StartMask;
+					*pData++ &= ~StartMask;
 					Count -= 2;
 					while (Count != 0)
 					{
-						*Data++ = 0;
+						*pData++ = 0;
 						--Count;
 					}
-					*Data &= ~EndMask;
+					*pData &= ~EndMask;
 				}
 			}
 		}
@@ -467,7 +467,7 @@ namespace EDX
 		int32 FindAndSetFirstZeroBit()
 		{
 			// Iterate over the array until we see a word with a zero bit.
-			uint32* RESTRICT DwordArray = Data();
+			uint32* __restrict DwordArray = Data();
 			const int32 DwordCount = Math::DivideAndRoundUp(Size(), NumBitsPerDWORD);
 			int32 DwordIndex = 0;
 			while (DwordIndex < DwordCount && DwordArray[DwordIndex] == 0xffffffff)
@@ -633,7 +633,7 @@ namespace EDX
 				if (!this->Mask)
 				{
 					// Advance to the next uint32.
-					this->Mask = (1 << (NumBitsPerDWORD - 1));
+					this->Mask = uint32(1 << (NumBitsPerDWORD - 1));
 					--this->DWORDIndex;
 				}
 				return *this;

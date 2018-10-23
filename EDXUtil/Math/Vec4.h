@@ -130,10 +130,10 @@ namespace EDX
 	template<class T> const Vec<4, T> Vec<4, T>::UNIT_W(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ONE);
 	template<class T> const Vec<4, T> Vec<4, T>::UNIT[4] =
 	{
-		Vec<4, T>(Math::EDX_ONE, Math::EDX_ZERO, Math::EDX_ZERO, EDX_ZERO),
-		Vec<4, T>(Math::EDX_ZERO, Math::EDX_ONE, Math::EDX_ZERO, EDX_ZERO),
-		Vec<4, T>(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ONE, EDX_ZERO),
-		Vec<4, T>(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ZERO, EDX_ONE)
+		Vec<4, T>(Math::EDX_ONE, Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ZERO),
+		Vec<4, T>(Math::EDX_ZERO, Math::EDX_ONE, Math::EDX_ZERO, Math::EDX_ZERO),
+		Vec<4, T>(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ONE, Math::EDX_ZERO),
+		Vec<4, T>(Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ZERO, Math::EDX_ONE)
 	};
 
 	//----------------------------------------------------------------------------------------------

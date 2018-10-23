@@ -414,7 +414,7 @@ namespace EDX
 				Compact();
 
 				// Sort the elements according to the provided comparison class.
-				::Sort(&GetData(0), Size(), ElementCompareClass< PREDICATE_CLASS >(Predicate));
+				EDX::Sort(&GetData(0), Size(), ElementCompareClass< PREDICATE_CLASS >(Predicate));
 			}
 		}
 
